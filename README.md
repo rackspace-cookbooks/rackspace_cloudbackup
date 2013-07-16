@@ -9,6 +9,7 @@ Requires Apt and Yum
 Attributes
 ----------
 default[:rackspace_cloud_backup][:rackspace_username] = nil
+
 default[:rackspace_cloud_backup][:rackspace_apikey] = nil
 
 Usage
