@@ -1,7 +1,7 @@
 rackspace-cloud-backup Cookbook
 ===============================
 This cookbook will install the Rackspace Cloud Backup agent and register it based on the credentials found in
-node['rackspace_cloud_backup']['username'] and node['rackspace_cloud_backup']['apikey']
+node['rackspace_cloud_backup']['rackspace_username'] and node['rackspace_cloud_backup']['rackspace_apikey']
 
 ------------
 Requires Apt and Yum
