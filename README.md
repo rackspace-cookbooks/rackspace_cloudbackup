@@ -17,6 +17,26 @@ Usage
 #### rackspace-cloud-backup::default
 Just set the environment variables for the rackspace_username and rackspace_apikey attributes
 
+Here's an example of some environment variables for if it used turbolift
+
+    "rackspace_cloud_backup": {
+      "backup_cron_hour": "*",
+      "backup_cron_day": "*",
+      "rackspace_username": "exampleuser",
+      "rackspace_endpoint": "dfw",
+      "backup_locations": [
+        "/root/files",
+        "/etc"
+      ],
+      "backup_cron_user": "root",
+      "backup_cron_weekday": "*",
+      "backup_container": "ubuntu-test-turbolift",
+      "rackspace_apikey": "lolnopenotgonnahappen",
+      "backup_cron_month": "*",
+      "backup_cron_minute": "50"
+    }
+
+
 Contributing
 ------------
 Please see https://github.com/rackspace-cookbooks/contributing for how to contribute.
