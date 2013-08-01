@@ -43,6 +43,46 @@ if node['cloud']['provider'] == 'rackspace'
     action :enable
   end
 
+  #set up cronjob
+  if node['rackspace_cloud_backup']['backup_locations'] && node['rackspace_cloud_backup']['backup_container'] && node['rackspace_cloud_backup']['rackspace_endpoint'] && node['rackspace_cloud_backup']['rackspace_apikey'] && node['rackspace_cloud_backup']['rackspace_username']
+   for location in node['rackspace_cloud_backup']['backup_locations'] do
+    cron "turbolift-#{location}" do
+      if node['rackspace_cloud_backup']['backup_cron_day']
+        day node['rackspace_cloud_backup']['backup_cron_day']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_hour']
+        hour node['rackspace_cloud_backup']['backup_cron_hour']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_minute']
+        minute node['rackspace_cloud_backup']['backup_cron_minute']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_month']
+        month node['rackspace_cloud_backup']['backup_cron_month']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_weekday']
+        weekday node['rackspace_cloud_backup']['backup_cron_weekday']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_user']
+        user node['rackspace_cloud_backup']['backup_cron_user']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_mailto']
+        mailto node['rackspace_cloud_backup']['backup_cron_mailto']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_path']
+        path node['rackspace_cloud_backup']['backup_cron_path']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_shell']
+        shell node['rackspace_cloud_backup']['backup_cron_shell']
+      end
+      if node['rackspace_cloud_backup']['backup_cron_home']
+        home node['rackspace_cloud_backup']['backup_cron_home']
+      end
+      command "time=$(date +\\%Y-\\%m-\\%d_\\%H:\\%M:\\%S); turbolift --os-rax-auth #{node['rackspace_cloud_backup']['rackspace_endpoint']} -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} archive -s #{location} -c #{node['rackspace_cloud_backup']['backup_container']} --verify --tar-name \"${time} - #{location.gsub('/', '___')}\""
+      action :create
+    end
+   end
+  end
+
 
 else
   
@@ -78,7 +118,8 @@ else
 
   #set up cronjob
   if node['rackspace_cloud_backup']['backup_locations'] && node['rackspace_cloud_backup']['backup_container'] && node['rackspace_cloud_backup']['rackspace_endpoint'] && node['rackspace_cloud_backup']['rackspace_apikey'] && node['rackspace_cloud_backup']['rackspace_username']
-    cron "turbolift" do
+   for location in node['rackspace_cloud_backup']['backup_locations'] do
+    cron "turbolift-#{location}" do
       if node['rackspace_cloud_backup']['backup_cron_day']
         day node['rackspace_cloud_backup']['backup_cron_day']
       end
@@ -109,9 +150,10 @@ else
       if node['rackspace_cloud_backup']['backup_cron_home']
         home node['rackspace_cloud_backup']['backup_cron_home']
       end
-      command "turbolift --os-rax-auth #{node['rackspace_cloud_backup']['rackspace_endpoint']} -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} archive -s #{node['rackspace_cloud_backup']['backup_locations']} -c #{node['rackspace_cloud_backup']['backup_container']}"
+      command "turbolift --os-rax-auth #{node['rackspace_cloud_backup']['rackspace_endpoint']} -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} archive -s #{location} -c #{node['rackspace_cloud_backup']['backup_container']}"
       action :create
     end
+   end
   end
 
 end
