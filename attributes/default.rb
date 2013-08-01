@@ -18,3 +18,16 @@
 
 default[:rackspace_cloud_backup][:rackspace_username] = nil
 default[:rackspace_cloud_backup][:rackspace_apikey] = nil
+default[:rackspace_cloud_backup][:rackspace_endpoint] = nil
+default[:rackspace_cloud_backup][:backup_locations] = nil
+default[:rackspace_cloud_backup][:backup_container] = nil
+default[:rackspace_cloud_backup][:backup_cron_day] = nil
+default[:rackspace_cloud_backup][:backup_cron_hour] = nil
+default[:rackspace_cloud_backup][:backup_cron_minute] = nil
+default[:rackspace_cloud_backup][:backup_cron_month] = nil
+default[:rackspace_cloud_backup][:backup_cron_weekday] = nil
+default[:rackspace_cloud_backup][:backup_cron_user] = nil
+default[:rackspace_cloud_backup][:backup_cron_mailto] = nil
+default[:rackspace_cloud_backup][:backup_cron_path] = nil
+default[:rackspace_cloud_backup][:backup_cron_shell] = nil
+default[:rackspace_cloud_backup][:backup_cron_home] = nil
