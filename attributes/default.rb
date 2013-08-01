@@ -18,14 +18,14 @@
 
 default[:rackspace_cloud_backup][:rackspace_username] = nil
 default[:rackspace_cloud_backup][:rackspace_apikey] = nil
-default[:rackspace_cloud_backup][:rackspace_endpoint] = nil
+default[:rackspace_cloud_backup][:rackspace_endpoint] = "dfw"
 default[:rackspace_cloud_backup][:backup_locations] = nil
 default[:rackspace_cloud_backup][:backup_container] = nil
-default[:rackspace_cloud_backup][:backup_cron_day] = nil
-default[:rackspace_cloud_backup][:backup_cron_hour] = nil
-default[:rackspace_cloud_backup][:backup_cron_minute] = nil
-default[:rackspace_cloud_backup][:backup_cron_month] = nil
-default[:rackspace_cloud_backup][:backup_cron_weekday] = nil
+default[:rackspace_cloud_backup][:backup_cron_day] = "*"
+default[:rackspace_cloud_backup][:backup_cron_hour] = "3"
+default[:rackspace_cloud_backup][:backup_cron_minute] = "14"
+default[:rackspace_cloud_backup][:backup_cron_month] = "*"
+default[:rackspace_cloud_backup][:backup_cron_weekday] = "*"
 default[:rackspace_cloud_backup][:backup_cron_user] = nil
 default[:rackspace_cloud_backup][:backup_cron_mailto] = nil
 default[:rackspace_cloud_backup][:backup_cron_path] = nil
