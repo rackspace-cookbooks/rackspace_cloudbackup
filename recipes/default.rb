@@ -43,23 +43,42 @@ if node['cloud']['provider'] == 'rackspace'
     action :enable
   end
 
+  #get token
+
+  #set up backups
 
 else
-  
 
   #set up repos
   case node[:platform]
     when "redhat", "centos"
+      yum_key "GPG-KEY-rackops" do
+        url "http://repo.rackops.org/rackops-signing-key.asc"
+        action :add
+      end
       yum_repository "rackops-repo" do
         description "Rackspace rackops repo"
         url "http://repo.rackops.org/rpm/"
+	key "GPG-KEY-rackops"
     end
     when "ubuntu","debian"
-      apt_repository "cloud-backup" do
-        uri "http://repo.rackops.org/deb/"
-	distribution ""
-        components ["./"]
-        action :add
+      case node["lsb"][:codename]
+      when "precise"
+        apt_repository "rackops-repo" do
+          uri "http://repo.rackops.org/apt/ubuntu"
+          distribution "precise"
+          components ["main"]
+          key "http://repo.rackops.org/rackops-signing-key.asc"
+          action :add
+      end
+      when "wheezy"
+        apt_repository "rackops-repo" do
+          uri "http://repo.rackops.org/apt/debian"
+          distribution "wheezy"
+          components ["main"]
+          key "http://repo.rackops.org/rackops-signing-key.asc"
+          action :add
+      end
     end
   end
 
@@ -71,7 +90,7 @@ else
     end
     when "ubuntu","debian"
       package "python-turbolift" do
-        options "--allow-unauthenticated"
+        #options "--allow-unauthenticated"
         action :upgrade
     end
   end
