@@ -31,3 +31,4 @@ default[:rackspace_cloud_backup][:backup_cron_mailto] = nil
 default[:rackspace_cloud_backup][:backup_cron_path] = nil
 default[:rackspace_cloud_backup][:backup_cron_shell] = nil
 default[:rackspace_cloud_backup][:backup_cron_home] = nil
+default[:rackspace_cloud_backup][:cloud_notify_email] = nil
