@@ -9,7 +9,12 @@
 if defined?(node['cloud']['provider'])
   if node['cloud']['provider'] == 'rackspace'
     include_recipe "rackspace-cloud-backup::cloud"
+  else
+  include_recipe "rackspace-cloud-backup::not_cloud"
   end
 else
-  include_recipe "rackspace-cloud-backup::not_cloud"
+  log "message" do
+	message "Could not find the node['cloud']['provider'] attribute!"
+	level :warn
+  end
 end
