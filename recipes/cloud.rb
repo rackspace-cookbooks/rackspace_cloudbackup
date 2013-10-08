@@ -60,7 +60,7 @@ end
 if node['rackspace_cloud_backup']['rackspace_username'] && node['rackspace_cloud_backup']['rackspace_apikey'] && node['rackspace_cloud_backup']['cloud_notify_email'] && node['rackspace_cloud_backup']['backup_locations']
   for location in node['rackspace_cloud_backup']['backup_locations'] do
     execute "create backup" do
-      command "/etc/driveclient/create-backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -d #{location} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} >> /etc/driveclient/run_backup"
+      command "echo '#!/usr/bin/env bash' >> /etc/driveclient/run_backup; /etc/driveclient/create-backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -d #{location} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} >> /etc/driveclient/run_backup"
       creates "/etc/driveclient/backups_created"
       action :run
     end
@@ -102,7 +102,14 @@ if node['rackspace_cloud_backup']['rackspace_username'] && node['rackspace_cloud
     if node['rackspace_cloud_backup']['backup_cron_home']
       home node['rackspace_cloud_backup']['backup_cron_home']
     end
-    command "/bin/bash /etc/driveclient/run_backup"
+    command "/etc/driveclient/run_backup"
+    action :create
+  end
+  file "/etc/driveclient/run_backup" do
+    owner "root"
+    group "root"
+    mode "0750"
     action :create
   end
 end
+
