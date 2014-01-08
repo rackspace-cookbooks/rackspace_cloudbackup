@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: rackspace-cloud-backup
-# Recipe:: default
+# Recipe:: cloud
 #
 # Copyright 2013, Rackspace US, Inc.
 #
@@ -8,13 +8,13 @@
 #
 
 #
-# Verify mandatory credentials are set
+# Verify mandatory options are set
 #
 opt_error = false
 ['rackspace_username', 'rackspace_apikey', 'cloud_notify_email', 'backup_locations'].each do |option|
   if node['rackspace_cloud_backup'][option].nil?
     # Logging, and not raising, here so that all missing args will be logged in one run
-    Chef::Log.warn "Mandatory option #{option} unset"
+    Chef::Log.warn "ERROR: rackspace-cloud-backup::cloud: Mandatory option #{option} unset"
     opt_error = true
   end
 end
