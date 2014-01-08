@@ -123,7 +123,13 @@ def create_backup_plan(args, token, machine_info):
         if status is not 200:
             errors.append(status)
             
-            tries -= 1
+            # Fail immediately on Client Error (4xx) responses
+            # TODO: Should we just fail immediately if status < 500?
+            if status >= 400 and status <= 499:
+                tries = 0
+            else:
+                tries -= 1
+
             if tries is 0:
                 from datetime import datetime
                 debugOut = {'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
