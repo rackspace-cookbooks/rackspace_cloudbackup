@@ -103,7 +103,7 @@ def create_backup_plan(args, token, machine_info):
     if args.verbose:
         print 'JSON REQUEST: ' + jsonreq
 
-    tries = 3
+    tries = args.retries
     errors = []
     while True:
         #make the request
@@ -149,6 +149,7 @@ if __name__ == '__main__':
     parser.add_argument('--email', '-e', required=True, help='Email to send notices to')
     parser.add_argument('--ip', '-i', required=True, help='IP address to add to the name')
     parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')
+    parser.add_argument('--retries', '-r', action='store', default=3, help="Number of times to retry API request before failing", type=int)
 
     #populate needed variables
     args = parser.parse_args()
