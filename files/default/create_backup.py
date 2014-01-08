@@ -19,6 +19,7 @@ exit codes:
   1 - generic failure
   2 - auth failure
   3 - backup api error
+  4 - /etc/driveclient/bootstrap.json error
 """
 
 
@@ -112,7 +113,15 @@ def create_backup_plan(args, token, machine_info):
             connection.set_debuglevel(1)
         headers = {'Content-type': 'application/json',
                    'X-Auth-Token': token}
-        path = "/v1.0/%s/backup-configuration" % machine_info['AccountId']
+        try:
+            path = "/v1.0/%s/backup-configuration" % machine_info['AccountId']
+        except KeyError:
+            if args.verbose:
+                print 'Failing due to missing key from /etc/driveclient/bootstrap.json.\nLoaded data:'
+                print machine_info
+            sysexit(4)
+            
+            
         connection.request('POST', path, jsonreq, headers)
 
         #process the request
