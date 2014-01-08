@@ -6,7 +6,7 @@
 #
 # Apache 2.0
 #
-if node['rackspace_cloud_backup']['rackspace_username'].nil? or node['rackspace_cloud_backup']['rackspace_api_key'].nil?
+if node['rackspace_cloud_backup']['rackspace_username'].nil? or node['rackspace_cloud_backup']['rackspace_apikey'].nil?
   raise RuntimeError, "No Rackspace credentials found"
 end
 
