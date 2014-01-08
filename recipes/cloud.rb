@@ -55,6 +55,14 @@ service "driveclient" do
   action :enable
 end
 
+#
+# Install deps for the backup scripts
+#
+package "python-argparse" do
+  action :install
+end
+
+
 #insert the backup creation script
 cookbook_file "/etc/driveclient/auth.py" do
   source "auth.py"
