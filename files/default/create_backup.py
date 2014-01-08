@@ -26,7 +26,7 @@ import argparse
 import json
 import httplib
 from sys import exit as sysexit
-
+import time
 
 def cloud_auth(args):
     """
@@ -146,6 +146,8 @@ def create_backup_plan(args, token, machine_info):
                 #print 'Check the endpoint and auth credentials.'
                 sysexit(2)
 
+        time.sleep(args.retrydelay)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Gets auth data via json')
@@ -156,6 +158,7 @@ if __name__ == '__main__':
     parser.add_argument('--ip', '-i', required=True, help='IP address to add to the name')
     parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')
     parser.add_argument('--retries', '-r', action='store', default=3, help="Number of times to retry API request before failing", type=int)
+    parser.add_argument('--retrydelay', '-R', action='store', default=1, help="Number of seconds to delay between API retries", type=int)
 
     #populate needed variables
     args = parser.parse_args()
