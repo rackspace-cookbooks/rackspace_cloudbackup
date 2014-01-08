@@ -150,7 +150,8 @@ def create_backup_plan(args, token, machine_info):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Gets auth data via json')
+    parser = argparse.ArgumentParser(description='Gets auth data via json',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--apiuser', '-u', required=True, help='Api username')
     parser.add_argument('--apikey', '-a', required=True, help='Account api key')
     parser.add_argument('--directory', '-d', required=True, help='Directory to back up')
