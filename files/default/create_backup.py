@@ -137,6 +137,11 @@ def create_backup_plan(args, token, machine_info):
                             'req': req }
 
                 open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dumps(debugOut))
+
+                if args.verbose:
+                    print 'Failing due to bad API responses.\nDebug:'
+                    print debugOut
+
                 sysexit(3)
         else:
             try:
