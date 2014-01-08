@@ -28,6 +28,7 @@ import json
 import httplib
 from sys import exit as sysexit
 import time
+from datetime import datetime
 
 def cloud_auth(args):
     """
@@ -116,6 +117,12 @@ def create_backup_plan(args, token, machine_info):
         try:
             path = "/v1.0/%s/backup-configuration" % machine_info['AccountId']
         except KeyError:
+            debugOut = {
+                'fail_type': 'bootstrap.json Key Failure',
+                'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
+                'machine_info': machine_info }
+            open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dumps(debugOut))
+
             if args.verbose:
                 print 'Failing due to missing key from /etc/driveclient/bootstrap.json.\nLoaded data:'
                 print machine_info
@@ -140,10 +147,11 @@ def create_backup_plan(args, token, machine_info):
                 tries -= 1
 
             if tries is 0:
-                from datetime import datetime
-                debugOut = {'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
-                            'responses': errors,
-                            'req': req }
+                debugOut = {
+                    'fail_type': 'API Request Failure',
+                    'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
+                    'responses': errors,
+                    'req': req }
 
                 open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dumps(debugOut))
 
