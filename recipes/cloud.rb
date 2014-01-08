@@ -28,6 +28,7 @@ case node[:platform]
     yum_repository "cloud-backup" do
       description "Rackspace cloud backup agent repo"
       url "http://agentrepo.drivesrvr.com/redhat/"
+      gpgcheck false
   end
   when "ubuntu","debian"
     apt_repository "cloud-backup" do
@@ -48,7 +49,9 @@ execute "registration" do
   command "driveclient -c -u #{node['rackspace_cloud_backup']['rackspace_username']} -k #{node['rackspace_cloud_backup']['rackspace_apikey']} && touch /etc/driveclient/.registered"
   creates "/etc/driveclient/.registered"
   action :run
-  notifies :restart, "service[driveclient]"
+
+  # Immediately restart as a [re]start is requred to write a key into bootstrap.json needed by create-backup.py
+  notifies :restart, "service[driveclient]", :immediately
 end
 
 service "driveclient" do
