@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright 2013 Rackspace Hosting, Inc.
+#Copyright 2014 Rackspace Hosting, Inc.
 
 #Licensed under the Apache License, Version 2.0 (the "License");
 #you may not use this file except in compliance with the License.
@@ -76,33 +76,36 @@ def create_backup_plan(args, token, machine_info):
     """
     Creates a basic backup plan based on the directory given
     """
-    jsonreq = json.dumps({"BackupConfigurationName": "Backup for %s, backing up %s" % (args.ip, args.directory),
-                          "MachineAgentId": machine_info['AgentId'],
-                          "IsActive": True,
-                          "VersionRetention": 30,
-                          "MissedBackupActionId": 1,
-                          "Frequency": "Manually",
-                          "StartTimeHour": None,
-                          "StartTimeMinute": None,
-                          "StartTimeAmPm": None,
-                          "DayOfWeekId": None,
-                          "HourInterval": None,
-                          "TimeZoneId": "UTC",
-                          "NotifyRecipients": args.email,
-                          "NotifySuccess": False,
-                          "NotifyFailure": True,
-                          "Inclusions": [
-                              {"FilePath": args.directory,
-                               "FileItemType": "Folder"
-                               }
-                          ],
-                          "Exclusions": []
-                          })
+    req = {"BackupConfigurationName": "Backup for %s, backing up %s" % (args.ip, args.directory),
+           "MachineAgentId": machine_info['AgentId'],
+           "IsActive": True,
+           "VersionRetention": 30,
+           "MissedBackupActionId": 1,
+           "Frequency": "Manually",
+           "StartTimeHour": None,
+           "StartTimeMinute": None,
+           "StartTimeAmPm": None,
+           "DayOfWeekId": None,
+           "HourInterval": None,
+           "TimeZoneId": "UTC",
+           "NotifyRecipients": args.email,
+           "NotifySuccess": False,
+           "NotifyFailure": True,
+           "Inclusions": [
+            {"FilePath": args.directory,
+             "FileItemType": "Folder"
+             }
+            ],
+           "Exclusions": []
+           }
+    jsonreq = json.dumps(req)
+
     if args.verbose:
         print 'JSON REQUEST: ' + jsonreq
 
     tries = 3
-    while tries is not 0:
+    errors = []
+    while True:
         #make the request
         connection = httplib.HTTPSConnection('backup.api.rackspacecloud.com', 443)
         if args.verbose:
@@ -118,9 +121,16 @@ def create_backup_plan(args, token, machine_info):
         json_response = json.loads(response.read())
         connection.close()
         if status is not 200:
+            errors.append(status)
+            
             tries -= 1
             if tries is 0:
-                open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dump(jsonreq))
+                from datetime import datetime
+                debugOut = {'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
+                            'responses': errors,
+                            'req': req }
+
+                open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dumps(debugOut))
                 sysexit(3)
         else:
             try:
