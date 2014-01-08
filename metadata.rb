@@ -9,4 +9,4 @@ version          '0.3.4'
 recipe           "rackspace-cloud-backup", "Installs and registers cloud backup"
 
 depends "apt"
-depends "yum"
+depends "yum", "~> 2.0"

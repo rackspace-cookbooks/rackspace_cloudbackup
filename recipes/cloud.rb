@@ -28,7 +28,9 @@ case node[:platform]
     yum_repository "cloud-backup" do
       description "Rackspace cloud backup agent repo"
       url "http://agentrepo.drivesrvr.com/redhat/"
-      gpgcheck false
+
+      # This will be needed with opscode-yum ~> 3.0, but not present on opscode-yum <3.0.0
+      # gpgcheck false
   end
   when "ubuntu","debian"
     apt_repository "cloud-backup" do
