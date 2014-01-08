@@ -6,6 +6,10 @@
 #
 # Apache 2.0
 #
+if node['rackspace_cloud_backup']['rackspace_username'].nil? or node['rackspace_cloud_backup']['rackspace_api_key'].nil?
+  raise RuntimeError, "No Rackspace credentials found"
+end
+
 case node[:platform]
   when "redhat", "centos"
     yum_repository "cloud-backup" do
@@ -27,15 +31,11 @@ package "driveclient" do
   action :upgrade
 end
 
-unless node['rackspace_cloud_backup']['rackspace_username'].nil?
-  unless node['rackspace_cloud_backup']['rackspace_apikey'].nil?
-    execute "registration" do
-      command "driveclient -c -u #{node['rackspace_cloud_backup']['rackspace_username']} -k #{node['rackspace_cloud_backup']['rackspace_apikey']} && touch /etc/driveclient/.registered"
-      creates "/etc/driveclient/.registered"
-      action :run
-      notifies :restart, "service[driveclient]"
-    end
-  end
+execute "registration" do
+  command "driveclient -c -u #{node['rackspace_cloud_backup']['rackspace_username']} -k #{node['rackspace_cloud_backup']['rackspace_apikey']} && touch /etc/driveclient/.registered"
+  creates "/etc/driveclient/.registered"
+  action :run
+  notifies :restart, "service[driveclient]"
 end
 
 service "driveclient" do
@@ -57,7 +57,7 @@ cookbook_file "/etc/driveclient/create-backup.py" do
 end
 
 #create the backup
-if node['rackspace_cloud_backup']['rackspace_username'] && node['rackspace_cloud_backup']['rackspace_apikey'] && node['rackspace_cloud_backup']['cloud_notify_email'] && node['rackspace_cloud_backup']['backup_locations']
+if node['rackspace_cloud_backup']['cloud_notify_email'] && node['rackspace_cloud_backup']['backup_locations']
   for location in node['rackspace_cloud_backup']['backup_locations'] do
     execute "create backup" do
       command "echo '#!/usr/bin/env bash' >> /etc/driveclient/run_backup; /etc/driveclient/create-backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -d #{location} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} >> /etc/driveclient/run_backup"
