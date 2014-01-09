@@ -47,45 +47,37 @@ package "driveclient" do
   action :upgrade
 end
 
-execute "registration" do
-  command "driveclient -c -u #{node['rackspace_cloud_backup']['rackspace_username']} -k #{node['rackspace_cloud_backup']['rackspace_apikey']} && touch /etc/driveclient/.registered"
-  creates "/etc/driveclient/.registered"
-  action :run
+#
+# Install deps for the Python scripts
+#
+package "python-argparse" do
+  action :install
+end
 
-  # Immediately restart as a [re]start is requred to write a key into bootstrap.json needed by create-backup.py
-  notifies :restart, "service[driveclient]", :immediately
+# Insert our scripts
+['verify_registration.py', 'auth.py', 'create_backup.py'].each do |script|
+  cookbook_file "/etc/driveclient/#{script}" do
+    source script
+    mode 00755
+    owner "root"
+    group "root"
+  end
+end
+
+execute "registration" do
+  # This script is idempotent and will bounce driveclient on register
+  command "/etc/driveclient/verify_registration.py --register -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']}"
+  action :run
 end
 
 service "driveclient" do
   action :enable
 end
 
-#
-# Install deps for the backup scripts
-#
-package "python-argparse" do
-  action :install
-end
-
-
-#insert the backup creation script
-cookbook_file "/etc/driveclient/auth.py" do
-  source "auth.py"
-  mode 00755
-  owner "root"
-  group "root"
-end
-cookbook_file "/etc/driveclient/create-backup.py" do
-  source "create_backup.py"
-  mode 00755
-  owner "root"
-  group "root"
-end
-
 #create the backup
 for location in node['rackspace_cloud_backup']['backup_locations'] do
   execute "create backup" do
-    command "echo '#!/usr/bin/env bash' >> /etc/driveclient/run_backup; /etc/driveclient/create-backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -d #{location} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} >> /etc/driveclient/run_backup"
+    command "echo '#!/usr/bin/env bash' >> /etc/driveclient/run_backup; /etc/driveclient/create_backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -d #{location} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} >> /etc/driveclient/run_backup"
     creates "/etc/driveclient/backups_created"
     action :run
   end
