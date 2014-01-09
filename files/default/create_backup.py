@@ -91,12 +91,12 @@ def get_machine_agent_id(args, required_keys = None):
                 debugOut = {
                     'fail_type': 'bootstrap.json Key Failure',
                     'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
-                    'machine_info': machine_info }
+                    'data': data }
                 open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dumps(debugOut))
             
                 if args.verbose:
                     print 'Failing due to missing key from /etc/driveclient/bootstrap.json.\nLoaded data:'
-                    print machine_info
+                    print data
                 sysexit(4)
 
             time.sleep(args.retrydelay)
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     #populate needed variables
     args = parser.parse_args()
     token = cloud_auth(args)
-    machine_info = get_machine_agent_id(args, ['AccountId'])
+    machine_info = get_machine_agent_id(args, ['AccountId', 'AgentId'])
 
     #create the backup plan
     backup_id = create_backup_plan(args, token, machine_info)
