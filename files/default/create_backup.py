@@ -91,7 +91,7 @@ def get_machine_agent_id(args, required_keys = None):
                 debugOut = {
                     'fail_type': 'bootstrap.json Key Failure',
                     'date': datetime.now().strftime('%Y/%m/%d %H:%M:%S'),
-                    'machine_info': machine_info }
+                    'data': data }
                 open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dumps(debugOut))
             
                 if args.verbose:
