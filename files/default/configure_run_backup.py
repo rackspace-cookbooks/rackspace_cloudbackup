@@ -302,7 +302,7 @@ def parseArguments():
     parser.add_argument('--retries', '-r', action='store', default=3, help="Number of times to retry a task before failing", type=int)
     parser.add_argument('--retrydelay', '-R', action='store', default=1, help="Number of seconds to delay between retries", type=int)
 
-    parser.add_argument('--conffile', action='store', default="/etc/driveclient/run_backup.conf.json", help="Number of seconds to delay between retries", type=str)
+    parser.add_argument('--conffile', action='store', default="/etc/driveclient/run_backup.conf.json", help="Target configuration file", type=str)
 
     parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')
 
