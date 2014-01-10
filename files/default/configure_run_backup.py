@@ -34,6 +34,7 @@ import copy
 def cloud_auth(args):
     """
     Authenticate and return authentication details via returned dict
+    Returns [API token, Tenant ID]
     """
     token = ""
     authurl = 'identity.api.rackspacecloud.com'
@@ -60,12 +61,14 @@ def cloud_auth(args):
         token = json_response['access']['token']['id']
         if args.verbose:
             print 'Token:\t\t', token
+           
+        tenantID = json_response['access']['token']['tenant']['id']
     except(KeyError, IndexError):
         #print 'Error while getting answers from auth server.'
         #print 'Check the endpoint and auth credentials.'
         sysexit(2)
     finally:
-        return token
+        return [token, tenantID]
 
 
 def get_machine_agent_id(args, required_keys = None):
@@ -104,7 +107,7 @@ def get_machine_agent_id(args, required_keys = None):
         else:
             return data
 
-def create_backup_plan(args, token, machine_info, directory):
+def create_backup_plan(args, tokenTuple, machine_info, directory):
     """
     Creates a basic backup plan based on the directory given
     """
@@ -147,8 +150,8 @@ def create_backup_plan(args, token, machine_info, directory):
         if args.verbose:
             connection.set_debuglevel(1)
         headers = {'Content-type': 'application/json',
-                   'X-Auth-Token': token}
-        path = "/v1.0/%s/backup-configuration" % machine_info['AccountId']
+                   'X-Auth-Token': tokenTuple[0]}
+        path = "/v1.0/%s/backup-configuration" % tokenTuple[1]
             
         connection.request('POST', path, jsonreq, headers)
 
@@ -255,10 +258,9 @@ def generateConfig(args, currentConfig, machine_info):
     config["authentication"]["apiuser"] = args.apiuser
     config["authentication"]["apikey"] = args.apikey
     config["general"]["endpoint"] = args.endpoint
-    config["general"]["accountID"] = machine_info['AccountId']
 
     targets = getTargetDirectories(args)
-    token = None
+    tokenTuple = None
 
     # Disable all existing backups to prevent orphaned jobs
     # from running.  Keep the block, though, to track the ID.
@@ -271,10 +273,10 @@ def generateConfig(args, currentConfig, machine_info):
             config["locations"][target] = {}
 
         if not config["locations"][target].has_key("BackupConfigurationId"):
-            if token is None:
-                token = cloud_auth(args)
+            if tokenTuple is None:
+                tokenTuple = cloud_auth(args)
 
-            config["locations"][target]["BackupConfigurationId"] = create_backup_plan(args, token, machine_info, target)
+            config["locations"][target]["BackupConfigurationId"] = create_backup_plan(args, tokenTuple, machine_info, target)
 
         # Ensure the backup is enabled
         config["locations"][target]["enabled"] = True
@@ -318,7 +320,7 @@ if __name__ == '__main__':
     args = parseArguments()
     currentConfig = loadConfig(args)
 
-    machine_info = get_machine_agent_id(args, ['AccountId', 'AgentId'])
+    machine_info = get_machine_agent_id(args, ['AgentId'])
     newConfig = generateConfig(args, currentConfig, machine_info)
 
     if newConfig != currentConfig:
