@@ -76,7 +76,7 @@ end
 
 execute "Generate run_backup config" do
   # This script is idempotent
-  command "/etc/driveclient/configure_run_backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} --directoryarray '#{node['rackspace_cloud_backup']['backup_locations']}'"
+  command "/etc/driveclient/configure_run_backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} --directoryarray '#{node['rackspace_cloud_backup']['backup_locations']}' --endpoint #{node['rackspace_cloud_backup']['rackspace_endpoint']}.backup.api.rackspacecloud.com"
   action :run
 end
 
