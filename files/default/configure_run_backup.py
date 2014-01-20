@@ -29,10 +29,12 @@ import httplib
 from sys import exit as sysexit
 import time
 from datetime import datetime
+import copy
 
 def cloud_auth(args):
     """
     Authenticate and return authentication details via returned dict
+    Returns [API token, Tenant ID]
     """
     token = ""
     authurl = 'identity.api.rackspacecloud.com'
@@ -59,12 +61,14 @@ def cloud_auth(args):
         token = json_response['access']['token']['id']
         if args.verbose:
             print 'Token:\t\t', token
+           
+        tenantID = json_response['access']['token']['tenant']['id']
     except(KeyError, IndexError):
         #print 'Error while getting answers from auth server.'
         #print 'Check the endpoint and auth credentials.'
         sysexit(2)
     finally:
-        return token
+        return [token, tenantID]
 
 
 def get_machine_agent_id(args, required_keys = None):
@@ -103,11 +107,15 @@ def get_machine_agent_id(args, required_keys = None):
         else:
             return data
 
-def create_backup_plan(args, token, machine_info):
+def create_backup_plan(args, tokenTuple, machine_info, directory):
     """
     Creates a basic backup plan based on the directory given
     """
-    req = {"BackupConfigurationName": "Backup for %s, backing up %s" % (args.ip, args.directory),
+
+    # TODO: This does no checking to ensure we're not duplicating IDs.
+    # Add code to see if the directory is already defined and, if so, reuse it.
+
+    req = {"BackupConfigurationName": "Backup for %s, backing up %s" % (args.ip, directory),
            "MachineAgentId": machine_info['AgentId'],
            "IsActive": True,
            "VersionRetention": 30,
@@ -123,7 +131,7 @@ def create_backup_plan(args, token, machine_info):
            "NotifySuccess": False,
            "NotifyFailure": True,
            "Inclusions": [
-            {"FilePath": args.directory,
+            {"FilePath": directory,
              "FileItemType": "Folder"
              }
             ],
@@ -138,12 +146,12 @@ def create_backup_plan(args, token, machine_info):
     errors = []
     while True:
         #make the request
-        connection = httplib.HTTPSConnection('backup.api.rackspacecloud.com', 443)
+        connection = httplib.HTTPSConnection(args.endpoint, 443)
         if args.verbose:
             connection.set_debuglevel(1)
         headers = {'Content-type': 'application/json',
-                   'X-Auth-Token': token}
-        path = "/v1.0/%s/backup-configuration" % machine_info['AccountId']
+                   'X-Auth-Token': tokenTuple[0]}
+        path = "/v1.0/%s/backup-configuration" % tokenTuple[1]
             
         connection.request('POST', path, jsonreq, headers)
 
@@ -186,27 +194,140 @@ def create_backup_plan(args, token, machine_info):
 
         time.sleep(args.retrydelay)
 
+def loadConfig(args):
+    """
+    Load json config file and return its contents
+    """
+    try:
+        try:
+            fd = open(args.conffile)
+        except IOError:
+            return {}
+        conf = json.load(fd)
+    except:
+        print "ERROR: Failed to read %s" % args.conffile
+        sysexit(1)
 
-if __name__ == '__main__':
+    return conf
+
+def saveConfig(args, config):
+    """
+    Save the json config file
+    """
+    try:
+        with open(args.conffile, "w") as fd:
+            fd.write(json.dumps(config))
+    except:
+        print "ERROR: Failed to write %s" % args.conffile
+        sysexit(1)
+
+def getTargetDirectories(args):
+    """
+    Parse user args and return a array of target dictionaries
+    """
+
+    if args.directoryarray:
+        retVal = json.loads(args.directoryarray)
+    else:
+        retVal = []
+        
+    if args.directory:
+        retVal.append(args.directory)
+
+    return retVal
+    
+
+
+def generateConfig(args, currentConfig, machine_info):
+    """
+    Generate a configuration dictionary for run_backup
+    """
+    
+    config = copy.deepcopy(currentConfig)
+    
+    if not isinstance(config, dict):
+        if args.verbose:
+            print "WARNING: Loaded config is not a dict"
+        config = {}
+
+    # Ensure our base blocks are present
+    for block in ["authentication", "general", "locations"]:
+        if not config.has_key(block):
+            config[block] = {}
+
+    config["authentication"]["apiuser"] = args.apiuser
+    config["authentication"]["apikey"] = args.apikey
+    config["general"]["endpoint"] = args.endpoint
+
+    targets = getTargetDirectories(args)
+    tokenTuple = None
+
+    # Disable all existing backups to prevent orphaned jobs
+    # from running.  Keep the block, though, to track the ID.
+    # The loop below will toggle required backups back on
+    for key in config["locations"].keys():
+        config["locations"][key]["enabled"] = False
+
+    for target in targets:
+        if not config["locations"].has_key(target):
+            config["locations"][target] = {}
+
+        if not config["locations"][target].has_key("BackupConfigurationId"):
+            if tokenTuple is None:
+                tokenTuple = cloud_auth(args)
+
+            config["locations"][target]["BackupConfigurationId"] = create_backup_plan(args, tokenTuple, machine_info, target)
+
+        # Ensure the backup is enabled
+        config["locations"][target]["enabled"] = True
+
+    return config
+
+def parseArguments():
+    """
+    Parse command line arguments
+    """
     parser = argparse.ArgumentParser(description='Gets auth data via json',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--apiuser', '-u', required=True, help='Api username')
     parser.add_argument('--apikey', '-a', required=True, help='Account api key')
-    parser.add_argument('--directory', '-d', required=True, help='Directory to back up')
+    parser.add_argument('--endpoint', action='store', default="backup.api.rackspacecloud.com", help="RCBU API Endpoint to use", type=str)
+
+    parser.add_argument('--directory', '-d', required=False, help='Directory to back up')
+    parser.add_argument('--directoryarray', required=False, help='json decodable array of directories to back up')
+
     parser.add_argument('--email', '-e', required=True, help='Email to send notices to')
     parser.add_argument('--ip', '-i', required=True, help='IP address to add to the name')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')
+
     parser.add_argument('--retries', '-r', action='store', default=3, help="Number of times to retry a task before failing", type=int)
     parser.add_argument('--retrydelay', '-R', action='store', default=1, help="Number of seconds to delay between retries", type=int)
 
+    parser.add_argument('--conffile', action='store', default="/etc/driveclient/run_backup.conf.json", help="Target configuration file", type=str)
+
+    parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')
+
     #populate needed variables
     args = parser.parse_args()
-    token = cloud_auth(args)
-    machine_info = get_machine_agent_id(args, ['AccountId', 'AgentId'])
 
-    #create the backup plan
-    backup_id = create_backup_plan(args, token, machine_info)
+    if not args.directory and not args.directoryarray:
+        print "ERROR: --directory or --directoryarray is required."
+        print "See help (-h) for further details"
+        sysexit(1)
 
-    register_cmd = "python /etc/driveclient/auth.py -u %s -a %s" % (args.apiuser, args.apikey)
-    trigger_cmd = "curl -X POST -H \"X-Auth-Token: $(%s)\" -H \"Content-type: application/json\" \"https://backup.api.rackspacecloud.com/v1.0/%s/backup/action-requested\" -d \'{\"Action\": \"StartManual\", \"Id\": %s}\'" % (register_cmd, machine_info['AccountId'], backup_id)
-    print trigger_cmd
+    return args
+
+if __name__ == '__main__':
+    args = parseArguments()
+    currentConfig = loadConfig(args)
+
+    machine_info = get_machine_agent_id(args, ['AgentId'])
+    newConfig = generateConfig(args, currentConfig, machine_info)
+
+    if newConfig != currentConfig:
+        if args.verbose:
+            print "INFO: Configuration changed, writing %s" % args.conffile
+            print "New Config:"
+            print newConfig
+        saveConfig(args, newConfig)
+
+    sysexit(0)
