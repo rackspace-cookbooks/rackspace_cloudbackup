@@ -1,7 +1,7 @@
-depends 'rackspace'
-provides 'rackspace/cloudbackup'
-provides 'rackspace/cloudbackup/is_registered'
-provides 'rackspace/cloudbackup/agent_id'
+#depends 'rackspace'
+provides 'rcbu'
+provides 'rcbu/is_registered'
+provides 'rcbu/agent_id'
 
 require 'json'
     
@@ -23,14 +23,13 @@ def gather_data(bootstrap_file)
   return bootstrap_data
 end
 
-rackspace Mash.new unless rackspace
-rackspace[:cloudbackup] = Mash.new unless rackspace[:cloudbackup]
-rackspace[:cloudbackup][:is_registered] = nil unless rackspace[:cloudbackup][:is_registered]
-rackspace[:cloudbackup][:agent_id]      = nil unless rackspace[:cloudbackup][:agent_id]
+rcbu Mash.new unless rackspace
+rcbu[:is_registered] = nil unless rcbu[:is_registered]
+rcbu[:agent_id]      = nil unless rcbu[:agent_id]
 
 data = gather_data("<%= @bootstrap_file -%>")
 unless data.nil?
   # WARNING: Don't return AccountId from this data!  It is not reliable and will result in race conditions!
-  rackspace[:cloudbackup][:is_registered] = data['IsRegistered']
-  rackspace[:cloudbackup][:agent_id]      = data['AgentId']
+  rcbu[:is_registered] = data['IsRegistered']
+  rcbu[:agent_id]      = data['AgentId']
 end
