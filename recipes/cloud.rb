@@ -12,7 +12,7 @@
 #
 opt_error = false
 ['rackspace_username', 'rackspace_apikey', 'cloud_notify_email', 'backup_locations'].each do |option|
-  if node['rackspace_cloud_backup'][option].nil?
+  if node['rackspace_cloudbackup'][option].nil?
     # Logging, and not raising, here so that all missing args will be logged in one run
     Chef::Log.warn "ERROR: rackspace-cloud-backup::cloud: Mandatory option #{option} unset"
     opt_error = true
@@ -66,7 +66,7 @@ end
 
 execute "Verify Registration" do
   # This script is idempotent and will bounce driveclient on register
-  command "/etc/driveclient/verify_registration.py --register -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']}"
+  command "/etc/driveclient/verify_registration.py --register -u #{node['rackspace_cloudbackup']['rackspace_username']} -a #{node['rackspace_cloudbackup']['rackspace_apikey']}"
   action :run
 end
 
@@ -76,7 +76,7 @@ end
 
 execute "Generate run_backup config" do
   # This script is idempotent
-  command "/etc/driveclient/configure_run_backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} --directoryarray '#{node['rackspace_cloud_backup']['backup_locations']}' --endpoint #{node['rackspace_cloud_backup']['rackspace_endpoint']}.backup.api.rackspacecloud.com"
+  command "/etc/driveclient/configure_run_backup.py -u #{node['rackspace_cloudbackup']['rackspace_username']} -a #{node['rackspace_cloudbackup']['rackspace_apikey']} -e #{node['rackspace_cloudbackup']['cloud_notify_email']} -i #{node['ipaddress']} --directoryarray '#{node['rackspace_cloudbackup']['backup_locations']}' --endpoint #{node['rackspace_cloudbackup']['rackspace_endpoint']}.backup.api.rackspacecloud.com"
   action :run
 end
 
@@ -90,35 +90,35 @@ end
 
 
 cron "cloud-backup-trigger" do
-  if node['rackspace_cloud_backup']['backup_cron_day']
-    day node['rackspace_cloud_backup']['backup_cron_day']
+  if node['rackspace_cloudbackup']['backup_cron_day']
+    day node['rackspace_cloudbackup']['backup_cron_day']
   end
-  if node['rackspace_cloud_backup']['backup_cron_hour']
-    hour node['rackspace_cloud_backup']['backup_cron_hour']
+  if node['rackspace_cloudbackup']['backup_cron_hour']
+    hour node['rackspace_cloudbackup']['backup_cron_hour']
   end
-  if node['rackspace_cloud_backup']['backup_cron_minute']
-    minute node['rackspace_cloud_backup']['backup_cron_minute']
+  if node['rackspace_cloudbackup']['backup_cron_minute']
+    minute node['rackspace_cloudbackup']['backup_cron_minute']
   end
-  if node['rackspace_cloud_backup']['backup_cron_month']
-    month node['rackspace_cloud_backup']['backup_cron_month']
+  if node['rackspace_cloudbackup']['backup_cron_month']
+    month node['rackspace_cloudbackup']['backup_cron_month']
   end
-  if node['rackspace_cloud_backup']['backup_cron_weekday']
-    weekday node['rackspace_cloud_backup']['backup_cron_weekday']
+  if node['rackspace_cloudbackup']['backup_cron_weekday']
+    weekday node['rackspace_cloudbackup']['backup_cron_weekday']
   end
-  if node['rackspace_cloud_backup']['backup_cron_user']
-    user node['rackspace_cloud_backup']['backup_cron_user']
+  if node['rackspace_cloudbackup']['backup_cron_user']
+    user node['rackspace_cloudbackup']['backup_cron_user']
   end
-  if node['rackspace_cloud_backup']['backup_cron_mailto']
-    mailto node['rackspace_cloud_backup']['backup_cron_mailto']
+  if node['rackspace_cloudbackup']['backup_cron_mailto']
+    mailto node['rackspace_cloudbackup']['backup_cron_mailto']
   end
-  if node['rackspace_cloud_backup']['backup_cron_path']
-    path node['rackspace_cloud_backup']['backup_cron_path']
+  if node['rackspace_cloudbackup']['backup_cron_path']
+    path node['rackspace_cloudbackup']['backup_cron_path']
   end
-  if node['rackspace_cloud_backup']['backup_cron_shell']
-    shell node['rackspace_cloud_backup']['backup_cron_shell']
+  if node['rackspace_cloudbackup']['backup_cron_shell']
+    shell node['rackspace_cloudbackup']['backup_cron_shell']
   end
-  if node['rackspace_cloud_backup']['backup_cron_home']
-    home node['rackspace_cloud_backup']['backup_cron_home']
+  if node['rackspace_cloudbackup']['backup_cron_home']
+    home node['rackspace_cloudbackup']['backup_cron_home']
   end
   command "/etc/driveclient/run_backup"
   action :create

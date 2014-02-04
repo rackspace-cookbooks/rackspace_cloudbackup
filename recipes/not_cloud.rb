@@ -53,40 +53,40 @@ case node[:platform]
 end
 
 #set up cronjob
-if node['rackspace_cloud_backup']['backup_locations'] && node['rackspace_cloud_backup']['backup_container'] && node['rackspace_cloud_backup']['rackspace_endpoint'] && node['rackspace_cloud_backup']['rackspace_apikey'] && node['rackspace_cloud_backup']['rackspace_username']
- for location in node['rackspace_cloud_backup']['backup_locations'] do
+if node['rackspace_cloudbackup']['backup_locations'] && node['rackspace_cloudbackup']['backup_container'] && node['rackspace_cloudbackup']['rackspace_endpoint'] && node['rackspace_cloudbackup']['rackspace_apikey'] && node['rackspace_cloudbackup']['rackspace_username']
+ for location in node['rackspace_cloudbackup']['backup_locations'] do
   cron "turbolift-#{location}" do
-    if node['rackspace_cloud_backup']['backup_cron_day']
-      day node['rackspace_cloud_backup']['backup_cron_day']
+    if node['rackspace_cloudbackup']['backup_cron_day']
+      day node['rackspace_cloudbackup']['backup_cron_day']
     end
-    if node['rackspace_cloud_backup']['backup_cron_hour']
-      hour node['rackspace_cloud_backup']['backup_cron_hour']
+    if node['rackspace_cloudbackup']['backup_cron_hour']
+      hour node['rackspace_cloudbackup']['backup_cron_hour']
     end
-    if node['rackspace_cloud_backup']['backup_cron_minute']
-      minute node['rackspace_cloud_backup']['backup_cron_minute']
+    if node['rackspace_cloudbackup']['backup_cron_minute']
+      minute node['rackspace_cloudbackup']['backup_cron_minute']
     end
-    if node['rackspace_cloud_backup']['backup_cron_month']
-      month node['rackspace_cloud_backup']['backup_cron_month']
+    if node['rackspace_cloudbackup']['backup_cron_month']
+      month node['rackspace_cloudbackup']['backup_cron_month']
     end
-    if node['rackspace_cloud_backup']['backup_cron_weekday']
-      weekday node['rackspace_cloud_backup']['backup_cron_weekday']
+    if node['rackspace_cloudbackup']['backup_cron_weekday']
+      weekday node['rackspace_cloudbackup']['backup_cron_weekday']
     end
-    if node['rackspace_cloud_backup']['backup_cron_user']
-      user node['rackspace_cloud_backup']['backup_cron_user']
+    if node['rackspace_cloudbackup']['backup_cron_user']
+      user node['rackspace_cloudbackup']['backup_cron_user']
     end
-    if node['rackspace_cloud_backup']['backup_cron_mailto']
-      mailto node['rackspace_cloud_backup']['backup_cron_mailto']
+    if node['rackspace_cloudbackup']['backup_cron_mailto']
+      mailto node['rackspace_cloudbackup']['backup_cron_mailto']
     end
-    if node['rackspace_cloud_backup']['backup_cron_path']
-      path node['rackspace_cloud_backup']['backup_cron_path']
+    if node['rackspace_cloudbackup']['backup_cron_path']
+      path node['rackspace_cloudbackup']['backup_cron_path']
     end
-    if node['rackspace_cloud_backup']['backup_cron_shell']
-      shell node['rackspace_cloud_backup']['backup_cron_shell']
+    if node['rackspace_cloudbackup']['backup_cron_shell']
+      shell node['rackspace_cloudbackup']['backup_cron_shell']
     end
-    if node['rackspace_cloud_backup']['backup_cron_home']
-      home node['rackspace_cloud_backup']['backup_cron_home']
+    if node['rackspace_cloudbackup']['backup_cron_home']
+      home node['rackspace_cloudbackup']['backup_cron_home']
     end
-    command "time=$(date +\\%Y-\\%m-\\%d_\\%H:\\%M:\\%S); turbolift --os-rax-auth #{node['rackspace_cloud_backup']['rackspace_endpoint']} -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} archive -s #{location} -c #{node['rackspace_cloud_backup']['backup_container']} --verify --tar-name \"${time} - #{location.gsub('/', '___')}\""
+    command "time=$(date +\\%Y-\\%m-\\%d_\\%H:\\%M:\\%S); turbolift --os-rax-auth #{node['rackspace_cloudbackup']['rackspace_endpoint']} -u #{node['rackspace_cloudbackup']['rackspace_username']} -a #{node['rackspace_cloudbackup']['rackspace_apikey']} archive -s #{location} -c #{node['rackspace_cloudbackup']['backup_container']} --verify --tar-name \"${time} - #{location.gsub('/', '___')}\""
     action :create
   end
  end

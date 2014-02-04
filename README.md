@@ -1,7 +1,7 @@
 rackspace-cloud-backup Cookbook
 ===============================
 This cookbook will install the Rackspace Cloud Backup agent and register it based on the credentials found in
-node['rackspace_cloud_backup']['rackspace_username'] and node['rackspace_cloud_backup']['rackspace_apikey']
+node['rackspace_cloudbackup']['rackspace_username'] and node['rackspace_cloudbackup']['rackspace_apikey']
 
 ------------
 Requires 
@@ -11,22 +11,22 @@ Requires
 
 Attributes
 ----------
-    default[:rackspace_cloud_backup][:rackspace_username] = nil
-    default[:rackspace_cloud_backup][:rackspace_apikey] = nil
-    default[:rackspace_cloud_backup][:rackspace_endpoint] = "dfw"
-    default[:rackspace_cloud_backup][:backup_locations] = nil
-    default[:rackspace_cloud_backup][:backup_container] = nil
-    default[:rackspace_cloud_backup][:backup_cron_day] = "*"
-    default[:rackspace_cloud_backup][:backup_cron_hour] = "3"
-    default[:rackspace_cloud_backup][:backup_cron_minute] = "14"
-    default[:rackspace_cloud_backup][:backup_cron_month] = "*"
-    default[:rackspace_cloud_backup][:backup_cron_weekday] = "*"
-    default[:rackspace_cloud_backup][:backup_cron_user] = nil
-    default[:rackspace_cloud_backup][:backup_cron_mailto] = nil
-    default[:rackspace_cloud_backup][:backup_cron_path] = nil
-    default[:rackspace_cloud_backup][:backup_cron_shell] = nil
-    default[:rackspace_cloud_backup][:backup_cron_home] = nil
-    default[:rackspace_cloud_backup][:cloud_notify_email] = nil
+    default[:rackspace_cloudbackup][:rackspace_username] = nil
+    default[:rackspace_cloudbackup][:rackspace_apikey] = nil
+    default[:rackspace_cloudbackup][:rackspace_endpoint] = "dfw"
+    default[:rackspace_cloudbackup][:backup_locations] = nil
+    default[:rackspace_cloudbackup][:backup_container] = nil
+    default[:rackspace_cloudbackup][:backup_cron_day] = "*"
+    default[:rackspace_cloudbackup][:backup_cron_hour] = "3"
+    default[:rackspace_cloudbackup][:backup_cron_minute] = "14"
+    default[:rackspace_cloudbackup][:backup_cron_month] = "*"
+    default[:rackspace_cloudbackup][:backup_cron_weekday] = "*"
+    default[:rackspace_cloudbackup][:backup_cron_user] = nil
+    default[:rackspace_cloudbackup][:backup_cron_mailto] = nil
+    default[:rackspace_cloudbackup][:backup_cron_path] = nil
+    default[:rackspace_cloudbackup][:backup_cron_shell] = nil
+    default[:rackspace_cloudbackup][:backup_cron_home] = nil
+    default[:rackspace_cloudbackup][:cloud_notify_email] = nil
 
 Usage
 -----
@@ -35,7 +35,7 @@ Just set the environment variables for the rackspace_username and rackspace_apik
 
 Here's an example of some environment variables for if it used turbolift
 
-    "rackspace_cloud_backup": {
+    "rackspace_cloudbackup": {
       "backup_cron_hour": "*",
       "backup_cron_day": "*",
       "rackspace_username": "exampleuser",
