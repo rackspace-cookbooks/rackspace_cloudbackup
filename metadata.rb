@@ -10,3 +10,4 @@ recipe           "rackspace-cloud-backup", "Installs and registers cloud backup"
 
 depends "apt"
 depends "yum", "~> 2.0"
+depends "ohai"

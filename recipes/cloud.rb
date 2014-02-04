@@ -7,6 +7,8 @@
 # Apache 2.0
 #
 
+include_recipe "rackspace_cloudbackup::ohai_plugin"
+
 #
 # Verify mandatory options are set
 #
