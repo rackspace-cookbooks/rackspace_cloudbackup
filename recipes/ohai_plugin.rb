@@ -1,15 +1,21 @@
-ohai 'reload_rackspace_cloudbackup' do
-  plugin 'rackspace_cloudbackup'
-  action :nothing
-end
-
-template "#{node['ohai']['plugin_path']}/rackspace_cloudbackup.rb" do
+plugin_install = template "#{node['ohai']['plugin_path']}/rackspace_cloudbackup.rb" do
   source 'plugins/rackspace_cloudbackup.rb.erb'
   owner  'root'
   group  'root'
-  mode   '0755'
-  notifies :reload, 'ohai[reload_rackspace_cloudbackup]', :immediately
+  mode   '0644'
   variables(bootstrap_file: '/etc/driveclient/bootstrap.json')
+  #  notifies :reload, 'ohai[reload_rackspace_cloudbackup]', :immediately
+  action :create
 end
 
-include_recipe 'ohai::default'
+ohai "reload" do
+  action :reload
+end
+
+ruby_block 'print cloudbackup info' do
+  block do
+    Chef::Log.warn("DEBUG: #{node['rackspace']}")
+    #Chef::Log.warn("DEBUG: Registered: #{node['rackspace']['cloudbackup']['is_registered']}")
+    #Chef::Log.warn("DEBUG: Agent ID: #{node['rackspace']['cloudbackup']['agent_id']}")
+  end
+end
