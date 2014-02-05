@@ -6,10 +6,8 @@ action :register do
   case node['rcbu']['is_registered']
   when false
     execute "registration" do
-      command "driveclient -c -u #{new_resource.rackspace_api_key} -k #{new_resource.rackspace_username}"
-      creates "/etc/driveclient/.registered"
+      command "driveclient -c -k #{new_resource.rackspace_api_key} -u #{new_resource.rackspace_username}"
       action :run
-      notifies :restart, "service[driveclient]"
     end
     new_resource.updated_by_last_action(true)
   when true
