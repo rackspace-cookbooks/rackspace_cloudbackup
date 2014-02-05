@@ -7,8 +7,6 @@
 # Apache 2.0
 #
 
-include_recipe "rackspace_cloudbackup::ohai_plugin"
-
 #
 # Verify mandatory options are set
 #
@@ -50,6 +48,29 @@ package "driveclient" do
 end
 
 #
+# Install Ohai plugin
+# This needs to run after DriveClient install so the default bootstrap.json file is present
+#
+include_recipe "rackspace_cloudbackup::ohai_plugin"
+
+#
+# Register agent
+#
+case node['rcbu']['is_registered']
+when false
+  execute "registration" do
+    command "driveclient -c -u #{node['rackspace_cloud_backup']['rackspace_username']} -k #{node['rackspace_cloud_backup']['rackspace_apikey']}"
+    creates "/etc/driveclient/.registered"
+    action :run
+    notifies :restart, "service[driveclient]"
+  end
+when true
+  Chef::Log.info("Rackspace CloudBackup Agent registered")
+else
+  fail "Rackspace CloudBackup Agent registration in unknown state: #{node['rcbu']['is_registered']}"
+end
+    
+#
 # Install deps for the Python scripts
 #
 package "python-argparse" do
@@ -57,19 +78,13 @@ package "python-argparse" do
 end
 
 # Insert our scripts
-['configure_run_backup.py', 'run_backup', 'verify_registration.py'].each do |script|
+['configure_run_backup.py', 'run_backup'].each do |script|
   cookbook_file "/etc/driveclient/#{script}" do
     source script
     mode 00755
     owner "root"
     group "root"
   end
-end
-
-execute "Verify Registration" do
-  # This script is idempotent and will bounce driveclient on register
-  command "/etc/driveclient/verify_registration.py --register -u #{node['rackspace_cloudbackup']['rackspace_username']} -a #{node['rackspace_cloudbackup']['rackspace_apikey']}"
-  action :run
 end
 
 service "driveclient" do
@@ -127,7 +142,7 @@ cron "cloud-backup-trigger" do
 end
 
 # Clean up after earlier revisions
-[ 'auth.py', 'backups_created', 'create_backup.py', '.registered'].each do |target|
+[ 'auth.py', 'backups_created', 'create_backup.py', '.registered', 'verify_registration.py' ].each do |target|
   file "/etc/driveclient/#{target}" do
     action :delete
   end
