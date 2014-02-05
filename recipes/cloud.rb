@@ -56,20 +56,17 @@ include_recipe "rackspace_cloudbackup::ohai_plugin"
 #
 # Register agent
 #
-case node['rcbu']['is_registered']
-when false
-  execute "registration" do
-    command "driveclient -c -u #{node['rackspace_cloud_backup']['rackspace_username']} -k #{node['rackspace_cloud_backup']['rackspace_apikey']}"
-    creates "/etc/driveclient/.registered"
-    action :run
-    notifies :restart, "service[driveclient]"
-  end
-when true
-  Chef::Log.info("Rackspace CloudBackup Agent registered")
-else
-  fail "Rackspace CloudBackup Agent registration in unknown state: #{node['rcbu']['is_registered']}"
+rackspace_cloudbackup_register_agent "Register #{node['hostname']}" do
+  rackspace_api_key  node['rackspace_cloudbackup']['rackspace_apikey']
+  rackspace_username node['rackspace_cloudbackup']['rackspace_username']
+  action :register
+  notifies :restart, 'service[driveclient]'
+  # Reload Ohai to load the new agent ID
+  notifies :reload, 'ohai[reload]', :immediately
+  # And smack the printing ruby block for debug info
+  notifies :create, 'ruby_block[print_cloudbackup_info]', :immediately
 end
-    
+ 
 #
 # Install deps for the Python scripts
 #
