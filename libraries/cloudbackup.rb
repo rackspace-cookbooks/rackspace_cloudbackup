@@ -1,0 +1,41 @@
+# Cookbook Name:: rackspace_cloudbackup
+#
+# Copyright 2014, Rackspace, US, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+module Opscode
+  module Rackspace
+    module CloudBackup
+      def gather_bootstrap_data(bootstrap_file)
+        begin
+          bootstrap_raw_data = open(bootstrap_file).read
+        rescue
+          Chef::Log.fatal("Error reading #{bootstrap_file}")
+          return nil
+        end
+
+        begin
+          bootstrap_data = JSON.parse(bootstrap_raw_data)
+        rescue
+          Chef::Log.fatal("Error parsing #{bootstrap_file}")
+          return nil
+        end
+      end
+      module_function :gather_bootstrap_data
+
+    end
+  end
+end
+
