@@ -25,13 +25,13 @@ template "#{node['ohai']['plugin_path']}/rackspace_cloudbackup.rb" do
   action :create
 end
 
-ohai "reload" do
+ohai 'reload' do
   action :reload
 end
 
 include_recipe 'ohai::default'
 
-ruby_block 'print cloudbackup info' do
+ruby_block 'print_cloudbackup_info' do
   block do
     Chef::Log.info("Rackspace CloudBackup Agent Registered: #{node['rcbu']['is_registered']}")
     Chef::Log.info("Rackspace CloudBackup Agent Agent ID: #{node['rcbu']['agent_id']}")

@@ -57,11 +57,16 @@ include_recipe "rackspace_cloudbackup::ohai_plugin"
 # Register agent
 #
 rackspace_cloudbackup_register_agent "Register #{node['hostname']}" do
-  rackspace_api_key  node['rackspace_cloud_backup']['rackspace_apikey']
-  rackspace_username node['rackspace_cloud_backup']['rackspace_username']
-  notifies :restart, "service[driveclient]"
+  rackspace_api_key  node['rackspace_cloudbackup']['rackspace_apikey']
+  rackspace_username node['rackspace_cloudbackup']['rackspace_username']
+  action :register
+  notifies :restart, 'service[driveclient]'
+  # Reload Ohai to load the new agent ID
+  notifies :reload, 'ohai[reload]', :immediately
+  # And smack the printing ruby block for debug info
+  notifies :create, 'ruby_block[print_cloudbackup_info]', :immediately
 end
-    
+ 
 #
 # Install deps for the Python scripts
 #
