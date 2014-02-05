@@ -5,6 +5,7 @@ action :register do
   
   case node['rcbu']['is_registered']
   when false
+    # Using Mixlib::ShellOut because execute was being run after the RPs it notified.  (?!?!?)
     cmdStr = "driveclient -c -k #{new_resource.rackspace_api_key} -u #{new_resource.rackspace_username}"
     cmd = Mixlib::ShellOut.new(cmdStr)
     cmd.run_command
