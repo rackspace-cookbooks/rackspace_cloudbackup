@@ -10,6 +10,8 @@ group :testing do
   gem 'chef',       '~> 11.0'
   gem 'rspec',      '~> 2.14'
   gem 'rubocop',    '~> 0.16' 
+
+  gem 'rest-client','~> 1.6.7'
 end
  
 group :integration do
