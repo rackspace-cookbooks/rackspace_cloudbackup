@@ -42,23 +42,23 @@ module Opscode
 
       class RcbuApiWrapper
         attr_accessor :token, :rcbu_api_url, :agent_id, :configurations
-        
+
         def initialize(api_username, api_key, region, agent_id)
           @agent_id = agent_id
 
           identity = identity_data(api_username, api_key)
           @token = identity['access']['token']['id']
-          
-          backup_catalog = identity['access']['serviceCatalog'].find { |c| c['name'] == "cloudBackup" }
+
+          backup_catalog = identity['access']['serviceCatalog'].find { |c| c['name'] == 'cloudBackup' }
           fail 'Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate cloudBackup service catalog' if backup_catalog.nil?
-          
+
           region.upcase!
           backup_catalog_region = backup_catalog['endpoints'].find { |e| e['region'] == region }
           fail "Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate CloudBackup details from service catalog for region #{region}" if backup_catalog_region.nil?
           @rcbu_api_url = backup_catalog_region['publicURL']
           fail "Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}" if @rcbu_api_url.nil?
         end
-        
+
         def identity_data(api_username, api_key, api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
           req = { 'auth' =>
             { 'RAX-KSKEY:apiKeyCredentials' =>
@@ -67,17 +67,17 @@ module Opscode
               }
             }
           }
-          
+
           begin
-            return JSON.parse(RestClient.post(api_url, req.to_json, { :content_type => :json, :accept => :json}))
+            return JSON.parse(RestClient.post(api_url, req.to_json,  content_type: :json, accept: :json))
           rescue
-            fail 'Opscode::Rackspace::CloudBackup::RcbuBinding.identity_data: Unable to gather Rackspace identity data'
+            raise 'Opscode::Rackspace::CloudBackup::RcbuBinding.identity_data: Unable to gather Rackspace identity data'
           end
         end
-        
-        def lookup_configurations()
+
+        def lookup_configurations
           @configurations = JSON.parse(RestClient.get("#{@rcbu_api_url}/backup-configuration/system/#{@agent_id}",
-                                                      { 'Content-Type' => :json, 'X-Auth-Token' => @token }))
+                                                      'Content-Type' => :json, 'X-Auth-Token' => @token))
         end
 
         def locate_existing_config(label)
@@ -87,21 +87,21 @@ module Opscode
               return config
             end
           end
-          
-          lookup_configurations()
+
+          lookup_configurations
           @configurations.find { |c| c['BackupConfigurationName'] == label }
         end
-          
+
         def create_config(config)
           RestClient.post("#{@rcbu_api_url}/backup-configuration/",
                           config.to_json,
-                          { 'Content-Type' => :json, 'X-Auth-Token' => @token })
+                          'Content-Type' => :json, 'X-Auth-Token' => @token)
         end
 
         def update_config(config_id, config)
           RestClient.put("#{@rcbu_api_url}/backup-configuration/#{config_id}",
                          config.to_json,
-                         { 'Content-Type' => :json, 'X-Auth-Token' => @token })
+                         'Content-Type' => :json, 'X-Auth-Token' => @token)
         end
       end
 
@@ -111,7 +111,7 @@ module Opscode
         def initialize(label, api_wrapper)
           @api_wrapper = api_wrapper
           @label = label
-          
+
           # Define getters
           @all_attributes = %w(Inclusions Exclusions BackupConfigurationId MachineAgentId MachineName Datacenter Flavor IsEncrypted
                                EncryptionKey BackupConfigurationName IsActive IsDeleted VersionRetention BackupConfigurationScheduleId
@@ -138,7 +138,7 @@ module Opscode
             @MachineAgentId = @api_wrapper.agent_id
           end
         end
-        
+
         def load
           # Load existing configuration data
           current_config = @api_wrapper.locate_existing_config(@label)
@@ -151,7 +151,7 @@ module Opscode
 
         def update(options = {})
           options.each do |k, v|
-            self.send("#{k}=", v)
+            send("#{k}=", v)
           end
         end
 
@@ -162,7 +162,7 @@ module Opscode
           end
           opt_hash
         end
-        
+
         def save
           # BackupConfigurationName is required, but is not desirable as a setter as it is the UID for the class instance
           opt_hash = to_hash(@settable_attributes + ['BackupConfigurationName'])
@@ -172,11 +172,10 @@ module Opscode
           else
             @api_wrapper.update_config(@BackupConfigurationId, opt_hash)
           end
-          
+
           return self
         end
       end
-              
     end
   end
 end
