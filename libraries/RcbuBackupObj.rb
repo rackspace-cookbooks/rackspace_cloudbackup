@@ -53,6 +53,14 @@ module Opscode
           if @MachineAgentId.nil?
             @MachineAgentId = @api_wrapper.agent_id
           end
+
+          # Inclusions and Exclusions need to be arrays
+          if @Inclusions.nil?
+              @Inclusions = []
+          end
+          if @Exclusions.nil?
+            @Exclusions = []
+          end
         end
 
         def load
