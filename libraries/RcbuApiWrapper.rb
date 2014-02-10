@@ -21,25 +21,6 @@ require 'rest_client'
 module Opscode
   module Rackspace
     module CloudBackup
-      def gather_bootstrap_data(bootstrap_file)
-        begin
-          bootstrap_raw_data = open(bootstrap_file).read
-        rescue
-          Chef::Log.fatal("Error reading #{bootstrap_file}")
-          return nil
-        end
-
-        begin
-          bootstrap_data = JSON.parse(bootstrap_raw_data)
-        rescue
-          Chef::Log.fatal("Error parsing #{bootstrap_file}")
-          return nil
-        end
-
-        return bootstrap_data
-      end
-      module_function :gather_bootstrap_data
-
       class RcbuApiWrapper
         attr_accessor :token, :rcbu_api_url, :agent_id, :configurations
 
@@ -102,78 +83,6 @@ module Opscode
           RestClient.put("#{@rcbu_api_url}/backup-configuration/#{config_id}",
                          config.to_json,
                          'Content-Type' => :json, 'X-Auth-Token' => @token)
-        end
-      end
-
-      class RcbuBackupObj
-        attr_accessor :api_wrapper, :all_attributes, :settable_attributes
-
-        def initialize(label, api_wrapper)
-          @api_wrapper = api_wrapper
-          @label = label
-
-          # Define getters
-          @all_attributes = %w(Inclusions Exclusions BackupConfigurationId MachineAgentId MachineName Datacenter Flavor IsEncrypted
-                               EncryptionKey BackupConfigurationName IsActive IsDeleted VersionRetention BackupConfigurationScheduleId
-                               MissedBackupActionId Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval
-                               TimeZoneId NextScheduledRunTime LastRunTime LastRunBackupReportId NotifyRecipients NotifySuccess
-                               NotifyFailure BackupPrescript BackupPostscript)
-          @all_attributes.each do |arg|
-            self.class.send(:define_method, arg, proc { instance_variable_get("@#{arg}") })
-          end
-
-          @settable_attributes = %w(Inclusions Exclusions MachineAgentId IsActive VersionRetention
-                                    Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval TimeZoneId
-                                    NotifyRecipients NotifySuccess NotifyFailure BackupPrescript BackupPostscript MissedBackupActionId)
-          # Define Setters
-          @settable_attributes.each do |arg|
-            self.class.send(:define_method, "#{arg}=", proc { |x| instance_variable_set("@#{arg}", x) })
-          end
-
-          @BackupConfigurationName = label
-          load
-
-          # Ensure @MachineAgentId is set for new configs, as we pass it in here
-          if @MachineAgentId.nil?
-            @MachineAgentId = @api_wrapper.agent_id
-          end
-        end
-
-        def load
-          # Load existing configuration data
-          current_config = @api_wrapper.locate_existing_config(@label)
-          unless current_config.nil?
-            current_config.each do |k, v|
-              instance_variable_set("@#{k}", v)
-            end
-          end
-        end
-
-        def update(options = {})
-          options.each do |k, v|
-            send("#{k}=", v)
-          end
-        end
-
-        def to_hash(target_attributes = @all_attributes)
-          opt_hash = {}
-          target_attributes.each do |arg|
-            opt_hash[arg] = instance_variable_get("@#{arg}")
-          end
-          opt_hash
-        end
-
-        def save
-          # BackupConfigurationName is required, but is not desirable as a setter as it is the UID for the class instance
-          opt_hash = to_hash(@settable_attributes + ['BackupConfigurationName'])
-          if @BackupConfigurationId.nil?
-            @api_wrapper.create_config(opt_hash)
-            load
-          else
-            @api_wrapper.update_config(@BackupConfigurationId, opt_hash)
-          end
-
-          return self
         end
       end
     end
