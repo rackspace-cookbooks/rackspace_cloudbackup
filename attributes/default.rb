@@ -36,10 +36,16 @@ default['rackspace']['datacenter'] = 'DFW'
 # backups is a list of hashes of filesystem locations to backup
 # The hash format is: {
 #   location: filesystem path to backup (Required)
-#   cloud_notify_email: Email addresses for notifications on Rackspace Cloud (Rackspace-Cloud only)
-#   container: Cloud Files container to back up to (Non-Rackspace cloud only)
 #   comment:   Some comment (optional)
 #   enable:    Enable the backup, Boolean, Optional with default of true
+#   cloud: Hash of options specific to Rackspace Cloud Servers.  Format: {
+#      notify_email: Email address for notifications on Rackspace Cloud
+#      label: Rackspace Cloud Backup label WARNING: SEE README!
+#      id:    Rackspace Cloud Backup configuration ID from the API, set by the resource provider
+#   }
+#   non-cloud: Hash of options specific to non-Rackspace Cloud Servers.  Format: {
+#      container: Cloud Files container to back up to
+#   }
 #   time: Time override hash for this backup.  (Optional) Format: {
 #      day: Day of month to run backup
 #      month: Month to run backup
