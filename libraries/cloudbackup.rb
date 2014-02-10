@@ -113,18 +113,18 @@ module Opscode
           @label = label
           
           # Define getters
-          @all_attributes = ["Inclusions", "Exclusions", "BackupConfigurationId", "MachineAgentId", "MachineName", "Datacenter", "Flavor", "IsEncrypted",
-                             "EncryptionKey", "BackupConfigurationName", "IsActive", "IsDeleted", "VersionRetention", "BackupConfigurationScheduleId",
-                             "MissedBackupActionId", "Frequency", "StartTimeHour", "StartTimeMinute", "StartTimeAmPm", "DayOfWeekId", "HourInterval",
-                             "TimeZoneId", "NextScheduledRunTime", "LastRunTime", "LastRunBackupReportId", "NotifyRecipients", "NotifySuccess",
-                             "NotifyFailure", "BackupPrescript", "BackupPostscript"]
+          @all_attributes = %w(Inclusions Exclusions BackupConfigurationId MachineAgentId MachineName Datacenter Flavor IsEncrypted
+                               EncryptionKey BackupConfigurationName IsActive IsDeleted VersionRetention BackupConfigurationScheduleId
+                               MissedBackupActionId Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval
+                               TimeZoneId NextScheduledRunTime LastRunTime LastRunBackupReportId NotifyRecipients NotifySuccess
+                               NotifyFailure BackupPrescript BackupPostscript)
           @all_attributes.each do |arg|
             self.class.send(:define_method, arg, proc { instance_variable_get("@#{arg}") })
           end
 
-          @settable_attributes = ["Inclusions", "Exclusions", "MachineAgentId", "IsActive", "VersionRetention",
-                                  "Frequency", "StartTimeHour", "StartTimeMinute", "StartTimeAmPm", "DayOfWeekId", "HourInterval", "TimeZoneId",
-                                  "NotifyRecipients", "NotifySuccess", "NotifyFailure", "BackupPrescript", "BackupPostscript", "MissedBackupActionId"]
+          @settable_attributes = %w(Inclusions Exclusions MachineAgentId IsActive VersionRetention
+                                    Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval TimeZoneId
+                                    NotifyRecipients NotifySuccess NotifyFailure BackupPrescript BackupPostscript MissedBackupActionId)
           # Define Setters
           @settable_attributes.each do |arg|
             self.class.send(:define_method, "#{arg}=", proc { |x| instance_variable_set("@#{arg}", x) })
