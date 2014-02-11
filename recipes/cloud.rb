@@ -78,9 +78,10 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
   end
 
   # Save the backup configuration ID for use by the run_backup template
-  id_map[job['label']] = Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.new(node['rackspace']['cloud_credentials']['username'],
-                                                                             node['rackspace']['cloud_credentials']['api_key'],
-                                                                             job['label']).backup_id
+  id_map[job['label']] = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(node['rackspace']['cloud_credentials']['username'],
+                                                                                node['rackspace']['cloud_credentials']['api_key'],
+                                                                                node['rackspace']['datacenter'],
+                                                                                job['label']).backup_id
   Chef::Log.info("Backup API ID for backup '#{job['label']}: #{id_map[job['label']]}")
 end
 
