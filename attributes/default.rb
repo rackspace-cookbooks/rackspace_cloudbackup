@@ -41,7 +41,6 @@ default['rackspace']['datacenter'] = 'DFW'
 #   enable:    Enable the backup, Boolean, Optional with default of true
 #   cloud: Hash of options specific to Rackspace Cloud Servers.  Format: {
 #      notify_email: Email address for notifications on Rackspace Cloud
-#      id:    Rackspace Cloud Backup configuration ID from the API, set by the resource provider
 #      version_retention: Retention value, see API documentation
 #   }
 #   non-cloud: Hash of options specific to non-Rackspace Cloud Servers.  Format: {

@@ -117,6 +117,10 @@ module Opscode
           @backup_obj.save
           return true
         end
+
+        def backup_id
+          @backup_obj.BackupConfigurationId
+        end
           
       end
     end
