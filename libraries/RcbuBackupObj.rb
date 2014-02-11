@@ -99,6 +99,16 @@ module Opscode
 
           return self
         end
+
+        def compare?(other_obj)
+          @all_attributes.each do |attr|
+            if send("@#{attr}") != other_obj.send("@#{attr}")
+              return false
+            end
+          end
+          return true
+        end
+
       end
     end
   end
