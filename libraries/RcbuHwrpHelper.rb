@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-require_local 'RcbuApiWrapper.rb'
-require_local 'RcbuBackupObj.rb'
+require_relative 'RcbuApiWrapper.rb'
+require_relative 'RcbuBackupObj.rb'
 
 module Opscode
   module Rackspace
