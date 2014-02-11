@@ -20,7 +20,7 @@ require_relative 'RcbuBackupObj.rb'
 module Opscode
   module Rackspace
     module CloudBackup
-      class RcbuHwrpHelper
+      class RcbuBackupWrapper
         def initialize(api_username, api_key, region, agent_id, backup_api_label)
           # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
           # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized

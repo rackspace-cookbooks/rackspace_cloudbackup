@@ -16,7 +16,7 @@
 #
 # http://tech.yipit.com/2013/05/09/advanced-chef-writing-heavy-weight-resource-providers-hwrp/
 
-require_relative 'RcbuHwrpHelper.rb'
+require_relative 'RcbuBackupWrapper.rb'
 
 class Chef
   class Resource
@@ -154,11 +154,11 @@ class Chef
         fail 'Failed to read agent ID from config' if @current_resource.agent_config['AgentId'].nil?
 
         # Load the API object
-        @current_resource.api_obj = Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.new(@current_resource.rackspace_username,
-                                                                                        @current_resource.rackspace_api_key,
-                                                                                        @current_resource.rackspace_api_region,
-                                                                                        @current_resource.agent_config['AgentId'],
-                                                                                        @current_resource.label)
+        @current_resource.api_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(@current_resource.rackspace_username,
+                                                                                           @current_resource.rackspace_api_key,
+                                                                                           @current_resource.rackspace_api_region,
+                                                                                           @current_resource.agent_config['AgentId'],
+                                                                                           @current_resource.label)
        
         @current_resource
       end
