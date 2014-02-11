@@ -36,7 +36,9 @@ end
 end
 
 # Configure our backups
-node['rackspace_cloudbackup']['backups'].each do |job|
+node['rackspace_cloudbackup']['backups'].each do |node_job|
+  job = node_job.dup # Obtain a copy that's not in the node attributes so we can tinker in it
+  
   if job['label'].nil?
     # NOTE: This format intentionally matches earlier revisions to avoid creating duplicate backups
     job['label'] = "Backup for #{node['ipaddress']}, backing up #{job['location']}"

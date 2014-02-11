@@ -19,30 +19,30 @@
 #
 # Define a common wrapper around cron we can share between cloud and non-cloud
 #
-define :cloud_backup_cron_configurator, :job, :command do
+define(:cloud_backup_cron_configurator, {job: nil, command: nil}) do
   # Avoid nil exceptions going forward
-  if job['time'].nil?
-    job['time'] = {}
+  if params[:job]['time'].nil?
+    params[:job]['time'] = {}
   end
-  if job['cron'].nil?
-    job['cron'] = {}
+  if params[:job]['cron'].nil?
+    params[:job]['cron'] = {}
   end
 
   # By default these are appended to root's crontab
-  cron "#{job['label']} cronjob" do
-    month   job['time']['month']   || node['rackspace_cloudbackup']['backups_defaults']['time']['month']
-    day     job['time']['day']     || node['rackspace_cloudbackup']['backups_defaults']['time']['day']
-    hour    job['time']['hour']    || node['rackspace_cloudbackup']['backups_defaults']['time']['hour']
-    minute  job['time']['minute']  || node['rackspace_cloudbackup']['backups_defaults']['time']['minute']
-    weekday job['time']['weekday'] || node['rackspace_cloudbackup']['backups_defaults']['time']['weekday']
+  cron "'#{params[:job]['label']}' cronjob" do
+    month   params[:job]['time']['month']   || node['rackspace_cloudbackup']['backups_defaults']['time']['month']
+    day     params[:job]['time']['day']     || node['rackspace_cloudbackup']['backups_defaults']['time']['day']
+    hour    params[:job]['time']['hour']    || node['rackspace_cloudbackup']['backups_defaults']['time']['hour']
+    minute  params[:job]['time']['minute']  || node['rackspace_cloudbackup']['backups_defaults']['time']['minute']
+    weekday params[:job]['time']['weekday'] || node['rackspace_cloudbackup']['backups_defaults']['time']['weekday']
 
-    user    job['cron']['user']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['user']
-    mailto  job['cron']['mailto'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['mailto']
-    path    job['cron']['path']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['path']
-    shell   job['cron']['shell']  || node['rackspace_cloudbackup']['backups_defaults']['cron']['shell']
-    home    job['cron']['home']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['home']
+    user    params[:job]['cron']['user']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['user']
+    mailto  params[:job]['cron']['mailto'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['mailto']
+    path    params[:job]['cron']['path']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['path']
+    shell   params[:job]['cron']['shell']  || node['rackspace_cloudbackup']['backups_defaults']['cron']['shell']
+    home    params[:job]['cron']['home']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['home']
 
-    command "/etc/driveclient/run_backup"
+    command  params[:command]
     action :create
   end
 end
