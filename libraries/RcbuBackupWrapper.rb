@@ -21,7 +21,12 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuBackupWrapper
-        def initialize(api_username, api_key, region, agent_id, backup_api_label)
+        def initialize(api_username, api_key, region, backup_api_label)
+          # Load the agent config
+          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/etc/driveclient/bootstrap.json')
+          fail 'Failed to read agent configuration' if agent_config.nil?
+          fail 'Failed to read agent ID from config' if agent_config['AgentId'].nil?
+
           # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
           # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized
           #    across different class instances.
@@ -30,11 +35,11 @@ module Opscode
           unless defined? @@api_obj_cache
             @@api_obj_cache = Opscode::Rackspace::CloudBackup::RcbuCache.new(4)
           end
-          api_obj = @@api_obj_cache.get(api_username, api_key, region, agent_id)
+          api_obj = @@api_obj_cache.get(api_username, api_key, region, agent_config['AgentId'])
           # rubocop:enable ClassVars
 
           if api_obj.nil?
-            api_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(api_username, api_key, region, agent_id)
+            api_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(api_username, api_key, region, agent_config['AgentId'])
             Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object")
           else
             Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")

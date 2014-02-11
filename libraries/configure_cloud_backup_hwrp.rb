@@ -22,8 +22,8 @@ class Chef
   class Resource
     # Implement the rackspace_cloudbackup_register_agent resource
     class RackspaceCloudbackupConfigureCloudBackup < Chef::Resource
-      attr_accessor :agent_config, :api_obj
-      attr_writer   :agent_config, :api_obj
+      attr_accessor :api_obj
+      attr_writer   :api_obj
 
       def initialize(name, run_context = nil)
         super
@@ -148,16 +148,10 @@ class Chef
           @current_resource.send(arg, new_resource.send(arg))
         end
 
-        # Load the agent config
-        @current_resource.agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/etc/driveclient/bootstrap.json')
-        fail 'Failed to read agent configuration' if @current_resource.agent_config.nil?
-        fail 'Failed to read agent ID from config' if @current_resource.agent_config['AgentId'].nil?
-
         # Load the API object
         @current_resource.api_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(@current_resource.rackspace_username,
                                                                                            @current_resource.rackspace_api_key,
                                                                                            @current_resource.rackspace_api_region,
-                                                                                           @current_resource.agent_config['AgentId'],
                                                                                            @current_resource.label)
        
         @current_resource
