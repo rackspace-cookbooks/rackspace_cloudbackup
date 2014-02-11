@@ -48,12 +48,8 @@ module Opscode
               }
             }
           }
-
-          begin
-            return JSON.parse(RestClient.post(api_url, req.to_json,  content_type: :json, accept: :json))
-          rescue
-            raise 'Opscode::Rackspace::CloudBackup::RcbuBinding.identity_data: Unable to gather Rackspace identity data'
-          end
+          
+          return JSON.parse(RestClient.post(api_url, req.to_json,  content_type: :json, accept: :json))
         end
 
         def lookup_configurations

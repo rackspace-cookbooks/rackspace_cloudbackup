@@ -71,7 +71,7 @@ module Opscode
               target.push(FilePath: dir, FileItemType: 'Folder')
             else
               # Don't waste the cycle checking this, either it is wrong and needs to be set or this will have no effect
-              api_dir.FileItemType = 'Folder'
+              api_dir[:FileItemType] = 'Folder'
             end
           end
         end
@@ -80,6 +80,10 @@ module Opscode
           comp_obj = @backup_obj.dup
 
           options.each do |key, value|
+            if value.nil?
+              next
+            end
+
             # Map in the objects with 1-1 mapping
             if @direct_name_map.key?(key)
               @backup_obj.send("#{@direct_name_map[key]}=", value)
@@ -88,22 +92,25 @@ module Opscode
 
             # Non-direct maps
             case key
-            when inclusions
+            when :inclusions
               # Inclusions is not quite 1-1 as the API adds extra fields and IDs, and requires a type value
-              _path_mapper(values, @backup_obj.Inclusions)
+              _path_mapper(value, @backup_obj.Inclusions)
               
-            when exclusions
+            when :exclusions
               # Exclusions is like Inclusions
-              _path_mapper(values, @backup_obj.Exclusions)
+              _path_mapper(value, @backup_obj.Exclusions)
 
             else
               raise "Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.update: Unknown option #{key}"
             end
           end
-             
-          @backup_obj.save
 
-          return @backup_obj.compare?(comp_obj)
+          if @backup_obj.compare?(comp_obj)
+            return false
+          end
+
+          @backup_obj.save
+          return true
         end
           
       end

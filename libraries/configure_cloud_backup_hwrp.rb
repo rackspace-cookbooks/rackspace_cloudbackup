@@ -16,7 +16,7 @@
 #
 # http://tech.yipit.com/2013/05/09/advanced-chef-writing-heavy-weight-resource-providers-hwrp/
 
-require_relative 'cloudbackup.rb'
+require_relative 'RcbuHwrpHelper.rb'
 
 class Chef
   class Resource
@@ -52,11 +52,11 @@ class Chef
       end
 
       def rackspace_api_key(arg = nil)
-        set_or_return(:rackspace_auth_url, arg, kind_of: String, required: true)
+        set_or_return(:rackspace_api_key, arg, kind_of: String, required: true)
       end
 
       def rackspace_api_region(arg = nil)
-        set_or_return(:rackspace_auth_url, arg, kind_of: String, required: true)
+        set_or_return(:rackspace_api_region, arg, kind_of: String, required: true)
       end
 
       def inclusions(arg = nil)
@@ -141,7 +141,7 @@ class Chef
     class RackspaceCloudbackupConfigureCloudBackup < Chef::Provider
       def load_current_resource
         @current_resource ||= Chef::Resource::RackspaceCloudbackupConfigureCloudBackup.new(new_resource.name)
-        [:label, :rackspace_api_key, :rackspace_username, :rackspace_api_region, :inclusions, :exclusions, :machine_agent_id, :is_active,
+        [:label, :rackspace_api_key, :rackspace_username, :rackspace_api_region, :inclusions, :exclusions, :is_active,
          :version_retention, :frequency, :start_time_hour, :start_time_minute, :start_time_am_pm, :day_of_week_id, :hour_interval,
          :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript, :backup_postscript, :missed_backup_action_id
         ].each do |arg|
@@ -154,12 +154,12 @@ class Chef
         fail 'Failed to read agent ID from config' if @current_resource.agent_config['AgentId'].nil?
 
         # Load the API object
-        @current_resource.api_obj = Opscode::Rackspace::CloudBackup.RcbuHwrpHelper(@current_resource.rackspace_username,
-                                                                                   @current_resource.rackspace_api_key,
-                                                                                   @current_resource.rackspace_api_region,
-                                                                                   @current_resource.agent_config['AgentId'],
-                                                                                   @current_resource.label)
-
+        @current_resource.api_obj = Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.new(@current_resource.rackspace_username,
+                                                                                        @current_resource.rackspace_api_key,
+                                                                                        @current_resource.rackspace_api_region,
+                                                                                        @current_resource.agent_config['AgentId'],
+                                                                                        @current_resource.label)
+       
         @current_resource
       end
 
@@ -168,7 +168,6 @@ class Chef
           @current_resource.api_obj.update(
             inclusions:        @current_resource.inclusions,
             exclusions:        @current_resource.exclusions,
-            machine_agent_id:  @current_resource.machine_agent_id,
             is_active:         @current_resource.is_active,
             version_retention: @current_resource.version_retention,
             frequency:         @current_resource.frequency,

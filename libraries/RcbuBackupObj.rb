@@ -102,7 +102,7 @@ module Opscode
 
         def compare?(other_obj)
           @all_attributes.each do |attr|
-            if send("@#{attr}") != other_obj.send("@#{attr}")
+            if send(attr) != other_obj.send(attr)
               return false
             end
           end
