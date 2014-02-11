@@ -29,7 +29,7 @@ class Chef
         super
         @resource_name = :rackspace_cloudbackup_configure_cloud_backup       # Bind ourselves to the name with an underscore
         @provider = Chef::Provider::RackspaceCloudbackupConfigureCloudBackup # We need to tie to our provider
-        @action = :update # Default
+        @action = :create  # Default Action
         @allowed_actions = [:create, :create_if_missing, :nothing]
 
         @label = name
@@ -108,7 +108,7 @@ class Chef
       end             
                 
       def notify_recipients(arg = nil)
-        set_or_return(:notify_recipients, arg, kind_of: String)
+        set_or_return(:notify_recipients, arg, kind_of: String, required: true)
       end             
                 
       def notify_success(arg = nil)
