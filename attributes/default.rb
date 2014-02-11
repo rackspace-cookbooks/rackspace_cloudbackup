@@ -35,13 +35,14 @@ default['rackspace']['datacenter'] = 'DFW'
 
 # backups is a list of hashes of filesystem locations to backup
 # The hash format is: {
+#   label: Unique backup label WARNING: SEE README!
 #   location: filesystem path to backup (Required)
 #   comment:   Some comment (optional)
 #   enable:    Enable the backup, Boolean, Optional with default of true
 #   cloud: Hash of options specific to Rackspace Cloud Servers.  Format: {
 #      notify_email: Email address for notifications on Rackspace Cloud
-#      label: Rackspace Cloud Backup label WARNING: SEE README!
 #      id:    Rackspace Cloud Backup configuration ID from the API, set by the resource provider
+#      version_retention: Retention value, see API documentation
 #   }
 #   non-cloud: Hash of options specific to non-Rackspace Cloud Servers.  Format: {
 #      container: Cloud Files container to back up to
@@ -78,6 +79,11 @@ default['rackspace_cloudbackup']['backups_defaults']['container'] = nil
 #   Required on Rackspace Cloud.  Notifications will come from Rackspace servers, must be a valid address.
 # Note: This is different from the Cron email address in case there are any issues with mail from the system MTA
 default['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email'] = nil
+
+# cloud_version_retention: Rackspace Cloud Backup retention value
+# See API documentation, only a small number of values are legal
+default['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention'] = 30
+
 
 # time: backup timing settings.  These settings are Cron format.
 default['rackspace_cloudbackup']['backups_defaults']['time']['day']     = "*"
