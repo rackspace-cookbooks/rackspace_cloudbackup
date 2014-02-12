@@ -25,7 +25,8 @@ exit codes:
 
 import argparse
 import json
-import httplib
+import yaml
+import urllib2
 import sys
 import syslog
 import time
@@ -34,24 +35,33 @@ def cloud_auth(config, args):
     """
     Authenticate and return authentication details via returned dict
     """
-    token = None
-    authurl = 'identity.api.rackspacecloud.com'
-    jsonreq = json.dumps({'auth': {'RAX-KSKEY:apiKeyCredentials':
-                                       {'username': config["authentication"]["apiuser"],
-                                        'apiKey': config["authentication"]["apikey"]}}})
-    if args.verbose:
-        print 'JSON REQUEST: ' + jsonreq
+    def cloud_auth_url_helper(val, target):
+        if not val.has_key('region'):
+            return False
+        if val['region'] == target:
+            return True
+        return False
 
-    #make the request
-    connection = httplib.HTTPSConnection(authurl, 443)
     if args.verbose:
-        connection.set_debuglevel(1)
-    headers = {'Content-type': 'application/json'}
-    connection.request('POST', '/v2.0/tokens', jsonreq, headers)
-    json_response = json.loads(connection.getresponse().read())
-    connection.close()
+        handler=urllib2.HTTPSHandler(debuglevel=10)
+        opener = urllib2.build_opener(handler)
+        urllib2.install_opener(opener)
 
-    #process the request
+    req = urllib2.Request("https://identity.api.rackspacecloud.com/v2.0/tokens",
+                          headers = {'Content-type': 'application/json'}
+                          )
+    req.add_data(json.dumps({'auth': {'RAX-KSKEY:apiKeyCredentials':
+                                          {'username': config["authentication"]["apiuser"],
+                                           'apiKey': config["authentication"]["apikey"]}
+                                      }
+                             }))
+    uh = urllib2.urlopen(req)
+    if uh.getcode() is not 200:
+        syslog.syslog("run_backup: INFO: Error requsting identity API data")
+        sys.exit(2)
+    json_response = json.loads(uh.read())
+
+    # process the request
     if args.verbose:
         print 'JSON decoded and pretty'
         print json.dumps(json_response, indent=2)
@@ -59,15 +69,30 @@ def cloud_auth(config, args):
         token = json_response['access']['token']['id']
         if args.verbose:
             print 'Token:\t\t', token
-        tenantID = json_response['access']['token']['tenant']['id']
+
+        backup_catalog = next((catalog for catalog in json_response['access']['serviceCatalog'] if catalog['name'] == 'cloudBackup'), None)
+        if backup_catalog is None:
+            syslog.syslog("run_backup: ERROR: Unable to locate cloudBackup in service catalog")
+            sys.exit(2)
+
+        backup_catalog_region = next((region for region in backup_catalog['endpoints'] if cloud_auth_url_helper(region, config['general']['region']) is True), None)
+        if backup_catalog_region is None:
+            syslog.syslog("run_backup: ERROR: Unable to locate cloudBackup endpoint in service catalog for region %s" % config['general']['region'])
+            sys.exit(2)
+        api_url = backup_catalog_region['publicURL']
+
     except(KeyError, IndexError):
         #print 'Error while getting answers from auth server.'
         #print 'Check the endpoint and auth credentials.'
+        syslog.syslog("run_backup: Error parsing auth API response")
         sys.exit(2)
     finally:
-        return [token, tenantID]
+        return {
+            'token':   token,
+            'api_url': api_url
+            }
 
-def triggerBackup(locationKey, config, tokenTuple, args):
+def triggerBackup(locationKey, config, tokenData, args):
     """
     Make a API request to start a backup.
     Returns True on success and False on failure
@@ -78,56 +103,49 @@ def triggerBackup(locationKey, config, tokenTuple, args):
             print "INFO: Skipping disabled location %s" % locationKey
         return True        
 
-    # Format from http://docs.rackspace.com/rcbu/api/v1.0/rcbu-devguide/content/startBackup.html
-    req = {"Action": "StartManual",
-           "Id": config["locations"][locationKey]["BackupConfigurationId"] }
-
-    connection = httplib.HTTPSConnection(config["general"]["endpoint"], 443)
     if args.verbose:
-        connection.set_debuglevel(1)
-    headers = {'Content-type': 'application/json',
-               'X-Auth-Token': tokenTuple[0]}
-    path = "/v1.0/%s/backup/action-requested" % tokenTuple[1]
+        handler=urllib2.HTTPSHandler(debuglevel=10)
+        opener = urllib2.build_opener(handler)
+        urllib2.install_opener(opener)
 
-    connection.request('POST', path, json.dumps(req), headers)
-            
-    # process the request                                                                                                                                                                                
-    response = connection.getresponse()
-    status = response.status
-    responseBody = response.read()
-    connection.close()
+    # Format from http://docs.rackspace.com/rcbu/api/v1.0/rcbu-devguide/content/startBackup.html
+    req = urllib2.Request("%s/backup/action-requested/" % tokenData['api_url'],
+                          headers = {'Content-type': 'application/json',
+                                     'X-Auth-Token': tokenData['token']}
+                          )
+    req.add_data(json.dumps({"Action": "StartManual",
+                             "Id": config["locations"][locationKey]["backupConfigurationId"] }))
 
-    if status is not 200:
+    uh = urllib2.urlopen(req)
+    
+    if uh.getcode() is not 200:
         syslog.syslog("run_backup: INFO: Error triggering backup for %s with BackupConfigurationId %s, status code: %s" % 
                       (location, config["locations"][locationKey]["BackupConfigurationId"], status))
         return False
 
-    syslog.syslog("run_backup: INFO: Triggered backup for %s, Backup job ID: %s" % (location, responseBody))
+    syslog.syslog("run_backup: INFO: Triggered backup for %s, Backup job ID: %s" % (location, uh.read()))
     return True
 
-def awakenAgents(args, config, tokenTuple):
+def awakenAgents(args, config, tokenData):
     """
     Make a API request to wake the agents
     """
-    
-    # http://docs.rackspace.com/rcbu/api/v1.0/rcbu-devguide/content/Wake-Up_Agents-d1003.html
-    req = {}
 
-    connection = httplib.HTTPSConnection(config["general"]["endpoint"], 443)
     if args.verbose:
-        connection.set_debuglevel(1)
-    headers = {'Content-type': 'application/json',
-               'X-Auth-Token': tokenTuple[0]}
-    path = "/v1.0/%s/user/wakeupagents" % tokenTuple[1]
+        handler=urllib2.HTTPSHandler(debuglevel=10)
+        opener = urllib2.build_opener(handler)
+        urllib2.install_opener(opener)
 
-    connection.request('POST', path, json.dumps(req), headers)
-            
-    # process the request                                                                                                                                                                                
-    response = connection.getresponse()
-    status = response.status
-    connection.close()
+    # http://docs.rackspace.com/rcbu/api/v1.0/rcbu-devguide/content/Wake-Up_Agents-d1003.html
+    req = urllib2.Request("%s/user/wakeupagents" % tokenData['api_url'],
+                          headers = {'Content-type': 'application/json',
+                                     'X-Auth-Token': tokenData['token']}
+                          )
+    req.add_data("") # A POST is required
 
-    if status is not 200:
+    uh = urllib2.urlopen(req)
+    
+    if uh.getcode() is not 200:
         syslog.syslog("run_backup: ERROR: Error waking up agents")
         sys.exit(3)
 
@@ -140,9 +158,13 @@ def loadConfig(args):
     Load json config file and return its contents
     """
     try:
-        conf = json.load(open(args.conffile))
+        conf = yaml.load(open(args.conffile))
     except:
         syslog.syslog("run_backup: ERROR: Failed to read %s" % (args.conffile))
+        sys.exit(1)
+
+    if conf['general']['configRevision'] != 2:
+        syslog.syslog("run_backup: ERROR: This version requires configuration revision 2" % (args.conffile))
         sys.exit(1)
 
     return conf
@@ -151,9 +173,9 @@ def parseArguments():
     """
     Parse command line arguments
     """
-    parser = argparse.ArgumentParser(description='Gets auth data via json',
+    parser = argparse.ArgumentParser(description='Triggers Rackspace Cloud Backup Jobs',
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--conffile', action='store', default="/etc/driveclient/run_backup.conf.json", help="JSON Configuration file to load", type=str)
+    parser.add_argument('--conffile', action='store', default="/etc/driveclient/run_backup.conf.yaml", help="YAML Configuration file to load", type=str)
     parser.add_argument('--wakedelay', action='store', default=30, help="Number of seconds to delay after waking agents (DELAY REQUIRED)", type=int)
     parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')    
  
@@ -165,18 +187,22 @@ def parseArguments():
 if __name__ == '__main__':
     args = parseArguments()
     config = loadConfig(args)
+
     if args.verbose:
         print "Config:"
         print config
         print ""
 
-
-    tokenTuple = cloud_auth(config, args)
-    awakenAgents(args, config, tokenTuple)
+    if config["locations"] is None:
+        syslog.syslog("run_backup: WARNING: No jobs configured!")
+        sys.exit(1)
+    
+    tokenData = cloud_auth(config, args)
+    awakenAgents(args, config, tokenData)
 
     failure = False
-    for location in config["locations"].keys():
-        if not triggerBackup(location, config, tokenTuple, args):
+    for location in config["locations"]:
+        if not triggerBackup(location, config, tokenData, args):
             failure = True
                       
     if failure:
