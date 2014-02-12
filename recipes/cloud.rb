@@ -54,6 +54,10 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
     job['cloud'] = {}
   end
 
+  if job['enabled'].nil?
+    job['cloud'] = true
+  end
+
   rackspace_cloudbackup_configure_cloud_backup job['label'] do
     rackspace_username   node['rackspace']['cloud_credentials']['username']
     rackspace_api_key    node['rackspace']['cloud_credentials']['api_key']
@@ -62,7 +66,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
 
     version_retention    job['cloud']['version_retention'] || node['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention']
     notify_recipients    job['cloud']['notify_email']      || node['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email']
-    is_active            job['enabled'] || true
+    is_active            job['enabled']
 
     # Backups configured with this module are triggered by cron for consistency with non-RS cloud
     frequency            "Manually"
