@@ -120,10 +120,10 @@ def triggerBackup(locationKey, config, tokenData, args):
     
     if uh.getcode() is not 200:
         syslog.syslog("run_backup: INFO: Error triggering backup for %s with BackupConfigurationId %s, status code: %s" % 
-                      (location, config["locations"][locationKey]["BackupConfigurationId"], status))
+                      (locationKey, config["locations"][locationKey]["BackupConfigurationId"], status))
         return False
 
-    syslog.syslog("run_backup: INFO: Triggered backup for %s, Backup job ID: %s" % (location, uh.read()))
+    syslog.syslog("run_backup: INFO: Triggered backup for %s, Backup job ID: %s" % (locationKey, uh.read()))
     return True
 
 def awakenAgents(args, config, tokenData):
@@ -179,6 +179,7 @@ def parseArguments():
     parser.add_argument('--wakedelay', action='store', default=30, help="Number of seconds to delay after waking agents (DELAY REQUIRED)", type=int)
     parser.add_argument('--identityurl', action='store', default="https://identity.api.rackspacecloud.com", help="Rackspace Identity API URL", type=str)
     parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')    
+    parser.add_argument('--location', action='store', default=None, help="Specific location to back up", type=str)
  
     args = parser.parse_args()
 
@@ -201,12 +202,16 @@ if __name__ == '__main__':
     tokenData = cloud_auth(config, args)
     awakenAgents(args, config, tokenData)
 
-    failure = False
-    for location in config["locations"].keys():
-        if not triggerBackup(location, config, tokenData, args):
-            failure = True
-                      
-    if failure:
-        sys.exit(3)
+    if args.location is None:
+        failure = False
+        for location in config["locations"].keys():
+            if not triggerBackup(location, config, tokenData, args):
+                failure = True
+
+        if failure:
+            sys.exit(3)
+    else:
+        if not triggerBackup(args.location, config, tokenData, args):
+            sys.exit(3)
     
     sys.exit(0)
