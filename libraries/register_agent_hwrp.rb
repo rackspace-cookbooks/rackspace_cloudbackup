@@ -16,7 +16,7 @@
 #
 # http://tech.yipit.com/2013/05/09/advanced-chef-writing-heavy-weight-resource-providers-hwrp/
 
-require_relative 'cloudbackup.rb'
+require_relative 'gather_bootstrap_data.rb'
 
 class Chef
   class Resource
