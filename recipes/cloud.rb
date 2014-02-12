@@ -55,7 +55,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
   end
 
   if job['enabled'].nil?
-    job['cloud'] = true
+    job['enabled'] = true
   end
 
   rackspace_cloudbackup_configure_cloud_backup job['label'] do
