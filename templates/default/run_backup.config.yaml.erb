@@ -19,7 +19,7 @@ locations:
   api_id = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(@api_username, @api_key, @api_region, backup['label']).backup_id
   raise "ERROR: nil api_id for #{backup['label']}" if api_id.nil?
 -%>
-  - <%= backup['location'] %>:
+  <%= backup['location'] %>:
     # Chef label: <%= backup['label'] %>
 <% if backup['comment'] -%>
     # <%= backup['comment'] %>
