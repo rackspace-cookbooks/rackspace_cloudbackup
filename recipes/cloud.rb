@@ -76,9 +76,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
   # Shared defininition from definitions/cron_wrapper.rb
   cloud_backup_cron_configurator "#{job['label']} cron_configurator" do
     job job
-    # Debug!
-#    command "/usr/local/bin/run_backup -l '#{job['location']}'"
-    command "/bin/false -l '#{job['location']}'"
+    command "/usr/local/bin/run_backup --location '#{job['location']}'"
   end
 
   # Set up the array the config template will use
