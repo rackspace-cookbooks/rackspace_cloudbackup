@@ -47,7 +47,7 @@ def cloud_auth(config, args):
         opener = urllib2.build_opener(handler)
         urllib2.install_opener(opener)
 
-    req = urllib2.Request("https://identity.api.rackspacecloud.com/v2.0/tokens",
+    req = urllib2.Request("%s/v2.0/tokens" % args.identityurl,
                           headers = {'Content-type': 'application/json'}
                           )
     req.add_data(json.dumps({'auth': {'RAX-KSKEY:apiKeyCredentials':
@@ -177,6 +177,7 @@ def parseArguments():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--conffile', action='store', default="/etc/driveclient/run_backup.conf.yaml", help="YAML Configuration file to load", type=str)
     parser.add_argument('--wakedelay', action='store', default=30, help="Number of seconds to delay after waking agents (DELAY REQUIRED)", type=int)
+    parser.add_argument('--identityurl', action='store', default="https://identity.api.rackspacecloud.com", help="Rackspace Identity API URL", type=str)
     parser.add_argument('--verbose', '-v', action='store_true', help='Turn up verbosity to 10')    
  
     args = parser.parse_args()
@@ -201,7 +202,7 @@ if __name__ == '__main__':
     awakenAgents(args, config, tokenData)
 
     failure = False
-    for location in config["locations"]:
+    for location in config["locations"].keys():
         if not triggerBackup(location, config, tokenData, args):
             failure = True
                       
