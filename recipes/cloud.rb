@@ -26,7 +26,7 @@ package "python-argparse" do
 end
 
 # Insert our scripts
-['run_backup'].each do |script|
+['run_backup.py'].each do |script|
   cookbook_file "/usr/local/bin/#{script}" do
     source script
     mode 00755
@@ -76,7 +76,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
   # Shared defininition from definitions/cron_wrapper.rb
   cloud_backup_cron_configurator "#{job['label']} cron_configurator" do
     job job
-    command "/usr/local/bin/run_backup --location '#{job['location']}'"
+    command "/usr/local/bin/run_backup.py --location '#{job['location']}'"
   end
 
   # Set up the array the config template will use
