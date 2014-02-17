@@ -16,6 +16,7 @@
 
 require_relative 'RcbuApiWrapper.rb'
 require_relative 'RcbuBackupObj.rb'
+require_relative 'RcbuBackupWrapper.rb'
 
 module Opscode
   module Rackspace
