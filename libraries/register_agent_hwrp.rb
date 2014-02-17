@@ -33,6 +33,7 @@ class Chef
         @allowed_actions = [:register, :nothing]
 
         @label = name
+        @bootstrap_file_path = '/etc/driveclient/bootstrap.json'
       end
 
       def label(arg = nil)
@@ -41,13 +42,15 @@ class Chef
       end
 
       def rackspace_username(arg = nil)
-        # set_or_return is a magic function from Chef that does most of the heavy lifting for attribute access.
         set_or_return(:rackspace_username, arg, kind_of: String, required: true)
       end
 
       def rackspace_api_key(arg = nil)
-        # set_or_return is a magic function from Chef that does most of the heavy lifting for attribute access.
         set_or_return(:rackspace_auth_url, arg, kind_of: String, required: true)
+      end
+
+      def bootstrap_file_path(arg = nil)
+        set_or_return(:bootstrap_file_path, arg, kind_of: String)
       end
     end
   end
@@ -59,11 +62,11 @@ class Chef
     class RackspaceCloudbackupRegisterAgent < Chef::Provider
       def load_current_resource
         @current_resource ||= Chef::Resource::RackspaceCloudbackupRegisterAgent.new(new_resource.name)
-        [:label, :rackspace_api_key, :rackspace_username].each do |arg|
+        [:label, :rackspace_api_key, :rackspace_username, :bootstrap_file_path].each do |arg|
           @current_resource.send(arg, new_resource.send(arg))
         end
 
-        @current_resource.agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/etc/driveclient/bootstrap.json')
+        @current_resource.agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data(@current_resource.bootstrap_file_path)
         fail 'Failed to read agent configuration' if @current_resource.agent_config.nil?
 
         @current_resource
