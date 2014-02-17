@@ -60,6 +60,8 @@ class Chef
   class Provider
     # Implement the rackspace_cloudbackup_register_agent provider
     class RackspaceCloudbackupRegisterAgent < Chef::Provider
+      attr_accessor :shell_cmd
+
       def load_current_resource
         @current_resource ||= Chef::Resource::RackspaceCloudbackupRegisterAgent.new(new_resource.name)
         [:label, :rackspace_api_key, :rackspace_username, :bootstrap_file_path].each do |arg|
@@ -75,9 +77,10 @@ class Chef
       def action_register
         case @current_resource.agent_config['IsRegistered']
         when false
-          cmdStr = "driveclient -c -k #{@current_resource.rackspace_api_key} -u #{@current_resource.rackspace_username}"
-          cmd = Mixlib::ShellOut.new(cmdStr)
-          cmd.run_command
+          cmd_str = "driveclient -c -k '#{@current_resource.rackspace_api_key}' -u '#{@current_resource.rackspace_username}'"
+          # This is a class instance variable to expose it for testing.  It allows Mixlib::ShellOut to be mocked and then probed via a getter
+          @shell_cmd = Mixlib::ShellOut.new(cmd_str)
+          @shell_cmd.run_command
           new_resource.updated_by_last_action(true)
         when true
           new_resource.updated_by_last_action(false)
