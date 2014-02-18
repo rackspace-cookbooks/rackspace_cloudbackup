@@ -55,7 +55,7 @@ module Opscode
 
         def lookup_configurations
           @configurations = JSON.parse(RestClient.get("#{@rcbu_api_url}/backup-configuration/system/#{@agent_id}",
-                                                      'Content-Type' => :json, 'X-Auth-Token' => @token))
+                                                      'X-Auth-Token' => @token, 'Accept' => :json))
         end
 
         def locate_existing_config(label)

@@ -29,11 +29,11 @@ module RcbuApiWrapperTestHelpers
       api_username: 'Test API Username',
       api_key:      'Test API Key',
       region:       'TESTREGION',    # Needs to be UPCASE
-      agent_id:     'Test Agent ID', # I believe in the real API this needs to be an int, but our code doesn't care
+      agent_id:     'TestAgentID', # I believe in the real API this needs to be an int, but our code doesn't care
       api_url:      'http://mockidentity.local/',
       
       # For Mocking
-      api_tenant_id: 'Test API Tenant ID',
+      api_tenant_id: 'TestAPITenantID', # Used in URL
       api_token: 'Test API Token',
     }
   end
@@ -89,8 +89,29 @@ module RcbuApiWrapperTestHelpers
     }
   end
   module_function :identity_API_data
+
+  def rcbu_API_configurations_data
+    # As we're just testing API calls and not the use of the data return dummy data
+    base_dataset = []
+    retVal = []
+    3.times do |x|
+      base_dataset.push({ 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}"})
+    end
+    retVal.push(base_dataset)
     
-  def mock_rcbu_API(data = test_data, identity_data = identity_API_data)
+    base_dataset = []
+    3.times do |y|
+      # Intentionally remove data0 so we can tell which set the data came from.
+      x = y + 1
+      base_dataset.push({ 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}"})
+    end
+    retVal.push(base_dataset)
+    
+    return retVal
+  end
+  module_function :rcbu_API_configurations_data
+    
+  def mock_rcbu_API(data = test_data, identity_data = identity_API_data, rcbu_configurations_data = rcbu_API_configurations_data)
     # Set up API mocks
     # Disallow any real connections, all connections should be mocked
     WebMock.disable_net_connect!
@@ -119,6 +140,19 @@ module RcbuApiWrapperTestHelpers
       to_return(:status => 200, :body => identity_data.to_json, :headers => {'Content-Type' => 'application/json'})
 
     # Mock the RCBU API
+    stub_request(:get, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/system/#{data[:agent_id]}").
+      with(:headers => {
+           # Headers with values we care about
+           'Accept'       => 'application/json',
+           'X-Auth-Token' => data[:api_token],
+           
+           # Headers we don't care about, but need to specify for mocking
+           'Accept-Encoding' => /.*/,
+           'User-Agent'      => /.*/
+           }).
+      to_return({ :status => 200, :body => rcbu_API_configurations_data[0].to_json, :headers => {} },
+                { :status => 200, :body => rcbu_API_configurations_data[1].to_json, :headers => {} })
+
   end
   module_function :mock_rcbu_API
 end
@@ -174,4 +208,90 @@ describe 'RcbuApiWrapper' do
       @test_obj.rcbu_api_url.should eql @identity_data['access']['serviceCatalog'][0]['endpoints'][0]['publicURL']
     end
   end
+
+  describe 'identity_data' do
+    before :each do
+      @test_data     = RcbuApiWrapperTestHelpers.test_data
+      @identity_data = RcbuApiWrapperTestHelpers.identity_API_data
+      RcbuApiWrapperTestHelpers.mock_rcbu_API(@test_data, @identity_data)
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+    end
+
+    # Butter test: this is a helper for initialize()
+    it 'returns the identity API data' do
+      @test_obj.identity_data(@test_data[:api_username], @test_data[:api_key]).should eql @identity_data
+    end
+  end
+
+  describe 'lookup_configurations' do
+    before :each do
+      @test_data     = RcbuApiWrapperTestHelpers.test_data
+      @identity_data = RcbuApiWrapperTestHelpers.identity_API_data
+      @configurations_data = RcbuApiWrapperTestHelpers.rcbu_API_configurations_data
+      RcbuApiWrapperTestHelpers.mock_rcbu_API(@test_data, @identity_data)
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+    end
+    
+    it 'sets the configurations class instance variable' do
+      @test_obj.configurations.should eql nil
+      @test_obj.lookup_configurations
+      @test_obj.configurations.should eql @configurations_data[0]
+    end
+
+    # This is really testing the test, but it is important to verify as locate_existing_config() tests depend on this behavior.
+    it 'updates the configurations class instance variable' do
+      # Rehash of the last test to get to proper state
+      @test_obj.configurations.should eql nil
+      @test_obj.lookup_configurations
+      @test_obj.configurations.should eql @configurations_data[0]
+
+      # Content of the new test
+      @test_obj.lookup_configurations
+      @test_obj.configurations.should eql @configurations_data[1]
+    end
+  end
+
+  describe 'locate_existing_config' do 
+    before :each do
+      @test_data     = RcbuApiWrapperTestHelpers.test_data
+      @identity_data = RcbuApiWrapperTestHelpers.identity_API_data
+      @configurations_data = RcbuApiWrapperTestHelpers.rcbu_API_configurations_data
+      RcbuApiWrapperTestHelpers.mock_rcbu_API(@test_data, @identity_data)
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+    end
+   
+    it 'looks up configurations when configurations class instance variable is nil' do
+      @test_obj.configurations.should eql nil
+      @test_obj.locate_existing_config('data0').should eql @configurations_data[0][0]
+    end
+
+    it 'only looks up configurations once when configurations class instance variable is nil' do
+      @test_obj.configurations.should eql nil
+      # This relies on the mock returning more data on the second call: data4 shouldn't be present in the first lookup
+      @test_obj.locate_existing_config('data3').should eql nil
+    end
+
+    it 'returns data from configurations class instance variable when configurations is not nil' do
+      @test_obj.configurations.should eql nil
+      @test_obj.lookup_configurations
+      @test_obj.configurations.should eql @configurations_data[0]
+
+      # This relies on the mock returning different data on the second call: data0 shouldn't be present in the second lookup
+      # so this should expose unnecessairy lookups
+      @test_obj.locate_existing_config('data0').should eql @configurations_data[0][0]
+    end
+
+    it 'performs a fresh lookup if desired value is not in configurations class instance variable' do
+      @test_obj.configurations.should eql nil
+      @test_obj.lookup_configurations
+      @test_obj.configurations.should eql @configurations_data[0]
+      
+      @test_obj.locate_existing_config('data3').should eql @configurations_data[1][2]
+    end
+
+    it 'returns nil on no match' do
+      @test_obj.locate_existing_config('bogus').should eql nil
+    end
+  end
+
 end    
