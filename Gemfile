@@ -12,6 +12,7 @@ group :testing do
   gem 'rubocop',    '~> 0.16' 
 
   gem 'rest-client','~> 1.6.7'
+  gem 'webmock',    '~> 1.17.3'
 end
  
 group :integration do

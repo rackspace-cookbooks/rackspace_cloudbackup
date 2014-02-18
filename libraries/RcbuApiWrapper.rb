@@ -22,10 +22,11 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuApiWrapper
-        attr_accessor :token, :rcbu_api_url, :agent_id, :configurations
+        attr_accessor :token, :rcbu_api_url, :agent_id, :configurations, :api_url
 
-        def initialize(api_username, api_key, region, agent_id)
+        def initialize(api_username, api_key, region, agent_id, api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
           @agent_id = agent_id
+          @api_url = api_url
 
           identity = identity_data(api_username, api_key)
           @token = identity['access']['token']['id']
@@ -40,7 +41,7 @@ module Opscode
           fail "Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}" if @rcbu_api_url.nil?
         end
 
-        def identity_data(api_username, api_key, api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
+        def identity_data(api_username, api_key)
           req = { 'auth' =>
             { 'RAX-KSKEY:apiKeyCredentials' =>
               { 'username' => api_username,
@@ -49,7 +50,7 @@ module Opscode
             }
           }
           
-          return JSON.parse(RestClient.post(api_url, req.to_json,  content_type: :json, accept: :json))
+          return JSON.parse(RestClient.post(@api_url, req.to_json,  content_type: :json, accept: :json))
         end
 
         def lookup_configurations
