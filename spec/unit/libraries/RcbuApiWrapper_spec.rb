@@ -20,7 +20,6 @@ require 'webmock/rspec'
 
 require_relative '../../../libraries/RcbuApiWrapper.rb'
 
-#include Opscode::Rackspace::CloudBackup
 include WebMock::API
 
 module RcbuApiWrapperTestHelpers
