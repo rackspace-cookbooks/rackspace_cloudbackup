@@ -254,20 +254,6 @@ describe 'RcbuApiWrapper' do
     end
   end
 
-  describe 'identity_data' do
-    before :each do
-      @test_data     = RcbuApiWrapperTestHelpers.test_data
-      @identity_data = RcbuApiWrapperTestHelpers.identity_API_data
-      RcbuApiWrapperTestHelpers.mock_identity_API(@test_data, @identity_data)
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
-    end
-
-    # Butter test: this is a helper for initialize()
-    it 'returns the identity API data' do
-      @test_obj.identity_data(@test_data[:api_username], @test_data[:api_key]).should eql @identity_data
-    end
-  end
-
   describe 'lookup_configurations' do
     before :each do
       @test_data     = RcbuApiWrapperTestHelpers.test_data

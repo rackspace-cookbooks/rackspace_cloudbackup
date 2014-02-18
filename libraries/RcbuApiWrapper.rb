@@ -28,7 +28,7 @@ module Opscode
           @agent_id = agent_id
           @api_url = api_url
 
-          identity = identity_data(api_username, api_key)
+          identity = _identity_data(api_username, api_key)
           @token = identity['access']['token']['id']
 
           backup_catalog = identity['access']['serviceCatalog'].find { |c| c['name'] == 'cloudBackup' }
@@ -41,7 +41,7 @@ module Opscode
           fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}" if @rcbu_api_url.nil?
         end
 
-        def identity_data(api_username, api_key)
+        def _identity_data(api_username, api_key)
           req = { 'auth' =>
             { 'RAX-KSKEY:apiKeyCredentials' =>
               { 'username' => api_username,
