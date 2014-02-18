@@ -38,11 +38,7 @@ module Opscode
         end
 
         def lookup_configurations
-          if @mock_configurations.length == 0
-            @configurations = nil
-          else
-            @configurations = @mock_configurations
-          end
+          @configurations = @mock_configurations
         end
 
         # Use real locate_existing_config: No code change needed

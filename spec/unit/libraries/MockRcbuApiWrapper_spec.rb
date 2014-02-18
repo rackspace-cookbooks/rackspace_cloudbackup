@@ -80,10 +80,10 @@ describe 'MockRcbuApiWrapper' do
       @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
-    it 'lookup_configurations sets configurations class instance variable to nil when mock_configurations class variable is empty' do
+    it 'lookup_configurations sets configurations class instance variable to [] when mock_configurations class variable is empty' do
       @test_obj.mock_configurations.should eql []
       @test_obj.lookup_configurations
-      @test_obj.configurations.should eql nil
+      @test_obj.configurations.should eql []
     end
 
     it 'create_config adds config to mock_configurations class variable' do
