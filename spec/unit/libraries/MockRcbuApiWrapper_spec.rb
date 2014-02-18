@@ -22,7 +22,7 @@ require_relative '../../../libraries/MockRcbuApiWrapper.rb'
 
 include WebMock::API
 
-module RcbuApiWrapperTestHelpers
+module MockRcbuApiWrapperTestHelpers
   def test_data
     return {
       api_username: 'Test API Username',
@@ -33,15 +33,12 @@ module RcbuApiWrapperTestHelpers
     }
   end
   module_function :test_data
-
-  
-
 end
 
 describe 'RcbuApiWrapper' do
   describe 'initialize' do
     before :each do
-      @test_data = RcbuApiWrapperTestHelpers.test_data
+      @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
       @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
@@ -65,7 +62,7 @@ describe 'RcbuApiWrapper' do
 
   describe '_identity_data' do
     before :each do
-      @test_data = RcbuApiWrapperTestHelpers.test_data
+      @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
       @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
@@ -78,7 +75,7 @@ describe 'RcbuApiWrapper' do
   # These are grouped because we need one to test the other.
   describe 'stateful lookup_configurations / create_config mocks: ' do
     before :each do
-      @test_data = RcbuApiWrapperTestHelpers.test_data
+      @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
       @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
@@ -117,7 +114,7 @@ describe 'RcbuApiWrapper' do
 
   describe 'update_config' do
     before :each do
-      @test_data = RcbuApiWrapperTestHelpers.test_data
+      @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
       @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
