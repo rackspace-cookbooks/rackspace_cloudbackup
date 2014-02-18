@@ -15,14 +15,13 @@
 # limitations under the License.
 #
 
-require 'json'
-require 'rest_client'
+require_relative 'RcbuApiWrapper.rb'
 
 module Opscode
   module Rackspace
     module CloudBackup
-      class MockRcbuApiWrapper
-        attr_accessor :token, :rcbu_api_url, :agent_id, :configurations, :api_url, :mock_configurations
+      class MockRcbuApiWrapper < RcbuApiWrapper
+        attr_accessor :mock_configurations
 
         def initialize(api_username, api_key, region, agent_id, api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
           @agent_id     = agent_id
@@ -46,17 +45,8 @@ module Opscode
           end
         end
 
-        def locate_existing_config(label)
-          unless @configurations.nil?
-            config = @configurations.find { |c| c['BackupConfigurationName'] == label }
-            unless config.nil?
-              return config
-            end
-          end
-
-          lookup_configurations
-          @configurations.find { |c| c['BackupConfigurationName'] == label }
-        end
+        # Use real locate_existing_config: No code change needed
+        # def locate_existing_config(label)
 
         def create_config(config)
           @mock_configurations.push(config)
