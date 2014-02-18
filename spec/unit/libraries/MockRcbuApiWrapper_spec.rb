@@ -35,7 +35,7 @@ module MockRcbuApiWrapperTestHelpers
   module_function :test_data
 end
 
-describe 'RcbuApiWrapper' do
+describe 'MockRcbuApiWrapper' do
   describe 'initialize' do
     before :each do
       @test_data = MockRcbuApiWrapperTestHelpers.test_data
