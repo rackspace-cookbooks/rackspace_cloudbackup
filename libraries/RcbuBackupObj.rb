@@ -22,7 +22,7 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuBackupObj
-        attr_accessor :api_wrapper, :all_attributes, :settable_attributes
+        attr_accessor :api_wrapper, :all_attributes, :settable_attributes, :label
 
         def initialize(label, api_wrapper)
           @api_wrapper = api_wrapper
