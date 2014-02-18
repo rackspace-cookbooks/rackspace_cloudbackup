@@ -32,13 +32,13 @@ module Opscode
           @token = identity['access']['token']['id']
 
           backup_catalog = identity['access']['serviceCatalog'].find { |c| c['name'] == 'cloudBackup' }
-          fail 'Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate cloudBackup service catalog' if backup_catalog.nil?
+          fail 'Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate cloudBackup service catalog' if backup_catalog.nil?
 
           region.upcase!
           backup_catalog_region = backup_catalog['endpoints'].find { |e| e['region'] == region }
-          fail "Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate CloudBackup details from service catalog for region #{region}" if backup_catalog_region.nil?
+          fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup details from service catalog for region #{region}" if backup_catalog_region.nil?
           @rcbu_api_url = backup_catalog_region['publicURL']
-          fail "Opscode::Rackspace::CloudBackup::RcbuBinding.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}" if @rcbu_api_url.nil?
+          fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}" if @rcbu_api_url.nil?
         end
 
         def identity_data(api_username, api_key)
@@ -54,8 +54,13 @@ module Opscode
         end
 
         def lookup_configurations
-          @configurations = JSON.parse(RestClient.get("#{@rcbu_api_url}/backup-configuration/system/#{@agent_id}",
-                                                      'X-Auth-Token' => @token, 'Accept' => :json))
+          response = RestClient.get("#{@rcbu_api_url}/backup-configuration/system/#{@agent_id}",
+                                    'X-Auth-Token' => @token, 'Accept' => :json)
+          if response.code != 200
+            fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.lookup_configurations: Bad response code #{response.code}"
+          end
+          
+          @configurations = JSON.parse(response)
         end
 
         def locate_existing_config(label)
@@ -71,15 +76,22 @@ module Opscode
         end
 
         def create_config(config)
-          RestClient.post("#{@rcbu_api_url}/backup-configuration/",
-                          config.to_json,
-                          'Content-Type' => :json, 'X-Auth-Token' => @token)
+          response = RestClient.post("#{@rcbu_api_url}/backup-configuration/",
+                                     config.to_json,
+                                     'Content-Type' => :json, 'X-Auth-Token' => @token)
+          
+          if response.code != 200
+            fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.create_config: Bad response code #{response.code}"
+          end
         end
 
         def update_config(config_id, config)
-          RestClient.put("#{@rcbu_api_url}/backup-configuration/#{config_id}",
-                         config.to_json,
-                         'Content-Type' => :json, 'X-Auth-Token' => @token)
+          response = RestClient.put("#{@rcbu_api_url}/backup-configuration/#{config_id}",
+                                    config.to_json,
+                                    'Content-Type' => :json, 'X-Auth-Token' => @token)
+          if response.code != 200
+            fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.create_config: Bad response code #{response.code}"
+          end
         end
       end
     end
