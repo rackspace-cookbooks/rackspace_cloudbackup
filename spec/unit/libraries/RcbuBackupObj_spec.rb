@@ -21,12 +21,6 @@ require_relative '../../../libraries/RcbuBackupObj.rb'
 require_relative '../../../libraries/MockRcbuApiWrapper.rb'
 
 module RcbuBackupObjTestHelpers
-#  def test_data
-#    return {
-#    }
-#  end
-#  module_function :test_data
-
   def test_api_wrapper
     return Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new('Test API Username',
                                                                    'Test API Key',
@@ -35,27 +29,219 @@ module RcbuBackupObjTestHelpers
                                                                    'http://localhost/')
   end
   module_function :test_api_wrapper
-                                                                   
+
+  # Helper class that adds an unlock method which adds setters for ALL attributes
+  # Required for compare? tests
+  # (Otherwise we have a chicken/egg problem testing compare? and load)
+  class UnlockedRcbuBackupObj < Opscode::Rackspace::CloudBackup::RcbuBackupObj
+    # THIS MUST NOT OVERLOAD ANY METHODS!  Doing so will invalidate tests!
+    def unlock_setters
+      @all_attributes.each do |arg|
+        self.class.send(:define_method, "#{arg}=", proc { |x| instance_variable_set("@#{arg}", x) })
+      end
+    end
+  end
+
+  # This variable is extremely useful in attribute testing.  This method allows us to access it outside of test scope.
+  def get_all_attributes
+    return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(nil, test_api_wrapper).all_attributes
+  end
+  module_function :get_all_attributes
+
+  def get_settable_attributes
+    return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(nil, test_api_wrapper).settable_attributes
+  end
+  module_function :get_settable_attributes
 end
 
 describe 'RcbuBackupObj' do
   describe 'initialize' do
     before :each do
-#      @test_data        = RcbuBackupObjTestHelpers.test_data
       @test_label       = 'Test Label'
       @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
     end
 
     it 'Sets the label class instance variable' do
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
       @test_obj.label.should eql @test_label
     end
 
     it 'Sets the api_wrapper class instance variable' do
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
       @test_obj.api_wrapper.should eql @test_api_wrapper
     end
+
+    # These don't have to be exhaustive, but they should contain all the attributes manipulated by the HWRP
+    %w(Inclusions Exclusions BackupConfigurationId MachineAgentId MachineName Datacenter Flavor IsEncrypted
+       EncryptionKey BackupConfigurationName IsActive IsDeleted VersionRetention BackupConfigurationScheduleId
+       MissedBackupActionId Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval
+       TimeZoneId NextScheduledRunTime LastRunTime LastRunBackupReportId NotifyRecipients NotifySuccess
+       NotifyFailure BackupPrescript BackupPostscript).each do |attr|
+      it "contains #{attr} in the all_attributes class instance variable" do
+        @test_obj.all_attributes.include?(attr).should eql true
+      end
+    end
+
+    %w(Inclusions Exclusions MachineAgentId IsActive VersionRetention
+       Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval TimeZoneId
+       NotifyRecipients NotifySuccess NotifyFailure BackupPrescript BackupPostscript MissedBackupActionId).each do |attr|
+      it "contains #{attr} in the settable_attributes class instance variable" do
+        @test_obj.settable_attributes.include?(attr).should eql true
+      end
+    end
+    
+
+    setters = RcbuBackupObjTestHelpers.get_settable_attributes
+    RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
+      it "has a getter for #{attr}" do
+        # *almost* all should return nil, but not all.  Banking on exceptions.
+        @test_obj.send(attr)
+      end
+    end
+      
+    if setters.include?(attr)
+      it "has a setter for #{attr}" do
+        @test_obj.send("#{attr}=", "Setter(#{attr}) Test Variable")
+        @test_obj.send(attr).should eql "Setter(#{attr}) Test Variable"
+      end
+    else
+      it "does not have a setter for #{attr}" do
+        expect { @test_obj.send("#{attr}=", "Setter(#{attr}) Test Variable") }.to raise_exception
+      end
+    end
+
+    it 'sets BackupConfigurationName to the label argument' do
+      @test_obj.BackupConfigurationName.should eql @test_label
+    end
+
+    describe 'with no loaded config' do
+      before :each do
+        @test_label       = 'Test Label'
+        @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+        @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+        fail 'mock data present' if @test_api_wrapper.mock_configurations != []
+      end
+
+      it 'sets MachineAgentId to api_wrapper.agent_id' do
+        @test_obj.MachineAgentId.should eql @test_api_wrapper.agent_id
+      end
+
+      it 'sets Inclusions to an empty array' do
+        @test_obj.Inclusions.should eql []
+      end
+
+      it 'sets Exclusions to an empty array' do
+        @test_obj.Exclusions.should eql []
+      end
+    end
+
+    describe 'with a loaded config' do
+      before :each do
+        @test_label       = 'Test Label'
+        @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+        
+        # Preload the stateful mocks with a dataset containing keys used in the constructor
+        # A more exhaustive test will be done against load itself.
+        @test_api_wrapper.create_config(  'BackupConfigurationName' => @test_label,
+                                          'MachineAgentId'          => 'TestMachineID',
+                                          'Inclusions'              => 'TestInclusions', # Technically invalid, but will suffice
+                                          'Exclusions'              => 'TestExclusions', # Technically invalid, but will suffice
+                                          )
+
+        @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+      end
+
+      it 'does not override MachineAgentId' do
+        @test_obj.MachineAgentId.should eql 'TestMachineID'
+      end
+
+      it 'does not override Inclusions' do
+        @test_obj.Inclusions.should eql 'TestInclusions'
+      end
+
+      it 'does not override Exclusions' do
+        @test_obj.Exclusions.should eql 'TestExclusions'
+      end
+    end
   end
+
+  describe 'compare?' do
+    before :each do
+      @test_label       = 'Test Label'
+      @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+
+      # Use the unlocked wrapper and unlock the setters
+      @test_obj = RcbuBackupObjTestHelpers::UnlockedRcbuBackupObj.new(@test_label, @test_api_wrapper)
+      @test_obj.unlock_setters
+    end
+
+    it 'returns true when all attributes are the same' do
+      @test_obj.all_attributes.each do |attr|
+        test_value = "Test #{attr} Value"
+        @test_obj.send("#{attr}=", test_value)
+        @test_obj.send(attr).should eql test_value
+      end
+
+      comp_obj = @test_obj.dup
+      @test_obj.compare?(comp_obj).should eql true
+    end
+
+    RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
+      it "returns false when #{attr} differ" do
+      @test_obj.all_attributes.each do |init_attr|
+        test_value = "Test #{init_attr} Value"
+          @test_obj.send("#{init_attr}=", test_value)
+          @test_obj.send(init_attr).should eql test_value
+        end
+ 
+        comp_obj = @test_obj.dup
+        comp_obj.send("#{attr}=", "Differing #{@test_obj.send(attr)}")
+        @test_obj.send(attr).should_not eql comp_obj.send(attr)
+        @test_obj.compare?(comp_obj).should eql false
+      end
+    end
+  end        
+  
+  # NOTE: These tests should run AFTER compare? as we use compare? for no change tests
+  describe 'load' do
+    before :each do
+      @test_label       = 'Test Label'
+      @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+    end
+
+    it 'doesn\'t modify the class when no configuration is loaded' do
+      fail 'mock data present' if @test_api_wrapper.mock_configurations != []
+      comp_obj = @test_obj.dup
+      @test_obj.load
+      @test_obj.compare?(comp_obj).should eql true
+    end
+
+    loadable_attrs = RcbuBackupObjTestHelpers.get_all_attributes
+    # Pop BackupConfigurationName, it's the search key and as such must match label; can't change it
+    loadable_attrs.delete('BackupConfigurationName')
+    loadable_attrs.each do |attr|
+      it "loads #{attr} into a class instance variable" do
+        test_value = "Test #{attr} Value"
+        @test_api_wrapper.create_config( 'BackupConfigurationName' => @test_label,
+                                         attr                      => test_value,
+                                         )
+        @test_obj.load
+        @test_obj.send(attr).should eql test_value
+      end
+    end
+    
+    # Spirit: Testing for code fragility / future breakage from API updates
+    it 'doesn\'t error when provided with unknown keys' do
+      @test_api_wrapper.create_config( 'BackupConfigurationName' => @test_label,
+                                       'RackSpaceRules'          => true,
+                                       'DevOpsRocks'             => 'doublePlusYes',
+                                       'Kittens'                 => 'mittens'
+                                       )
+      @test_obj.load
+    end
+  end
+
+  
 end
     
     
