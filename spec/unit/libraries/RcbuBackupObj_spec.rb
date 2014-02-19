@@ -98,14 +98,15 @@ describe 'RcbuBackupObj' do
       end
     end
       
+    test_variable = "Setter(#{attr}) Test Variable"
     if setters.include?(attr)
       it "has a setter for #{attr}" do
-        @test_obj.send("#{attr}=", "Setter(#{attr}) Test Variable")
-        @test_obj.send(attr).should eql "Setter(#{attr}) Test Variable"
+        @test_obj.send("#{attr}=", test_variable)
+        @test_obj.send(attr).should eql test_variable
       end
     else
       it "does not have a setter for #{attr}" do
-        expect { @test_obj.send("#{attr}=", "Setter(#{attr}) Test Variable") }.to raise_exception
+        expect { @test_obj.send("#{attr}=", test_variable) }.to raise_exception
       end
     end
 
@@ -241,7 +242,52 @@ describe 'RcbuBackupObj' do
     end
   end
 
-  
+  describe 'update' do
+    before :each do
+      @test_label       = 'Test Label'
+      @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+    end
+
+    setters = RcbuBackupObjTestHelpers.get_settable_attributes
+    RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
+      test_variable = "update(#{attr}) Test Variable"
+      
+      if setters.include?(attr)
+        it "updates settable attribute #{attr}" do
+          @test_obj.update(attr => test_variable)
+          @test_obj.send(attr).should eql test_variable
+        end
+      else
+        it "does update non-settable #{attr}" do
+          expect { @test_obj.update(attr => test_variable) }.to raise_exception
+        end
+      end
+    end
+  end
+    
+  describe 'to_hash' do
+    before :each do
+      @test_label       = 'Test Label'
+      @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+    end
+    
+    it 'returns a hash of all_attributes when no argument is given' do
+      @test_obj.to_hash().keys.should eql @test_obj.all_attributes
+    end
+
+    # For this test looping over all_attributes is really overkill
+    # So let's pick the variables that have defaults in the constructor and call it good.
+    it 'returns correct values in the hash' do
+      targets = %w(BackupConfigurationName MachineAgentId Inclusions Exclusions)
+      hash_data = @test_obj.to_hash(targets)
+      targets.each do |attr|
+        hash_data[attr].should eql @test_obj.send(attr)
+      end
+    end
+  end
+    
 end
     
     
