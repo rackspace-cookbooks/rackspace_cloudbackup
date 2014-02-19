@@ -29,6 +29,8 @@ module Opscode
           @label = label
 
           # Define getters
+          # This must contain all the API values supported by the class, if values are omitted compare? will nto function correctly
+          # Also assumed to be complete by tests.
           @all_attributes = %w(Inclusions Exclusions BackupConfigurationId MachineAgentId MachineName Datacenter Flavor IsEncrypted
                                EncryptionKey BackupConfigurationName IsActive IsDeleted VersionRetention BackupConfigurationScheduleId
                                MissedBackupActionId Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval
@@ -38,6 +40,8 @@ module Opscode
             self.class.send(:define_method, arg, proc { instance_variable_get("@#{arg}") })
           end
 
+          # Many attributes are read only and will result in an API error if a change is made to them
+          # Only define setters for settible attributes
           @settable_attributes = %w(Inclusions Exclusions MachineAgentId IsActive VersionRetention
                                     Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval TimeZoneId
                                     NotifyRecipients NotifySuccess NotifyFailure BackupPrescript BackupPostscript MissedBackupActionId)
