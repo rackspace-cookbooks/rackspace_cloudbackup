@@ -22,7 +22,9 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuBackupWrapper
-        def initialize(api_username, api_key, region, backup_api_label)
+        def initialize(api_username, api_key, region, backup_api_label, mock = false)
+          @mocking = mock
+
           # Load the agent config
           agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/etc/driveclient/bootstrap.json')
           fail 'Failed to read agent configuration' if agent_config.nil?
@@ -40,7 +42,8 @@ module Opscode
           # rubocop:enable ClassVars
 
           if api_obj.nil?
-            api_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(api_username, api_key, region, agent_config['AgentId'])
+            tgt_class = @mocking ? Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper : Opscode::Rackspace::CloudBackup::RcbuApiWrapper
+            api_obj = tgt_class.new(api_username, api_key, region, agent_config['AgentId'])
             Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object")
           else
             Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")
@@ -123,6 +126,15 @@ module Opscode
           @backup_obj.BackupConfigurationId
         end
           
+        # mock?: Return if we are mocked
+        # PRE: None
+        # POST: None
+        # RETURN VALUE: Boolean
+        def mock?
+          return @mocking
+        end
+
+        # No mock! method: @mocking is consumed in the constructor.
       end
     end
   end
