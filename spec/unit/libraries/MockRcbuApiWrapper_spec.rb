@@ -147,5 +147,15 @@ describe 'MockRcbuApiWrapper' do
       @test_obj.update_config(@test_obj.mock_configurations[0]['BackupConfigurationId'], new_data)
       @test_obj.mock_configurations[0].should eql new_data
     end
+
+    it 'rejects changing the BackupConfigurationId' do
+      @test_obj.mock_configurations.should eql []
+      initial_data = { 'name' => 'dataI', 'key1' => 'dataI-1', 'key2' => 'dataI-2' }
+      @test_obj.create_config(initial_data)
+      
+      new_data = { 'name' => 'dataN', 'key1' => 'dataN-1', 'key2' => 'dataN-2', 'BackupConfigurationId' => 'Bad Test ID' }
+      expect { @test_obj.update_config(@test_obj.mock_configurations[0]['BackupConfigurationId'], new_data) }.to raise_exception
+    end
+      
   end
 end    

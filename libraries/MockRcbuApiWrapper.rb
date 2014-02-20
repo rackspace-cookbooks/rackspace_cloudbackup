@@ -57,10 +57,16 @@ module Opscode
         end
 
         def update_config(config_id, config)
+          if config.key? 'BackupConfigurationId'
+            fail 'Cannot change BackupConfigurationId' unless config['BackupConfigurationId'] == config_id
+          end
+
           # We need to get the index to change the parent data structure, so not using .find
           @mock_configurations.length.times do |i|
             if @mock_configurations[i]['BackupConfigurationId'] == config_id
               @mock_configurations[i] = config
+              # Ensure the BackupConfigurationId isn't accidentially changed
+              @mock_configurations[i]['BackupConfigurationId'] = config_id
               return
             end
           end
