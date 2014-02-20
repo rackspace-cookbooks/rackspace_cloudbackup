@@ -45,7 +45,15 @@ module Opscode
         # def locate_existing_config(label)
 
         def create_config(config)
-          @mock_configurations.push(config)
+          # There are more fields the user should not set, but we're not checking for them at this time.
+          fail 'BackupConfigurationId should not be set by the user' unless config['BackupConfigurationId'].nil?
+
+          # Dup the hash so we don't modify the parent
+          my_config = config.dup
+
+          # Add fields populated by the API
+          my_config['BackupConfigurationId'] = _random_id
+          @mock_configurations.push(my_config)
         end
 
         def update_config(config_id, config)
@@ -58,6 +66,12 @@ module Opscode
           end
             
           fail 'Unable to locate BackupConfigurationId #{config_id} for update'            
+        end
+
+        # Helper for testing
+        def _random_id
+          src = [('a'..'z'), ('A'..'Z')].map { |i| i.to_a }.flatten
+          return (0...10).map { src[rand(src.length)] }.join
         end
       end
     end
