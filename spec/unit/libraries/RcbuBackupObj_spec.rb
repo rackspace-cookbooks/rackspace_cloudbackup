@@ -220,6 +220,8 @@ describe 'RcbuBackupObj' do
     loadable_attrs = RcbuBackupObjTestHelpers.get_all_attributes
     # Pop BackupConfigurationName, it's the search key and as such must match label; can't change it
     loadable_attrs.delete('BackupConfigurationName')
+    # Pop BackupConfigurationId, it's set by the mocked API and requires a unique test
+    loadable_attrs.delete('BackupConfigurationId')
     loadable_attrs.each do |attr|
       it "loads #{attr} into a class instance variable" do
         test_value = "Test #{attr} Value"
@@ -229,6 +231,13 @@ describe 'RcbuBackupObj' do
         @test_obj.load
         @test_obj.send(attr).should eql test_value
       end
+    end
+
+    it "loads BackupConfigurationId into a class instance variable" do
+      @test_api_wrapper.create_config( 'BackupConfigurationName' => @test_label )
+      @test_api_wrapper.mock_configurations.length.should eql 1
+      @test_obj.load
+      @test_obj.BackupConfigurationId.should eql @test_api_wrapper.mock_configurations[0]['BackupConfigurationId']
     end
     
     # Spirit: Testing for code fragility / future breakage from API updates
@@ -287,7 +296,47 @@ describe 'RcbuBackupObj' do
       end
     end
   end
-    
+
+  describe 'save' do
+    before :each do
+      @test_label       = 'Test Label'
+      @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+      fail 'mock data present' if @test_api_wrapper.mock_configurations != []
+    end
+
+    it 'creates new configurations' do
+      fail 'BackupConfigurationId set' unless @test_obj.BackupConfigurationId.nil?
+      @test_obj.save
+      @test_api_wrapper.mock_configurations.length.should eql 1
+    end
+
+    it 'loads API details after creating new configurations' do
+      fail 'BackupConfigurationId set' unless @test_obj.BackupConfigurationId.nil?
+      @test_obj.save
+      @test_api_wrapper.mock_configurations.length.should eql 1
+      @test_obj.BackupConfigurationId.should_not eql nil
+    end
+
+    it 'updates existing configurations' do
+      fail 'BackupConfigurationId set' unless @test_obj.BackupConfigurationId.nil?
+      @test_obj.save
+      @test_api_wrapper.mock_configurations.length.should eql 1
+      @test_obj.BackupConfigurationId.should_not eql nil
+      
+      # Deeply hooking into the underlying mock object to test this.
+      orig_mock_api_data = @test_api_wrapper.mock_configurations[0].dup
+
+      @test_obj.MachineAgentId = "Test Machine Agent ID"
+      @test_obj.NotifySuccess  = "Test Notify Value"
+
+      @test_obj.save
+      @test_api_wrapper.mock_configurations.length.should eql 1
+      @test_obj.BackupConfigurationId.should eql orig_mock_api_data['BackupConfigurationId']
+      orig_mock_api_data['BackupConfigurationId'].should eql @test_api_wrapper.mock_configurations[0]['BackupConfigurationId']
+      orig_mock_api_data.should_not eql @test_api_wrapper.mock_configurations[0]
+    end
+  end
 end
     
     
