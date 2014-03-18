@@ -120,7 +120,7 @@ def create_backup_plan(args, token, machine_info):
         if status is not 200:
             tries -= 1
             if tries is 0:
-                open('/etc/driveclient/failed-setup-backups.json', 'a+b').write(json.dump(jsonreq))
+                json.dump(jsonreq, open('/etc/driveclient/failed-setup-backups.json', 'a+b'))
                 sysexit(3)
         else:
             try:
