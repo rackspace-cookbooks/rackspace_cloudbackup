@@ -19,13 +19,18 @@
 #
 # Originally from https://github.com/customink-webops/hostsfile/blob/master/spec/spec_helper.rb
 
+# This file is seperate from rspec_helper as chefspec triggers berkshelf which calls out to the web,
+# breaking API mock tests.
+
 require 'chefspec'
 require 'chefspec/berkshelf'
 
 require_relative 'supported_platforms.rb'
 
+# Sets common RSpec.configure option
+require_relative 'rspec_helper.rb'
+
+# ChefSpec specific options
 RSpec.configure do |c|
-  c.filter_run(focus: true)
-  c.run_all_when_everything_filtered = true
   c.log_level = :warn
 end

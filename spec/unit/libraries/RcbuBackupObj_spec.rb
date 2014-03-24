@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'spec_helper'
+require 'rspec_helper'
 
 require_relative '../../../libraries/RcbuBackupObj.rb'
 require_relative '../../../libraries/MockRcbuApiWrapper.rb'

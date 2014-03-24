@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'spec_helper'
+require 'rspec_helper'
 require 'webmock/rspec'
 
 require_relative '../../../libraries/RcbuApiWrapper.rb'
