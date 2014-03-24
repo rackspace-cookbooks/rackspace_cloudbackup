@@ -15,12 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'chefspec_helper'
-
-require_relative '../../../libraries/register_agent_hwrp.rb'
-require_relative 'test_helpers.rb'
 
 module RegisterAgentHwrpSpecHelpers
+  def initialize_tests
+    # This is required here as ChefSpec interferes with WebMocks, breaking tests
+    # rspec does not fully reinitialize the global namespace, so anything declated outside of tests
+    # shared between all tests.
+    require 'chefspec_helper'
+    require_relative '../../../libraries/register_agent_hwrp.rb'
+    require_relative 'test_helpers.rb'
+  end
+  module_function :initialize_tests
+
   def common_new_resource_data
     return CloudBackupTestHelpers::TestResourceData.new({
                                                           name:                 'Test Name',
@@ -57,6 +63,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
   describe 'resource' do
     describe '#initialize' do
       before :each do
+        RegisterAgentHwrpSpecHelpers.initialize_tests
         @test_resource = Chef::Resource::RackspaceCloudbackupRegisterAgent.new('Test Label')
       end
 
@@ -90,6 +97,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
     }.each do |attr, value|
       describe "##{attr}" do
         before :all do
+          RegisterAgentHwrpSpecHelpers.initialize_tests
           @test_resource = Chef::Resource::RackspaceCloudbackupRegisterAgent.new('Test Label')
         end
 
@@ -109,6 +117,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
   describe 'provider' do
     describe 'load_current_resource' do
       before :each do
+        RegisterAgentHwrpSpecHelpers.initialize_tests
         @new_resource = RegisterAgentHwrpSpecHelpers.common_new_resource_data
         @test_obj = RegisterAgentHwrpSpecHelpers.common_test_obj(@new_resource)
         Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).with('Test Bootstrap File Path') { CloudBackupTestHelpers.valid_bootstrap_data }
@@ -144,6 +153,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
 
     describe 'action_register' do
       before :each do
+        RegisterAgentHwrpSpecHelpers.initialize_tests
         @new_resource = RegisterAgentHwrpSpecHelpers.common_new_resource_data
         @test_obj = RegisterAgentHwrpSpecHelpers.common_test_obj(@new_resource)
         stub_const('Mixlib::ShellOut', RegisterAgentHwrpSpecHelpers::MixLibShellOutMock)
@@ -178,6 +188,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
 
     describe 'action_nothing' do
       before :each do
+        RegisterAgentHwrpSpecHelpers.initialize_tests
         @test_obj = RegisterAgentHwrpSpecHelpers.common_test_obj
       end
 

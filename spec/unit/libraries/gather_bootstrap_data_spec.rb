@@ -15,11 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'chefspec_helper'
 require 'tempfile'
 require 'json'
-
-require_relative '../../../libraries/gather_bootstrap_data.rb'
 
 module GatherBootstrapDataTestHelpers
   class DummyBootstrapFile
@@ -45,6 +42,12 @@ module GatherBootstrapDataTestHelpers
 end
 
 describe 'gather_bootstrap_data' do
+  before :each do
+    # ChefSpec conflicts with rspec which breaks WebMock tests.  Require ChefSpec in test scope.
+    require 'chefspec_helper'
+    require_relative '../../../libraries/gather_bootstrap_data.rb'
+  end
+    
   it 'returns nil when the target file does not exist' do
     Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/dev/null/this/should/be/sufficiently/bogus').should eql nil
   end
