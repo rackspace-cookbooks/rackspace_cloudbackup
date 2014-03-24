@@ -22,11 +22,11 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuBackupWrapper
-        def initialize(api_username, api_key, region, backup_api_label, mock = false)
+        def initialize(api_username, api_key, region, backup_api_label, mock = false, rcbu_bootstrap_file = '/etc/driveclient/bootstrap.json')
           @mocking = mock
 
           # Load the agent config
-          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/etc/driveclient/bootstrap.json')
+          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data(rcbu_bootstrap_file)
           fail 'Failed to read agent configuration' if agent_config.nil?
           fail 'Failed to read agent ID from config' if agent_config['AgentId'].nil?
 
