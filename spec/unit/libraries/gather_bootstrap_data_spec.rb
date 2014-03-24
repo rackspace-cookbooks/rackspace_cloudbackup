@@ -15,13 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'spec_helper'
+require 'chefspec_helper'
 require 'tempfile'
 require 'json'
 
 require_relative '../../../libraries/gather_bootstrap_data.rb'
-
-include Opscode::Rackspace::CloudBackup
 
 module GatherBootstrapDataTestHelpers
   class DummyBootstrapFile
