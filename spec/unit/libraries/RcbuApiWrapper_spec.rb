@@ -214,9 +214,9 @@ describe 'RcbuApiWrapper' do
       @test_obj.agent_id.should eql @test_data[:agent_id]
     end
 
-    it 'sets the api_url class instance variable' do
+    it 'sets the identity_api_url class instance variable' do
       @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
-      @test_obj.api_url.should eql @test_data[:api_url]
+      @test_obj.identity_api_url.should eql @test_data[:api_url]
     end
 
     it 'sets the api token class instance variable' do

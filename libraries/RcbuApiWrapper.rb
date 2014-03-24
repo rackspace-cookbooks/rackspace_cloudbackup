@@ -22,11 +22,11 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuApiWrapper
-        attr_accessor :token, :rcbu_api_url, :agent_id, :configurations, :api_url
+        attr_accessor :token, :rcbu_api_url, :agent_id, :configurations, :identity_api_url
 
-        def initialize(api_username, api_key, region, agent_id, api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
+        def initialize(api_username, api_key, region, agent_id, identity_api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
           @agent_id = agent_id
-          @api_url = api_url
+          @identity_api_url = identity_api_url
 
           identity = _identity_data(api_username, api_key)
           @token = identity['access']['token']['id']
@@ -50,7 +50,7 @@ module Opscode
             }
           }
           
-          return JSON.parse(RestClient.post(@api_url, req.to_json,  content_type: :json, accept: :json))
+          return JSON.parse(RestClient.post(@identity_api_url, req.to_json,  content_type: :json, accept: :json))
         end
 
         def lookup_configurations
