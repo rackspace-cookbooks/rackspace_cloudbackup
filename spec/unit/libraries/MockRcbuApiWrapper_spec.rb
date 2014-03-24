@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'spec_helper'
+require 'rspec_helper'
 require 'webmock/rspec'
 
 require_relative '../../../libraries/MockRcbuApiWrapper.rb'
@@ -47,8 +47,8 @@ describe 'MockRcbuApiWrapper' do
       @test_obj.agent_id.should eql @test_data[:agent_id]
     end
 
-    it 'sets the api_url class instance variable' do
-      @test_obj.api_url.should eql @test_data[:api_url]
+    it 'sets the identity_api_url class instance variable' do
+      @test_obj.identity_api_url.should eql @test_data[:api_url]
     end
 
     it 'sets the api token class instance variable' do

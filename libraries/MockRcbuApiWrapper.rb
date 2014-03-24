@@ -23,9 +23,9 @@ module Opscode
       class MockRcbuApiWrapper < RcbuApiWrapper
         attr_accessor :mock_configurations
 
-        def initialize(api_username, api_key, region, agent_id, api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
+        def initialize(api_username, api_key, region, agent_id, identity_api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
           @agent_id     = agent_id
-          @api_url      = api_url
+          @identity_api_url      = identity_api_url
           @token        = 'MockRcbuApiWrapper Test Token'
           @rcbu_api_url = 'https://MockRcbuApiWrapper.dummy.api.local/'
 
