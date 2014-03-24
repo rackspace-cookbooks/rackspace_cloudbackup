@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-require 'spec_helper'
+require 'chefspec_helper'
 
 require_relative '../../../libraries/register_agent_hwrp.rb'
 require_relative 'test_helpers.rb'
