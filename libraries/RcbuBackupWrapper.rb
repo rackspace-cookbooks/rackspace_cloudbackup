@@ -22,35 +22,14 @@ module Opscode
   module Rackspace
     module CloudBackup
       class RcbuBackupWrapper
+        attr_accessor :mocking, :agent_config, :backup_obj, :direct_name_map
+
         def initialize(api_username, api_key, region, backup_api_label, mock = false, rcbu_bootstrap_file = '/etc/driveclient/bootstrap.json')
           @mocking = mock
-
-          # Load the agent config
-          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data(rcbu_bootstrap_file)
-          fail 'Failed to read agent configuration' if agent_config.nil?
-          fail 'Failed to read agent ID from config' if agent_config['AgentId'].nil?
-
-          # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
-          # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized
-          #    across different class instances.
-          # Basically we're in a corner case where class variables are called for.
-          # rubocop:disable ClassVars
-          unless defined? @@api_obj_cache
-            @@api_obj_cache = Opscode::Rackspace::CloudBackup::RcbuCache.new(4)
-          end
-          api_obj = @@api_obj_cache.get(api_username, api_key, region, agent_config['AgentId'])
-          # rubocop:enable ClassVars
-
-          if api_obj.nil?
-            tgt_class = @mocking ? Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper : Opscode::Rackspace::CloudBackup::RcbuApiWrapper
-            api_obj = tgt_class.new(api_username, api_key, region, agent_config['AgentId'])
-            Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object")
-          else
-            Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")
-          end
-
-          @backup_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(backup_api_label, api_obj)
-
+          
+          @agent_config = _load_backup_config(rcbu_bootstrap_file)
+          @backup_obj = _get_backup_obj(api_username, api_key, region)
+          
           # Mapping of the HWRP option names to the BackupObj (API) names that map directly (no mods)
           @direct_name_map = {
             is_active:         'IsActive',
@@ -69,7 +48,39 @@ module Opscode
             backup_postscript: 'BackupPostscript',
             missed_backup_action_id: 'MissedBackupActionId'
           }
-            
+        end
+        
+        # This is a static method to ease testing as it is called by the constructor
+        def self._load_backup_config(rcbu_bootstrap_file)
+          # Load the agent config
+          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data(rcbu_bootstrap_file)
+          fail 'Failed to read agent configuration' if agent_config.nil?
+          fail 'Failed to read agent ID from config' if agent_config['AgentId'].nil?
+          return agent_config
+        end
+
+        def _get_backup_obj(api_username, api_key, region)
+          # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
+          # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized
+          #    across different class instances.
+          # Basically we're in a corner case where class variables are called for.
+          # rubocop:disable ClassVars
+          unless defined? @@api_obj_cache
+            @@api_obj_cache = Opscode::Rackspace::CloudBackup::RcbuCache.new(4)
+          end
+          api_obj = @@api_obj_cache.get(api_username, api_key, region, @agent_config['AgentId'])
+          # rubocop:enable ClassVars
+          
+          if api_obj.nil?
+            tgt_class = @mocking ? Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper : Opscode::Rackspace::CloudBackup::RcbuApiWrapper
+            api_obj = tgt_class.new(api_username, api_key, region, @agent_config['AgentId'])
+            @@api_obj_cache.save(api_obj, api_username, api_key, region, @agent_config['AgentId']) # rubocop:disable ClassVars
+            Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object")
+          else
+            Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")
+          end
+          
+          return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(backup_api_label, api_obj)
         end
 
         def _path_mapper(data_array, target)
@@ -125,16 +136,6 @@ module Opscode
         def backup_id
           @backup_obj.BackupConfigurationId
         end
-          
-        # mock?: Return if we are mocked
-        # PRE: None
-        # POST: None
-        # RETURN VALUE: Boolean
-        def mock?
-          return @mocking
-        end
-
-        # No mock! method: @mocking is consumed in the constructor.
       end
     end
   end
