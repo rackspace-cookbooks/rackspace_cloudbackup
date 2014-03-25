@@ -15,9 +15,6 @@
 # limitations under the License.
 #
 
-require 'json'
-require 'rest_client'
-
 module Opscode
   module Rackspace
     module CloudBackup
