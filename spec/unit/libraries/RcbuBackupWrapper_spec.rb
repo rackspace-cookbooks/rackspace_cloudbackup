@@ -38,6 +38,16 @@ module RcbuBackupWrapperTestHelpers
     return "STUB: ARGS: #{api_username}, #{api_key}, #{region}"
   end
   module_function :get_backup_obj_stub
+  
+  class RcbuApiWrapperStub
+    attr_accessor :api_username, :api_key, :region, :agent_id
+    def initialize(api_username, api_key, region, agent_id)
+      @api_username = api_username
+      @api_key = api_key
+      @region = region
+      @agent_id = agent_id
+    end
+  end      
 end
 
 describe 'RcbuBackupWrapper' do
@@ -93,4 +103,79 @@ describe 'RcbuBackupWrapper' do
     end
   end
 
+  describe '_get_api_obj' do
+    before :each do
+      # This method calls Chef debug prints
+      # Include ChefSpec here to avoid colissions with WebMock
+      require 'chefspec_helper'
+
+      # Stub _load_backup_config and _get_backup_obj so the constructor loads smoothly
+      Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.any_instance.stub(:_load_backup_config) do |arg|
+        RcbuBackupWrapperTestHelpers.load_backup_config_stub(arg)
+      end
+
+      Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.any_instance.stub(:_get_backup_obj) do |arg1, arg2, arg3|
+        RcbuBackupWrapperTestHelpers.get_backup_obj_stub(arg1, arg2, arg3)
+      end
+    end
+    
+    it 'returns a Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper class when mocking is true' do
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
+      test_obj.mocking.should eql true
+      test_obj._get_api_obj('Mock Test Username', 'Test Key', 'Test Region').should be_an_instance_of Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper
+    end
+
+    it 'returns a Opscode::Rackspace::CloudBackup::RcbuApiWrapper class when mocking is false' do
+      # Stub out the Opscode::Rackspace::CloudBackup::RcbuApiWrapper class as we don't want to actually open an API connection.
+      stub_const('Opscode::Rackspace::CloudBackup::RcbuApiWrapper', RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub)
+
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', false, 'Test Bootstrap File')
+      test_obj.mocking.should eql false
+
+      test_obj._get_api_obj('API Test Username', 'Test Key', 'Test Region').should be_an_instance_of RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub
+    end
+
+    it 'passes proper variables to Opscode::Rackspace::CloudBackup::RcbuApiWrapper' do
+      # Use our stub class to check the variables
+      stub_const('Opscode::Rackspace::CloudBackup::RcbuApiWrapper', RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub)
+
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', false, 'Test Bootstrap File')
+      test_obj.mocking.should eql false
+
+      # rspec doesn't reinitialize class variables, so use a unique username to avoid a cache hit from previous tests.
+      api_obj = test_obj._get_api_obj('Variable Test Username', 'Variable Test Key', 'Variable Test Region')
+      api_obj.should be_an_instance_of RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub
+      
+      api_obj.api_username.should eql 'Variable Test Username'
+      api_obj.api_key.should eql 'Variable Test Key'
+      api_obj.region.should eql 'Variable Test Region'
+      api_obj.agent_id.should eql RcbuBackupWrapperTestHelpers.dummy_bootstrap_data['AgentId']
+    end      
+
+    it 'returns cached values on cache hit' do
+      # Utilize Ruby class object_ids for verifying cache hits
+      # http://ruby-doc.org/core-2.1.1/Object.html#method-i-object_id
+      
+      # Stub out the Opscode::Rackspace::CloudBackup::RcbuApiWrapper class as we don't want to actually open an API connection.
+      stub_const('Opscode::Rackspace::CloudBackup::RcbuApiWrapper', RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub)
+
+      test_obj_1 = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', false, 'Test Bootstrap File')
+      test_obj_1.mocking.should eql false
+      api_obj_1 = test_obj_1._get_api_obj('Cache Test Username', 'Cache Test Key', 'Cache Test Region')
+
+      test_obj_2 = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', false, 'Test Bootstrap File')
+      test_obj_2.mocking.should eql false
+      api_obj_2 = test_obj_2._get_api_obj('Cache Test Username', 'Cache Test Key', 'Cache Test Region')
+      
+      # The test objects must be different
+      test_obj_1.object_id.should_not eql test_obj_2.object_id
+      
+      # The API Objects should be the same
+      api_obj_1.object_id.should eql api_obj_2.object_id
+    end
+  end
+    
+  describe '_get_backup_obj' do
+  end    
+  
 end

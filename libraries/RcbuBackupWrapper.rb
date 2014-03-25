@@ -15,8 +15,9 @@
 #
 
 require_relative 'RcbuApiWrapper.rb'
+require_relative 'MockRcbuApiWrapper.rb'
 require_relative 'RcbuBackupObj.rb'
-require_relative 'RcbuBackupWrapper.rb'
+require_relative 'RcbuCache.rb'
 
 module Opscode
   module Rackspace
@@ -59,7 +60,7 @@ module Opscode
           return agent_config
         end
 
-        def _get_backup_obj(api_username, api_key, region)
+        def _get_api_obj(api_username, api_key, region)
           # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
           # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized
           #    across different class instances.
@@ -70,7 +71,7 @@ module Opscode
           end
           api_obj = @@api_obj_cache.get(api_username, api_key, region, @agent_config['AgentId'])
           # rubocop:enable ClassVars
-          
+
           if api_obj.nil?
             tgt_class = @mocking ? Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper : Opscode::Rackspace::CloudBackup::RcbuApiWrapper
             api_obj = tgt_class.new(api_username, api_key, region, @agent_config['AgentId'])
@@ -79,7 +80,12 @@ module Opscode
           else
             Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")
           end
-          
+
+          return api_obj
+        end
+
+        def _get_backup_obj(api_username, api_key, region)
+          api_obj = _get_api_obj(api_username, api_key, region)
           return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(backup_api_label, api_obj)
         end
 
