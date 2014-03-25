@@ -38,7 +38,8 @@ module RcbuBackupWrapperTestHelpers
     return "STUB: ARGS: #{api_username}, #{api_key}, #{region}"
   end
   module_function :get_backup_obj_stub
-  
+
+  # This is a very simple stub class for testing mock/non-mock behavior
   class RcbuApiWrapperStub
     attr_accessor :api_username, :api_key, :region, :agent_id
     def initialize(api_username, api_key, region, agent_id)
@@ -47,7 +48,7 @@ module RcbuBackupWrapperTestHelpers
       @region = region
       @agent_id = agent_id
     end
-  end      
+  end
 end
 
 describe 'RcbuBackupWrapper' do
@@ -176,6 +177,48 @@ describe 'RcbuBackupWrapper' do
   end
     
   describe '_get_backup_obj' do
+    before :each do
+      # _get_api_obj method calls Chef debug prints and it isn't worth stubbing
+      # Include ChefSpec here to avoid colissions with WebMock
+      require 'chefspec_helper'
+
+      # Stub _load_backup_config and _get_backup_obj so the constructor loads smoothly
+      Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.any_instance.stub(:_load_backup_config) do |arg|
+        RcbuBackupWrapperTestHelpers.load_backup_config_stub(arg)
+      end
+    end
+
+    it 'returns a Opscode::Rackspace::CloudBackup::RcbuBackupObj object' do
+      # Initialize test_obj in the test.
+      # The constructor will call _get_backup_obj so this may barf if _get_backup_obj is b0rked.
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
+      test_obj.mocking.should eql true
+
+      test_obj._get_backup_obj('Test Username', 'Test Key', 'Test Region', 'Test Label').should  be_an_instance_of Opscode::Rackspace::CloudBackup::RcbuBackupObj
+    end
+    
+    it 'passes backup_api_label into Opscode::Rackspace::CloudBackup::RcbuBackupObj' do
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
+      test_obj.mocking.should eql true
+      backup_obj = test_obj._get_backup_obj('Test Username', 'Test Key', 'Test Region', '_get_backup_obj Label Test Label')
+      backup_obj.label.should eql '_get_backup_obj Label Test Label'
+    end
+
+    it 'passes in the api_obj from _get_api_obj' do
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
+      test_obj.mocking.should eql true
+      backup_obj = test_obj._get_backup_obj('_get_backup_obj api_obj Test Username', '_get_backup_obj api_obj Test Key', '_get_backup_obj api_obj Test Region',
+                                            '_get_backup_obj Label Test Label')
+      
+      # Leverage the cache to get the same object
+      # This test may fail if _get_api_obj() isn't caching
+      api_obj = test_obj._get_api_obj('_get_backup_obj api_obj Test Username', '_get_backup_obj api_obj Test Key', '_get_backup_obj api_obj Test Region')
+      backup_obj.api_wrapper.should eql api_obj
+    end   
   end    
-  
+
+  #
+  # INCOMPLETE: METHOD TESTS MISSING
+  #
+
 end

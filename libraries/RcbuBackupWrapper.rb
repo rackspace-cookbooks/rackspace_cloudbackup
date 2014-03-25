@@ -29,7 +29,8 @@ module Opscode
           @mocking = mock
           
           @agent_config = _load_backup_config(rcbu_bootstrap_file)
-          @backup_obj = _get_backup_obj(api_username, api_key, region)
+                                        # TODO: Should these arguments just be class variables?
+          @backup_obj = _get_backup_obj(api_username, api_key, region, backup_api_label)
           
           # Mapping of the HWRP option names to the BackupObj (API) names that map directly (no mods)
           @direct_name_map = {
@@ -84,7 +85,7 @@ module Opscode
           return api_obj
         end
 
-        def _get_backup_obj(api_username, api_key, region)
+        def _get_backup_obj(api_username, api_key, region, backup_api_label)
           api_obj = _get_api_obj(api_username, api_key, region)
           return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(backup_api_label, api_obj)
         end
