@@ -18,6 +18,7 @@ require_relative 'RcbuApiWrapper.rb'
 require_relative 'MockRcbuApiWrapper.rb'
 require_relative 'RcbuBackupObj.rb'
 require_relative 'RcbuCache.rb'
+require_relative 'gather_bootstrap_data.rb'
 
 module Opscode
   module Rackspace
@@ -28,12 +29,31 @@ module Opscode
         def initialize(api_username, api_key, region, backup_api_label, mock = false, rcbu_bootstrap_file = '/etc/driveclient/bootstrap.json')
           @mocking = mock
           
-          @agent_config = _load_backup_config(rcbu_bootstrap_file)
+          @agent_config = self.class._load_backup_config(rcbu_bootstrap_file)
                                         # TODO: Should these arguments just be class variables?
           @backup_obj = _get_backup_obj(api_username, api_key, region, backup_api_label)
           
           # Mapping of the HWRP option names to the BackupObj (API) names that map directly (no mods)
-          @direct_name_map = {
+          @direct_name_map = self.class._default_direct_name_map
+        end
+        
+        #
+        # Class methods
+        #
+
+        # Class methods are used to ease testing
+
+        def self._load_backup_config(rcbu_bootstrap_file)
+          # Load the agent config
+          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data(rcbu_bootstrap_file)
+          fail 'Failed to read agent configuration' if agent_config.nil?
+          fail 'Failed to read agent ID from config' if agent_config['AgentId'].nil?
+          return agent_config
+        end
+
+        # This is a static method to enable testing
+        def self._default_direct_name_map
+          return {
             is_active:         'IsActive',
             version_retention: 'VersionRetention',
             frequency:         'Frequency',
@@ -51,16 +71,25 @@ module Opscode
             missed_backup_action_id: 'MissedBackupActionId'
           }
         end
-        
-        # This is a static method to ease testing as it is called by the constructor
-        def self._load_backup_config(rcbu_bootstrap_file)
-          # Load the agent config
-          agent_config = Opscode::Rackspace::CloudBackup.gather_bootstrap_data(rcbu_bootstrap_file)
-          fail 'Failed to read agent configuration' if agent_config.nil?
-          fail 'Failed to read agent ID from config' if agent_config['AgentId'].nil?
-          return agent_config
+
+        # This is a static method to ease testing
+        def self._path_mapper(data_array, target)
+          data_array.each do |dir|
+            api_dir = target.find { |i| i['FilePath'] == dir }
+            if api_dir.nil?
+              # We assume all the arguments are directories
+              target.push('FilePath' => dir, 'FileItemType' => 'Folder')
+            else
+              # Don't waste the cycle checking this, either it is wrong and needs to be set or this will have no effect
+              api_dir['FileItemType'] = 'Folder'
+            end
+          end
         end
 
+        #
+        # Instance Methods
+        #
+        
         def _get_api_obj(api_username, api_key, region)
           # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
           # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized
@@ -81,28 +110,15 @@ module Opscode
           else
             Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")
           end
-
+          
           return api_obj
         end
-
+        
         def _get_backup_obj(api_username, api_key, region, backup_api_label)
           api_obj = _get_api_obj(api_username, api_key, region)
           return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(backup_api_label, api_obj)
         end
-
-        def _path_mapper(data_array, target)
-          data_array.each do |dir|
-            api_dir = target.find { |i| i['FilePath'] == dir }
-            if api_dir.nil?
-              # We assume all the arguments are directories
-              target.push(FilePath: dir, FileItemType: 'Folder')
-            else
-              # Don't waste the cycle checking this, either it is wrong and needs to be set or this will have no effect
-              api_dir[:FileItemType] = 'Folder'
-            end
-          end
-        end
-
+        
         def update(options = {})
           comp_obj = @backup_obj.dup
 
@@ -121,11 +137,11 @@ module Opscode
             case key
             when :inclusions
               # Inclusions is not quite 1-1 as the API adds extra fields and IDs, and requires a type value
-              _path_mapper(value, @backup_obj.Inclusions)
+              self.class._path_mapper(value, @backup_obj.Inclusions)
               
             when :exclusions
               # Exclusions is like Inclusions
-              _path_mapper(value, @backup_obj.Exclusions)
+              self.class._path_mapper(value, @backup_obj.Exclusions)
 
             else
               raise "Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.update: Unknown option #{key}"
