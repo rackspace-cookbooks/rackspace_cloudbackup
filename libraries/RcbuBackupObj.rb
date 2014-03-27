@@ -110,6 +110,24 @@ module Opscode
           return true
         end
 
+        def dup
+          def _deep_copy_array(tgt)
+            ret_val = []
+            tgt.each do |src|
+              ret_val.push(src.dup)
+            end
+            return ret_val
+          end
+
+          copy = super
+
+          # Inclusions and Exclusions are arrays and are shallow copied by dup
+          copy.Inclusions=_deep_copy_array(@Inclusions)
+          copy.Exclusions=_deep_copy_array(@Exclusions)
+
+          return copy
+        end
+
       end
     end
   end
