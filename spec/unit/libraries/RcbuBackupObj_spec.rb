@@ -34,7 +34,7 @@ module RcbuBackupObjTestHelpers
   # Required for compare? tests
   # (Otherwise we have a chicken/egg problem testing compare? and load)
   class UnlockedRcbuBackupObj < Opscode::Rackspace::CloudBackup::RcbuBackupObj
-    # THIS MUST NOT OVERLOAD ANY METHODS!  Doing so will invalidate tests!
+    # THIS MUST NOT OVERRIDE ANY METHODS!  Doing so will invalidate tests!
     def unlock_setters
       @all_attributes.each do |arg|
         self.class.send(:define_method, "#{arg}=", proc { |x| instance_variable_set("@#{arg}", x) })
@@ -173,13 +173,27 @@ describe 'RcbuBackupObj' do
       # Use the unlocked wrapper and unlock the setters
       @test_obj = RcbuBackupObjTestHelpers::UnlockedRcbuBackupObj.new(@test_label, @test_api_wrapper)
       @test_obj.unlock_setters
+
+      # Create a hash of test values
+      @test_values = {}
+      @test_differing_values = {}
+      # Create a default string for all values
+      @test_obj.all_attributes.each do |attr|
+        @test_values[attr] = "Test #{attr} Value"
+        @test_differing_values[attr] = "Test Duiffering #{attr} Value"
+      end
+      # Inclusions and Exclusions must be arrays of hashes
+      # They are handled differently by the .dup override to make a deep copy
+      @test_values['Inclusions'] = [{val: 'Test Includes Value 1'}, {val: 'Test Includes Value 2'}]
+      @test_differing_values['Inclusions'] = [{val: 'Test Differing Includes Value 1'}, {val: 'Test Includes Value 2'}]
+      @test_values['Exclusions'] = [{val: 'Test Excludes Value 1'}, {val: 'Test Excludes Value 2'}]
+      @test_differing_values['Inclusions'] = [{val: 'Test Differing Includes Value 1'}, {val: 'Test Includes Value 2'}]
     end
 
     it 'returns true when all attributes are the same' do
       @test_obj.all_attributes.each do |attr|
-        test_value = "Test #{attr} Value"
-        @test_obj.send("#{attr}=", test_value)
-        @test_obj.send(attr).should eql test_value
+        @test_obj.send("#{attr}=", @test_values[attr])
+        @test_obj.send(attr).should eql @test_values[attr]
       end
 
       comp_obj = @test_obj.dup
@@ -188,14 +202,13 @@ describe 'RcbuBackupObj' do
 
     RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
       it "returns false when #{attr} differ" do
-      @test_obj.all_attributes.each do |init_attr|
-        test_value = "Test #{init_attr} Value"
-          @test_obj.send("#{init_attr}=", test_value)
-          @test_obj.send(init_attr).should eql test_value
+        @test_obj.all_attributes.each do |init_attr|
+          @test_obj.send("#{init_attr}=", @test_values[init_attr])
+          @test_obj.send(init_attr).should eql @test_values[init_attr]
         end
- 
+        
         comp_obj = @test_obj.dup
-        comp_obj.send("#{attr}=", "Differing #{@test_obj.send(attr)}")
+        comp_obj.send("#{attr}=", @test_differing_values[attr])
         @test_obj.send(attr).should_not eql comp_obj.send(attr)
         @test_obj.compare?(comp_obj).should eql false
       end
@@ -337,6 +350,24 @@ describe 'RcbuBackupObj' do
       orig_mock_api_data.should_not eql @test_api_wrapper.mock_configurations[0]
     end
   end
+
+  describe 'dup' do
+    before :each do
+      @test_label       = 'Test Label'
+      @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
+      fail 'mock data present' if @test_api_wrapper.mock_configurations != []
+    end
+    
+    direct_attrs = RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
+      it "duplicates #{attr} value" do
+        copy = @test_obj.dup
+        copy.send(attr).should eql @test_obj.send(attr)
+      end
+    end
+
+    # TODO: INCOMPLETE
+  end    
 end
     
     
