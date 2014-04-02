@@ -67,10 +67,6 @@ class Chef
         set_or_return(:exclusions, arg, kind_of: Array)
       end
 
-#      def machine_agent_id(arg = nil)
-#        set_or_return(:machine_agent_id, arg, kind_of: String, required: true)
-#      end
-      
       def is_active(arg = nil)
         set_or_return(:is_active, arg, kind_of: [TrueClass, FalseClass])
       end
