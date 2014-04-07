@@ -37,9 +37,11 @@ class Chef
         # Set basic defaults
         @is_active = true
         @missed_backup_action_id = 1 # See http://docs.rackspace.com/rcbu/api/v1.0/rcbu-devguide/content/createConfig.html
-        @notify_success = false
-        @notify_failure = true
-        @time_zone_id   = 'UTC'
+        @notify_success          = false
+        @notify_failure          = true
+        @time_zone_id            = 'UTC'
+        @mock                    = false
+        @rcbu_bootstrap_file     = '/etc/driveclient/bootstrap.json'
       end
 
       def label(arg = nil)
@@ -127,6 +129,13 @@ class Chef
         set_or_return(:missed_backup_action_id, arg, kind_of: Integer)
       end             
 
+      def mock(arg = nil)
+        set_or_return(:mock, arg, kind_of: [TrueClass, FalseClass])
+      end
+      
+      def rcbu_bootstrap_file(arg = nil)
+        set_or_return(:rcbu_bootstrap_file, arg, kind_of: String)
+      end             
     end
   end
 end
@@ -139,7 +148,8 @@ class Chef
         @current_resource ||= Chef::Resource::RackspaceCloudbackupConfigureCloudBackup.new(new_resource.name)
         [:label, :rackspace_api_key, :rackspace_username, :rackspace_api_region, :inclusions, :exclusions, :is_active,
          :version_retention, :frequency, :start_time_hour, :start_time_minute, :start_time_am_pm, :day_of_week_id, :hour_interval,
-         :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript, :backup_postscript, :missed_backup_action_id
+         :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript, :backup_postscript, :missed_backup_action_id,
+         :mock, :rcbu_bootstrap_file
         ].each do |arg|
           @current_resource.send(arg, new_resource.send(arg))
         end
@@ -148,7 +158,10 @@ class Chef
         @current_resource.api_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(@current_resource.rackspace_username,
                                                                                            @current_resource.rackspace_api_key,
                                                                                            @current_resource.rackspace_api_region,
-                                                                                           @current_resource.label)
+                                                                                           @current_resource.label,
+                                                                                           @current_resource.mock,
+                                                                                           @current_resource.rcbu_bootstrap_file
+                                                                                           )
        
         @current_resource
       end
