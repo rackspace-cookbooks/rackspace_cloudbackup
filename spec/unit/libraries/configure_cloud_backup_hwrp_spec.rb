@@ -176,10 +176,121 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
       end
     end
 
-    #
-    # INCOMPLETE: NEED
-    # action_create
-    # action_create_if_missing
-    # action_nothing
+    describe 'action_create' do
+      before :each do
+        ConfigureCloudBackupHwrpSpecHelpers.initialize_tests
+        @new_resource = ConfigureCloudBackupHwrpSpecHelpers.common_new_resource_data
+        @new_resource.label = 'action_create test object'
+        @test_obj = ConfigureCloudBackupHwrpSpecHelpers.common_test_obj(@new_resource)
+        Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).with(@new_resource.rcbu_bootstrap_file) { CloudBackupTestHelpers.valid_bootstrap_data }
+        @test_obj.load_current_resource
+      end
+      
+      it 'returns true when the object is updated' do
+        @test_obj.new_resource.updated.should eql nil
+        @test_obj.action_create
+        @test_obj.new_resource.updated.should eql true
+      end
+
+      # Test the 'standard' options
+      [ :is_active, :version_retention, :frequency, :start_time_hour, :start_time_minute, :start_time_am_pm,
+        :day_of_week_id, :hour_interval, :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript,
+        :backup_postscript, :missed_backup_action_id ].each do |attr|
+        # Test methodology:  Rely on updated_by_last_action to know if it made a change
+        # Rely on the underlying tests to ensure @current_resource.api_obj.update to return true/false appropriately.
+
+        it "Updates the object with #{attr}" do
+          @test_obj.action_create
+
+          # Test that the underlying object was updated
+          @test_obj.current_resource.api_obj.backup_obj.send(
+                                                             Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._default_direct_name_map[attr]
+                                                             ).should eql @new_resource.send(attr)
+        end
+      end
+
+      # Test the special cases
+      { inclusions: { obj_attr: 'Inclusions', expected_value: [{"FilePath"=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:inclusions][:test_value][0], "FileItemType"=>"Folder"}]},
+        exclusions: { obj_attr: 'Exclusions', expected_value: [{"FilePath"=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:exclusions][:test_value][0], "FileItemType"=>"Folder"}]}
+      }.each do |attr, opt_hash|
+        it "Updates the object with #{attr}" do
+          @test_obj.action_create
+          
+          # Test that the underlying object was updated
+          @test_obj.current_resource.api_obj.backup_obj.send(opt_hash[:obj_attr]).should eql opt_hash[:expected_value]
+        end
+      end
+      
+      it 'returns false when the object is not updated' do
+        # Relying on persistant mocks here.
+        @test_obj.new_resource.updated.should eql nil
+        @test_obj.action_create
+        @test_obj.new_resource.updated.should eql false
+      end
+    end
+
+    describe 'action_create_if_missing' do
+      #
+      # NOTE: In the current implementation action_create_if_missing calls action_create to actually update the object
+      # Testing tests this implementation as it allows us to stub action_create, greatly simplifying the test coverage required.
+      #
+
+      before :each do
+        ConfigureCloudBackupHwrpSpecHelpers.initialize_tests
+        @new_resource = ConfigureCloudBackupHwrpSpecHelpers.common_new_resource_data
+        @new_resource.label = 'action_create_if_missing test object'
+        @test_obj = ConfigureCloudBackupHwrpSpecHelpers.common_test_obj(@new_resource)
+        Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).with(@new_resource.rcbu_bootstrap_file) { CloudBackupTestHelpers.valid_bootstrap_data }
+        @test_obj.load_current_resource
+      end
+
+      it 'calls action_create when BackupConfigurationId is nil' do
+        # Stubbing the action_create method is testing the implementation somewhat, but it eases testing this method tremendously.
+        @test_obj.stub(:action_create) do
+          # This is dirty, but functional
+          # Raise a specific exception we can catch in the test
+          # If the stub is called, we catch the exception, and we're good.
+          fail "EXPECTED ERROR: action_create called"
+        end
+
+        @test_obj.current_resource.api_obj.backup_obj.BackupConfigurationId.should eql nil
+        # Catch the exception thrown by the stub
+        # This is dirty, but makes the test so much easier
+        expect { @test_obj.action_create_if_missing }.to raise_error("EXPECTED ERROR: action_create called")
+      end
+        
+      
+      it 'returns false when BackupConfigurationId is not nil' do
+        @test_obj.new_resource.updated.should eql nil
+        # Call action_create to ensure BackupConfigurationId is populated
+        @test_obj.action_create
+
+        # This test should NOT invoke action_create
+        @test_obj.stub(:action_create) do
+          fail "ERROR: action_create called unexpectedly"
+        end
+
+        @test_obj.current_resource.api_obj.backup_obj.BackupConfigurationId.should_not eql nil
+        @test_obj.action_create_if_missing
+        @test_obj.new_resource.updated.should eql false
+      end
+    end
+
+    describe 'action_nothing' do
+      before :each do
+        ConfigureCloudBackupHwrpSpecHelpers.initialize_tests
+        @new_resource = ConfigureCloudBackupHwrpSpecHelpers.common_new_resource_data
+        @new_resource.label = 'action_nothing test object'
+        @test_obj = ConfigureCloudBackupHwrpSpecHelpers.common_test_obj(@new_resource)
+        Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).with(@new_resource.rcbu_bootstrap_file) { CloudBackupTestHelpers.valid_bootstrap_data }
+        @test_obj.load_current_resource
+      end
+      
+      it 'does nothing' do
+        @test_obj.new_resource.updated.should eql nil
+        @test_obj.action_nothing
+        @test_obj.new_resource.updated.should eql false
+      end
+    end  
   end    
 end

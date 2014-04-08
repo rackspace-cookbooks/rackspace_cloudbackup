@@ -191,7 +191,7 @@ class Chef
       end
 
       def action_create_if_missing
-        if @current_resource.api_obj.BackupConfigurationId.nil?
+        if @current_resource.api_obj.backup_obj.BackupConfigurationId.nil?
           action_create
         else
           new_resource.updated_by_last_action(false)
