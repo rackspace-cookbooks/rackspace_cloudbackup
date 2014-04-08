@@ -17,7 +17,7 @@
 
 # This helper file defines the platforms to test in ChefSpec
 
-def rackspace_cloudmonitoring_test_platforms
+def rackspace_cloudbackup_test_platforms
   return {
     ubuntu: %w(12.04),
     debian: %w(7.2), # Requires Fauxhai chicanery as https://github.com/customink/fauxhai/pull/60
