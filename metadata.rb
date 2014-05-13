@@ -9,6 +9,6 @@ version          '1.0.0'
 
 recipe           "rackspace-cloud-backup", "Installs and registers cloud backup"
 
-depends "rackspace_apt", "~> 3.0"
-depends "rackspace_yum", "~> 4.0"
+depends "apt", "~> 2.0"
+depends "yum", "~> 3.0"
 depends "ohai"
