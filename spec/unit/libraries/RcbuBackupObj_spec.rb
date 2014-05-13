@@ -76,37 +76,37 @@ describe 'RcbuBackupObj' do
        EncryptionKey BackupConfigurationName IsActive IsDeleted VersionRetention BackupConfigurationScheduleId
        MissedBackupActionId Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval
        TimeZoneId NextScheduledRunTime LastRunTime LastRunBackupReportId NotifyRecipients NotifySuccess
-       NotifyFailure BackupPrescript BackupPostscript).each do |attr|
-      it "contains #{attr} in the all_attributes class instance variable" do
-        @test_obj.all_attributes.include?(attr).should eql true
+       NotifyFailure BackupPrescript BackupPostscript).each do |attribute|
+      it "contains #{attribute} in the all_attributes class instance variable" do
+        @test_obj.all_attributes.include?(attribute).should eql true
       end
     end
 
     %w(Inclusions Exclusions MachineAgentId IsActive VersionRetention
        Frequency StartTimeHour StartTimeMinute StartTimeAmPm DayOfWeekId HourInterval TimeZoneId
-       NotifyRecipients NotifySuccess NotifyFailure BackupPrescript BackupPostscript MissedBackupActionId).each do |attr|
-      it "contains #{attr} in the settable_attributes class instance variable" do
-        @test_obj.settable_attributes.include?(attr).should eql true
+       NotifyRecipients NotifySuccess NotifyFailure BackupPrescript BackupPostscript MissedBackupActionId).each do |attribute|
+      it "contains #{attribute} in the settable_attributes class instance variable" do
+        @test_obj.settable_attributes.include?(attribute).should eql true
       end
     end
 
     setters = RcbuBackupObjTestHelpers.get_settable_attributes
-    RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
-      it "has a getter for #{attr}" do
+    RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+      it "has a getter for #{attribute}" do
         # *almost* all should return nil, but not all.  Banking on exceptions.
-        @test_obj.send(attr)
+        @test_obj.send(attribute)
       end
-    end
 
-    test_variable = "Setter(#{attr}) Test Variable"
-    if setters.include?(attr)
-      it "has a setter for #{attr}" do
-        @test_obj.send("#{attr}=", test_variable)
-        @test_obj.send(attr).should eql test_variable
-      end
-    else
-      it "does not have a setter for #{attr}" do
-        expect { @test_obj.send("#{attr}=", test_variable) }.to raise_exception
+      test_variable = "Setter(#{attribute}) Test Variable"
+      if setters.include?(attribute)
+        it "has a setter for #{attribute}" do
+          @test_obj.send("#{attribute}=", test_variable)
+          @test_obj.send(attribute).should eql test_variable
+        end
+      else
+        it "does not have a setter for #{attribute}" do
+          expect { @test_obj.send("#{attribute}=", test_variable) }.to raise_exception
+        end
       end
     end
 
@@ -178,9 +178,9 @@ describe 'RcbuBackupObj' do
       @test_values = {}
       @test_differing_values = {}
       # Create a default string for all values
-      @test_obj.all_attributes.each do |attr|
-        @test_values[attr] = "Test #{attr} Value"
-        @test_differing_values[attr] = "Test Duiffering #{attr} Value"
+      @test_obj.all_attributes.each do |attribute|
+        @test_values[attribute] = "Test #{attribute} Value"
+        @test_differing_values[attribute] = "Test Duiffering #{attribute} Value"
       end
       # Inclusions and Exclusions must be arrays of hashes
       # They are handled differently by the .dup override to make a deep copy
@@ -191,25 +191,25 @@ describe 'RcbuBackupObj' do
     end
 
     it 'returns true when all attributes are the same' do
-      @test_obj.all_attributes.each do |attr|
-        @test_obj.send("#{attr}=", @test_values[attr])
-        @test_obj.send(attr).should eql @test_values[attr]
+      @test_obj.all_attributes.each do |attribute|
+        @test_obj.send("#{attribute}=", @test_values[attribute])
+        @test_obj.send(attribute).should eql @test_values[attribute]
       end
 
       comp_obj = @test_obj.dup
       @test_obj.compare?(comp_obj).should eql true
     end
 
-    RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
-      it "returns false when #{attr} differ" do
+    RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+      it "returns false when #{attribute} differ" do
         @test_obj.all_attributes.each do |init_attr|
           @test_obj.send("#{init_attr}=", @test_values[init_attr])
           @test_obj.send(init_attr).should eql @test_values[init_attr]
         end
 
         comp_obj = @test_obj.dup
-        comp_obj.send("#{attr}=", @test_differing_values[attr])
-        @test_obj.send(attr).should_not eql comp_obj.send(attr)
+        comp_obj.send("#{attribute}=", @test_differing_values[attribute])
+        @test_obj.send(attribute).should_not eql comp_obj.send(attribute)
         @test_obj.compare?(comp_obj).should eql false
       end
     end
@@ -235,14 +235,14 @@ describe 'RcbuBackupObj' do
     loadable_attrs.delete('BackupConfigurationName')
     # Pop BackupConfigurationId, it's set by the mocked API and requires a unique test
     loadable_attrs.delete('BackupConfigurationId')
-    loadable_attrs.each do |attr|
-      it "loads #{attr} into a class instance variable" do
-        test_value = "Test #{attr} Value"
+    loadable_attrs.each do |attribute|
+      it "loads #{attribute} into a class instance variable" do
+        test_value = "Test #{attribute} Value"
         @test_api_wrapper.create_config('BackupConfigurationName' => @test_label,
-                                        attr                      => test_value,
+                                        attribute                      => test_value,
                                          )
         @test_obj.load
-        @test_obj.send(attr).should eql test_value
+        @test_obj.send(attribute).should eql test_value
       end
     end
 
@@ -272,17 +272,17 @@ describe 'RcbuBackupObj' do
     end
 
     setters = RcbuBackupObjTestHelpers.get_settable_attributes
-    RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
-      test_variable = "update(#{attr}) Test Variable"
+    RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+      test_variable = "update(#{attribute}) Test Variable"
 
-      if setters.include?(attr)
-        it "updates settable attribute #{attr}" do
-          @test_obj.update(attr => test_variable)
-          @test_obj.send(attr).should eql test_variable
+      if setters.include?(attribute)
+        it "updates settable attribute #{attribute}" do
+          @test_obj.update(attribute => test_variable)
+          @test_obj.send(attribute).should eql test_variable
         end
       else
-        it "does update non-settable #{attr}" do
-          expect { @test_obj.update(attr => test_variable) }.to raise_exception
+        it "does update non-settable #{attribute}" do
+          expect { @test_obj.update(attribute => test_variable) }.to raise_exception
         end
       end
     end
@@ -304,8 +304,8 @@ describe 'RcbuBackupObj' do
     it 'returns correct values in the hash' do
       targets = %w(BackupConfigurationName MachineAgentId Inclusions Exclusions)
       hash_data = @test_obj.to_hash(targets)
-      targets.each do |attr|
-        hash_data[attr].should eql @test_obj.send(attr)
+      targets.each do |attribute|
+        hash_data[attribute].should eql @test_obj.send(attribute)
       end
     end
   end
@@ -359,10 +359,10 @@ describe 'RcbuBackupObj' do
       fail 'mock data present' if @test_api_wrapper.mock_configurations != []
     end
 
-    direct_attrs = RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
-      it "duplicates #{attr} value" do
+    direct_attrs = RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+      it "duplicates #{attribute} value" do
         copy = @test_obj.dup
-        copy.send(attr).should eql @test_obj.send(attr)
+        copy.send(attribute).should eql @test_obj.send(attribute)
       end
     end
 
