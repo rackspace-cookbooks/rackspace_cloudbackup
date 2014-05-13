@@ -94,12 +94,12 @@ describe 'RcbuBackupWrapper' do
       Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).and_return({'foo' => 'bar'})
       expect { Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._load_backup_config(nil) }.to raise_exception
     end
-    
+
     it 'returns data from Opscode::Rackspace::CloudBackup.gather_bootstrap_data when data is valid' do
       Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data) do |arg|
         RcbuBackupWrapperTestHelpers.load_backup_config_stub(arg)
       end
-      
+
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._load_backup_config('Test Bootstrap File').should eql RcbuBackupWrapperTestHelpers.load_backup_config_stub('Test Bootstrap File')
     end
   end
@@ -109,7 +109,7 @@ describe 'RcbuBackupWrapper' do
       # Don't bother checking the exact content, just check that it is set
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._default_direct_name_map.should be_an_instance_of Hash
     end
-    
+
     # Options that are not 1-1 and handled explicitly
     [:inclusions, :exclusions].each do |option|
       it "does not add #{option} to direct_name_map" do
@@ -126,7 +126,7 @@ describe 'RcbuBackupWrapper' do
       test_target.should eql [{'FilePath' => 'testdir1', 'FileItemType' => 'Folder'},
                               {'FilePath' => 'testdir2', 'FileItemType' => 'Folder'}]
     end
-    
+
     it 'updates FileItemType for existing directories' do
       test_data = ['testdir1', 'testdir2']
       test_target = [{'FilePath' => 'testdir1', 'FileItemType' => 'Foo'},
@@ -152,7 +152,7 @@ describe 'RcbuBackupWrapper' do
         RcbuBackupWrapperTestHelpers.get_backup_obj_stub(arg1, arg2, arg3)
       end
     end
-    
+
     it 'returns a Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper class when mocking is true' do
       test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
       test_obj.mocking.should eql true
@@ -179,17 +179,17 @@ describe 'RcbuBackupWrapper' do
       # rspec doesn't reinitialize class variables, so use a unique username to avoid a cache hit from previous tests.
       api_obj = test_obj._get_api_obj('Variable Test Username', 'Variable Test Key', 'Variable Test Region')
       api_obj.should be_an_instance_of RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub
-      
+
       api_obj.api_username.should eql 'Variable Test Username'
       api_obj.api_key.should eql 'Variable Test Key'
       api_obj.region.should eql 'Variable Test Region'
       api_obj.agent_id.should eql RcbuBackupWrapperTestHelpers.dummy_bootstrap_data['AgentId']
-    end      
+    end
 
     it 'returns cached values on cache hit' do
       # Utilize Ruby class object_ids for verifying cache hits
       # http://ruby-doc.org/core-2.1.1/Object.html#method-i-object_id
-      
+
       # Stub out the Opscode::Rackspace::CloudBackup::RcbuApiWrapper class as we don't want to actually open an API connection.
       stub_const('Opscode::Rackspace::CloudBackup::RcbuApiWrapper', RcbuBackupWrapperTestHelpers::RcbuApiWrapperStub)
 
@@ -200,15 +200,15 @@ describe 'RcbuBackupWrapper' do
       test_obj_2 = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', false, 'Test Bootstrap File')
       test_obj_2.mocking.should eql false
       api_obj_2 = test_obj_2._get_api_obj('Cache Test Username', 'Cache Test Key', 'Cache Test Region')
-      
+
       # The test objects must be different
       test_obj_1.object_id.should_not eql test_obj_2.object_id
-      
+
       # The API Objects should be the same
       api_obj_1.object_id.should eql api_obj_2.object_id
     end
   end
-    
+
   describe '_get_backup_obj' do
     before :each do
       # _get_api_obj method calls Chef debug prints and it isn't worth stubbing
@@ -229,7 +229,7 @@ describe 'RcbuBackupWrapper' do
 
       test_obj._get_backup_obj('Test Username', 'Test Key', 'Test Region', 'Test Label').should  be_an_instance_of Opscode::Rackspace::CloudBackup::RcbuBackupObj
     end
-    
+
     it 'passes backup_api_label into Opscode::Rackspace::CloudBackup::RcbuBackupObj' do
       test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
       test_obj.mocking.should eql true
@@ -242,29 +242,29 @@ describe 'RcbuBackupWrapper' do
       test_obj.mocking.should eql true
       backup_obj = test_obj._get_backup_obj('_get_backup_obj api_obj Test Username', '_get_backup_obj api_obj Test Key', '_get_backup_obj api_obj Test Region',
                                             '_get_backup_obj Label Test Label')
-      
+
       # Leverage the cache to get the same object
       # This test may fail if _get_api_obj() isn't caching
       api_obj = test_obj._get_api_obj('_get_backup_obj api_obj Test Username', '_get_backup_obj api_obj Test Key', '_get_backup_obj api_obj Test Region')
       backup_obj.api_wrapper.should eql api_obj
-    end   
-  end    
+    end
+  end
 
   describe 'update' do
     before :each do
       # _get_api_obj method calls Chef debug prints and it isn't worth stubbing
       # Include ChefSpec here to avoid colissions with WebMock
       require 'chefspec_helper'
-      
+
       # Stub _load_backup_config so the constructor loads smoothly
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.stub(:_load_backup_config) do |arg|
         RcbuBackupWrapperTestHelpers.load_backup_config_stub(arg)
       end
-      
+
       @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
       fail 'Failed to mock' unless @test_obj.mocking == true
     end
-    
+
     # Test direct maps
     # Currently none of the direct maps should be initialized by RcbuBackupObj
     Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._default_direct_name_map.each do |option, api_name|
@@ -272,7 +272,7 @@ describe 'RcbuBackupWrapper' do
         before :each do
           @test_value = "Test #{option} Value"
         end
-        
+
         it 'sets the specified value' do
           @test_obj.backup_obj.send(api_name).should eql nil
           @test_obj.update({option => @test_value}).should eql true
@@ -284,7 +284,7 @@ describe 'RcbuBackupWrapper' do
           @test_obj.update({option => @test_value}).should eql false
         @test_obj.backup_obj.send(api_name).should eql @test_value
         end
-        
+
         it "Doesn't update the object when passed a nil value" do
           @test_obj.backup_obj.send(api_name).should eql @test_value
           @test_obj.update({option => nil}).should eql false
@@ -292,7 +292,7 @@ describe 'RcbuBackupWrapper' do
         end
       end
     end
-      
+
     # Test indirect maps
     {inclusions: 'Inclusions', exclusions: 'Exclusions'}.each do |option, api_name|
       describe "for option #{option}" do
@@ -301,19 +301,19 @@ describe 'RcbuBackupWrapper' do
           @api_test_value = []
           Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._path_mapper(@test_value, @api_test_value)
         end
-      
+
         it 'sets the proper path hash' do
           @test_obj.backup_obj.send(api_name).should eql []
           @test_obj.update({option => @test_value}).should eql true
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
         end
-        
+
         it "Doesn't update the object when the value is unchanged" do
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
           @test_obj.update({option => @test_value}).should eql false
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
         end
-        
+
         it "Doesn't update the object when passed a nil value" do
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
           @test_obj.update({option => nil}).should eql false
@@ -328,12 +328,12 @@ describe 'RcbuBackupWrapper' do
       # _get_api_obj method calls Chef debug prints and it isn't worth stubbing
       # Include ChefSpec here to avoid colissions with WebMock
       require 'chefspec_helper'
-      
+
       # Stub _load_backup_config so the constructor loads smoothly
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.stub(:_load_backup_config) do |arg|
         RcbuBackupWrapperTestHelpers.load_backup_config_stub(arg)
       end
-      
+
       @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
       fail 'Failed to mock' unless @test_obj.mocking == true
     end

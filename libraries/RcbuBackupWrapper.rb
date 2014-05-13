@@ -28,15 +28,15 @@ module Opscode
 
         def initialize(api_username, api_key, region, backup_api_label, mock = false, rcbu_bootstrap_file = '/etc/driveclient/bootstrap.json')
           @mocking = mock
-          
+
           @agent_config = self.class._load_backup_config(rcbu_bootstrap_file)
                                         # TODO: Should these arguments just be class variables?
           @backup_obj = _get_backup_obj(api_username, api_key, region, backup_api_label)
-          
+
           # Mapping of the HWRP option names to the BackupObj (API) names that map directly (no mods)
           @direct_name_map = self.class._default_direct_name_map
         end
-        
+
         #
         # Class methods
         #
@@ -89,7 +89,7 @@ module Opscode
         #
         # Instance Methods
         #
-        
+
         def _get_api_obj(api_username, api_key, region)
           # This class intentionally uses a class variable to share API tokens and cached data connections across class instances
           # The class variable is guarded by use of the RcbuCache class which ensures proper connections are utilized
@@ -110,15 +110,15 @@ module Opscode
           else
             Chef::Log.debug('Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object')
           end
-          
+
           return api_obj
         end
-        
+
         def _get_backup_obj(api_username, api_key, region, backup_api_label)
           api_obj = _get_api_obj(api_username, api_key, region)
           return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(backup_api_label, api_obj)
         end
-        
+
         def update(options = {})
           comp_obj = @backup_obj.dup
 
@@ -138,7 +138,7 @@ module Opscode
             when :inclusions
               # Inclusions is not quite 1-1 as the API adds extra fields and IDs, and requires a type value
               self.class._path_mapper(value, @backup_obj.Inclusions)
-              
+
             when :exclusions
               # Exclusions is like Inclusions
               self.class._path_mapper(value, @backup_obj.Exclusions)

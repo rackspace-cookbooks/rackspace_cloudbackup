@@ -47,17 +47,17 @@ describe 'gather_bootstrap_data' do
     require 'chefspec_helper'
     require_relative '../../../libraries/gather_bootstrap_data.rb'
   end
-    
+
   it 'returns nil when the target file does not exist' do
     Opscode::Rackspace::CloudBackup.gather_bootstrap_data('/dev/null/this/should/be/sufficiently/bogus').should eql nil
   end
-  
+
   it 'returns nil when the content is malformed' do
     test_file = GatherBootstrapDataTestHelpers::DummyBootstrapFile.new('wqerklkshksdagksaldgvbwae;o')
     Opscode::Rackspace::CloudBackup.gather_bootstrap_data(test_file.path).should eql nil
     test_file.close
   end
-  
+
   it 'returns properly formatted content' do
     test_content = {'foo' => 'bar', 'bar' => 'baz', 'baz' => 'foobar'}
     test_file = GatherBootstrapDataTestHelpers::DummyBootstrapFile.new(JSON.dump(test_content))

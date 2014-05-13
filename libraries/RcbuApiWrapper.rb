@@ -49,7 +49,7 @@ module Opscode
               }
             }
           }
-          
+
           return JSON.parse(RestClient.post(@identity_api_url, req.to_json,  content_type: :json, accept: :json))
         end
 
@@ -59,7 +59,7 @@ module Opscode
           if response.code != 200
             fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.lookup_configurations: Bad response code #{response.code}"
           end
-          
+
           @configurations = JSON.parse(response)
         end
 
@@ -79,7 +79,7 @@ module Opscode
           response = RestClient.post("#{@rcbu_api_url}/backup-configuration/",
                                      config.to_json,
                                      'Content-Type' => :json, 'X-Auth-Token' => @token)
-          
+
           if response.code != 200
             fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.create_config: Bad response code #{response.code}"
           end

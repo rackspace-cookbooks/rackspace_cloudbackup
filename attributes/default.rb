@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: rackspace-cloud-backup
-# Attributes:: default 
+# Attributes:: default
 #
 # Copyright:: 2013, Rackspace US, inc. <matt.thode@rackspace.com>
 #
@@ -59,7 +59,7 @@ default['rackspace']['datacenter'] = 'DFW'
 #      path:   Cron path
 #      shell:  Cron shell
 #      home:   Cron home
-#  }  
+#  }
 # }
 # Many of the above options will pull from the default hash.
 # See the default hash description below for defaults and requirement details
@@ -82,7 +82,6 @@ default['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email'] = nil
 # cloud_version_retention: Rackspace Cloud Backup retention value
 # See API documentation, only a small number of values are legal
 default['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention'] = 30
-
 
 # time: backup timing settings.  These settings are Cron format.
 default['rackspace_cloudbackup']['backups_defaults']['time']['day']     = '*'

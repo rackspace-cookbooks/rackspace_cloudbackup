@@ -74,11 +74,11 @@ class Chef
       def is_active(arg = nil)
         set_or_return(:is_active, arg, kind_of: [TrueClass, FalseClass])
       end
-      
+
       def version_retention(arg = nil)
         set_or_return(:version_retention, arg, kind_of: Integer, required: true)
       end
-      
+
       def frequency(arg = nil)
         set_or_return(:frequency, arg, kind_of: String)
       end
@@ -86,58 +86,58 @@ class Chef
       def start_time_hour(arg = nil)
         set_or_return(:start_time_hour, arg, kind_of: Integer)
       end
-      
+
       def start_time_minute(arg = nil)
         set_or_return(:start_time_minute, arg, kind_of: Integer)
-      end             
-               
+      end
+
       def start_time_am_pm(arg = nil)
         set_or_return(:start_time_am_pm, arg, kind_of: Integer)
-      end             
-                
+      end
+
       def day_of_week_id(arg = nil)
         set_or_return(:day_of_week_id, arg, kind_of: Integer)
-      end             
-      
+      end
+
       def hour_interval(arg = nil)
         set_or_return(:hour_interval, arg, kind_of: Integer)
-      end             
-      
+      end
+
       def time_zone_id(arg = nil)
         set_or_return(:time_zone_id, arg, kind_of: String)
-      end             
-                
+      end
+
       def notify_recipients(arg = nil)
         set_or_return(:notify_recipients, arg, kind_of: String, required: true)
-      end             
-                
+      end
+
       def notify_success(arg = nil)
         set_or_return(:notify_success, arg, kind_of: [TrueClass, FalseClass])
-      end     
+      end
 
       def notify_failure(arg = nil)
         set_or_return(:notify_failure, arg, kind_of: [TrueClass, FalseClass])
-      end             
-      
+      end
+
       def backup_prescript(arg = nil)
         set_or_return(:backup_prescript, arg, kind_of: String)
-      end             
-      
+      end
+
       def backup_postscript(arg = nil)
         set_or_return(:backup_postscript, arg, kind_of: String)
-      end             
-      
+      end
+
       def missed_backup_action_id(arg = nil)
         set_or_return(:missed_backup_action_id, arg, kind_of: Integer)
-      end             
+      end
 
       def mock(arg = nil)
         set_or_return(:mock, arg, kind_of: [TrueClass, FalseClass])
       end
-      
+
       def rcbu_bootstrap_file(arg = nil)
         set_or_return(:rcbu_bootstrap_file, arg, kind_of: String)
-      end             
+      end
     end
   end
 end
@@ -164,7 +164,7 @@ class Chef
                                                                                            @current_resource.mock,
                                                                                            @current_resource.rcbu_bootstrap_file
                                                                                            )
-       
+
         @current_resource
       end
 

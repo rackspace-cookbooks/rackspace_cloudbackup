@@ -35,7 +35,6 @@ module CloudSpecHelpers
   module_function :test_backup_data
 end
 
-
 describe 'rackspace_cloudbackup::cloud' do
   # TODO: Determine if this causes conflicts at this level.
   CloudSpecHelpers.initialize_tests
@@ -55,12 +54,12 @@ describe 'rackspace_cloudbackup::cloud' do
               node.set['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email'] = 'root@localhost'
             end
           end
-          
+
           before :each do
             chef_run.node.set['rackspace_cloudbackup']['backups'] = CloudSpecHelpers.test_backup_data
             chef_run.converge('rackspace_cloudbackup::cloud')
           end
-        
+
           it 'includes the cloud_agent recipe' do
             expect(chef_run).to include_recipe 'rackspace_cloudbackup::cloud_agent'
           end
@@ -68,11 +67,11 @@ describe 'rackspace_cloudbackup::cloud' do
           it 'installs python-argparse' do
             expect(chef_run).to install_package 'python-argparse'
           end
-          
+
           it 'installs run_backup.py' do
             expect(chef_run).to render_file('/usr/local/bin/run_backup.py')
           end
-          
+
           CloudSpecHelpers.test_backup_data.each do |job|
             describe "test backup of '#{job['location']}'" do
               it 'creates a backup configuration' do
@@ -91,13 +90,13 @@ describe 'rackspace_cloudbackup::cloud' do
           it 'Creates the run_backup.conf.yaml file' do
             expect(chef_run).to render_file('/etc/driveclient/run_backup.conf.yaml')
           end
- 
+
         end
       end
     end
   end
 end
 
-          
-           
-            
+
+
+

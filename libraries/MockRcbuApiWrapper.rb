@@ -70,8 +70,8 @@ module Opscode
               return
             end
           end
-            
-          fail 'Unable to locate BackupConfigurationId #{config_id} for update'            
+
+          fail 'Unable to locate BackupConfigurationId #{config_id} for update'
         end
 
         # Helper for testing

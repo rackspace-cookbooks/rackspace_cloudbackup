@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 module ConfigureCloudBackupHwrpSpecHelpers
   def initialize_tests
     # This is required here as ChefSpec interferes with WebMocks, breaking tests
@@ -122,7 +121,7 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
           it 'should initially return the default value' do
             @test_resource.send(attr).should eql value_data[:default]
           end
-        end         
+        end
 
         it 'should set values' do
           @test_resource.send(attr, value_data[:test_value]).should eql value_data[:test_value]
@@ -159,7 +158,7 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
       it 'Sets label to new_resource.label when new_resource.label is specified' do
         @test_obj.current_resource.label.should eql @new_resource.label
       end
-      
+
       [:rackspace_api_key, :rackspace_username, :rackspace_api_region, :inclusions, :exclusions, :is_active,
        :version_retention, :frequency, :start_time_hour, :start_time_minute, :start_time_am_pm, :day_of_week_id, :hour_interval,
        :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript, :backup_postscript, :missed_backup_action_id,
@@ -185,7 +184,7 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
         Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).with(@new_resource.rcbu_bootstrap_file) { CloudBackupTestHelpers.valid_bootstrap_data }
         @test_obj.load_current_resource
       end
-      
+
       it 'returns true when the object is updated' do
         @test_obj.new_resource.updated.should eql nil
         @test_obj.action_create
@@ -215,12 +214,12 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
       }.each do |attr, opt_hash|
         it "Updates the object with #{attr}" do
           @test_obj.action_create
-          
+
           # Test that the underlying object was updated
           @test_obj.current_resource.api_obj.backup_obj.send(opt_hash[:obj_attr]).should eql opt_hash[:expected_value]
         end
       end
-      
+
       it 'returns false when the object is not updated' do
         # Relying on persistant mocks here.
         @test_obj.new_resource.updated.should eql nil
@@ -258,8 +257,7 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
         # This is dirty, but makes the test so much easier
         expect { @test_obj.action_create_if_missing }.to raise_error('EXPECTED ERROR: action_create called')
       end
-        
-      
+
       it 'returns false when BackupConfigurationId is not nil' do
         @test_obj.new_resource.updated.should eql nil
         # Call action_create to ensure BackupConfigurationId is populated
@@ -285,12 +283,12 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
         Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).with(@new_resource.rcbu_bootstrap_file) { CloudBackupTestHelpers.valid_bootstrap_data }
         @test_obj.load_current_resource
       end
-      
+
       it 'does nothing' do
         @test_obj.new_resource.updated.should eql nil
         @test_obj.action_nothing
         @test_obj.new_resource.updated.should eql false
       end
-    end  
-  end    
+    end
+  end
 end

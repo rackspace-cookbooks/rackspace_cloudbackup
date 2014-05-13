@@ -88,7 +88,6 @@ describe 'RcbuBackupObj' do
         @test_obj.settable_attributes.include?(attr).should eql true
       end
     end
-    
 
     setters = RcbuBackupObjTestHelpers.get_settable_attributes
     RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
@@ -97,7 +96,7 @@ describe 'RcbuBackupObj' do
         @test_obj.send(attr)
       end
     end
-      
+
     test_variable = "Setter(#{attr}) Test Variable"
     if setters.include?(attr)
       it "has a setter for #{attr}" do
@@ -139,7 +138,7 @@ describe 'RcbuBackupObj' do
       before :each do
         @test_label       = 'Test Label'
         @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
-        
+
         # Preload the stateful mocks with a dataset containing keys used in the constructor
         # A more exhaustive test will be done against load itself.
         @test_api_wrapper.create_config(  'BackupConfigurationName' => @test_label,
@@ -206,15 +205,15 @@ describe 'RcbuBackupObj' do
           @test_obj.send("#{init_attr}=", @test_values[init_attr])
           @test_obj.send(init_attr).should eql @test_values[init_attr]
         end
-        
+
         comp_obj = @test_obj.dup
         comp_obj.send("#{attr}=", @test_differing_values[attr])
         @test_obj.send(attr).should_not eql comp_obj.send(attr)
         @test_obj.compare?(comp_obj).should eql false
       end
     end
-  end        
-  
+  end
+
   # NOTE: These tests should run AFTER compare? as we use compare? for no change tests
   describe 'load' do
     before :each do
@@ -252,7 +251,7 @@ describe 'RcbuBackupObj' do
       @test_obj.load
       @test_obj.BackupConfigurationId.should eql @test_api_wrapper.mock_configurations[0]['BackupConfigurationId']
     end
-    
+
     # Spirit: Testing for code fragility / future breakage from API updates
     it 'doesn\'t error when provided with unknown keys' do
       @test_api_wrapper.create_config( 'BackupConfigurationName' => @test_label,
@@ -274,7 +273,7 @@ describe 'RcbuBackupObj' do
     setters = RcbuBackupObjTestHelpers.get_settable_attributes
     RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
       test_variable = "update(#{attr}) Test Variable"
-      
+
       if setters.include?(attr)
         it "updates settable attribute #{attr}" do
           @test_obj.update(attr => test_variable)
@@ -287,14 +286,14 @@ describe 'RcbuBackupObj' do
       end
     end
   end
-    
+
   describe 'to_hash' do
     before :each do
       @test_label       = 'Test Label'
       @test_api_wrapper = RcbuBackupObjTestHelpers.test_api_wrapper
       @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
     end
-    
+
     it 'returns a hash of all_attributes when no argument is given' do
       @test_obj.to_hash().keys.should eql @test_obj.all_attributes
     end
@@ -336,7 +335,7 @@ describe 'RcbuBackupObj' do
       @test_obj.save
       @test_api_wrapper.mock_configurations.length.should eql 1
       @test_obj.BackupConfigurationId.should_not eql nil
-      
+
       # Deeply hooking into the underlying mock object to test this.
       orig_mock_api_data = @test_api_wrapper.mock_configurations[0].dup
 
@@ -358,7 +357,7 @@ describe 'RcbuBackupObj' do
       @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
       fail 'mock data present' if @test_api_wrapper.mock_configurations != []
     end
-    
+
     direct_attrs = RcbuBackupObjTestHelpers.get_all_attributes.each do |attr|
       it "duplicates #{attr} value" do
         copy = @test_obj.dup
@@ -367,7 +366,7 @@ describe 'RcbuBackupObj' do
     end
 
     # TODO: INCOMPLETE
-  end    
+  end
 end
-    
-    
+
+

@@ -102,7 +102,6 @@ describe 'MockRcbuApiWrapper' do
       stored_data.should eql test_data
     end
 
-
     it 'create_config adds unique configs to mock_configurations class variable' do
       @test_obj.mock_configurations.should eql []
       test_data = { 'name' => 'dataW', 'key1' => 'dataW-1', 'key2' => 'dataW-2' }
@@ -110,7 +109,7 @@ describe 'MockRcbuApiWrapper' do
         @test_obj.create_config(test_data)
       end
       @test_obj.mock_configurations.length.should eql 10
-    end     
+    end
 
     it 'rejects data with BackupConfigurationId set' do
       test_data = { 'name' => 'dataW', 'key1' => 'dataW-1', 'key2' => 'dataW-2', 'BackupConfigurationId' => 29475 }
@@ -132,7 +131,7 @@ describe 'MockRcbuApiWrapper' do
       WebMock.disable_net_connect!
       @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
-    
+
     it 'fails if the config_id doesn\'t exist in mock_configurations class variable' do
       @test_obj.mock_configurations.should eql []
       expect { @test_obj.update_config(12345, { foo: 'bar' }) }.to raise_exception
@@ -142,7 +141,7 @@ describe 'MockRcbuApiWrapper' do
       @test_obj.mock_configurations.should eql []
       initial_data = { 'name' => 'dataI', 'key1' => 'dataI-1', 'key2' => 'dataI-2' }
       @test_obj.create_config(initial_data)
-      
+
       new_data = { 'name' => 'dataN', 'key1' => 'dataN-1', 'key2' => 'dataN-2', 'BackupConfigurationId' => @test_obj.mock_configurations[0]['BackupConfigurationId'] }
       @test_obj.update_config(@test_obj.mock_configurations[0]['BackupConfigurationId'], new_data)
       @test_obj.mock_configurations[0].should eql new_data
@@ -152,10 +151,10 @@ describe 'MockRcbuApiWrapper' do
       @test_obj.mock_configurations.should eql []
       initial_data = { 'name' => 'dataI', 'key1' => 'dataI-1', 'key2' => 'dataI-2' }
       @test_obj.create_config(initial_data)
-      
+
       new_data = { 'name' => 'dataN', 'key1' => 'dataN-1', 'key2' => 'dataN-2', 'BackupConfigurationId' => 'Bad Test ID' }
       expect { @test_obj.update_config(@test_obj.mock_configurations[0]['BackupConfigurationId'], new_data) }.to raise_exception
     end
-      
+
   end
-end    
+end

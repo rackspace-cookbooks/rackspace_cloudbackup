@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 module RegisterAgentHwrpSpecHelpers
   def initialize_tests
     # This is required here as ChefSpec interferes with WebMocks, breaking tests
@@ -57,7 +56,6 @@ module RegisterAgentHwrpSpecHelpers
     end
   end
 end
-
 
 describe 'rackspace_cloudbackup_register_agent_hwrp' do
   describe 'resource' do

@@ -19,7 +19,6 @@
 # Install the agent
 include_recipe 'rackspace_cloudbackup::cloud_agent'
 
-
 # Install deps for the Python scripts
 package 'python-argparse' do
   action :install
@@ -44,7 +43,7 @@ end
 template_data = []
 node['rackspace_cloudbackup']['backups'].each do |node_job|
   job = node_job.dup # Obtain a copy that's not in the node attributes so we can tinker in it
-  
+
   if job['label'].nil?
     # NOTE: This format intentionally matches earlier revisions to avoid creating duplicate backups
     job['label'] = "Backup for #{node['ipaddress']}, backing up #{job['location']}"
@@ -85,7 +84,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
                        'location' => job['location'],
                        'comment'  => job['comment'],
                        'enabled'  => job['enabled'] })
-                       
+
 end
 
 # Write the configuration file for the cron job script
