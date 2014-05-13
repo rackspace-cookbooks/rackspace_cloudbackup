@@ -43,7 +43,8 @@ module RcbuApiWrapperTestHelpers
   end
   module_function :test_data
 
-  def identity_API_data(data = test_data)
+                                          # Disable method length errors: this is returning mock data
+  def identity_API_data(data = test_data) # rubocop: disable MethodLength
     return {
       'access' => {
         'token' => {
@@ -197,7 +198,6 @@ module RcbuApiWrapperTestHelpers
       # Overload the data response for bad call testing
       to_return({ :status => 200, :body => '', :headers => {} },
                 { :status => 400, :body => '', :headers => {} })
-
   end
   module_function :mock_rcbu_backup_configuration_api
 end
