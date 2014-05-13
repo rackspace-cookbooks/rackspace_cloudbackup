@@ -21,6 +21,8 @@ require_relative 'RcbuBackupWrapper.rb'
 class Chef
   class Resource
     # Implement the rackspace_cloudbackup_register_agent resource
+
+    # TODO: This naming is poor.  rackspace_cloudbackup_backup_configuration or similar would make more sense.
     class RackspaceCloudbackupConfigureCloudBackup < Chef::Resource
       attr_accessor :api_obj
       attr_writer   :api_obj
