@@ -49,14 +49,14 @@ module RcbuApiWrapperTestHelpers
       'access' => {
         'token' => {
           'id'  => data[:api_token],
-          'expires' =>'2014-02-19T01:20:15.305Z',
+          'expires' => '2014-02-19T01:20:15.305Z',
           'tenant'  => {
             'id'   => data[:api_tenant_id],
             'name' => data[:api_tenant_id]
           },
-          'RAX-AUTH:authenticatedBy'=>['APIKEY']
+          'RAX-AUTH:authenticatedBy' => ['APIKEY']
         },
-        'serviceCatalog'=> [
+        'serviceCatalog' => [
                             # WARNING: failure case tests below assume cloudBackup is ['serviceCatalog'][0]
                             {
                               'name'      => 'cloudBackup',
@@ -98,11 +98,11 @@ module RcbuApiWrapperTestHelpers
   def rcbu_API_configurations_data
     # As we're just testing API calls and not the use of the data return dummy data
     base_dataset = []
-    retVal = []
+    ret_val = []
     3.times do |x|
       base_dataset.push('name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}")
     end
-    retVal.push(base_dataset)
+    ret_val.push(base_dataset)
 
     base_dataset = []
     3.times do |y|
@@ -110,9 +110,9 @@ module RcbuApiWrapperTestHelpers
       x = y + 1
       base_dataset.push('name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}")
     end
-    retVal.push(base_dataset)
+    ret_val.push(base_dataset)
 
-    return retVal
+    return ret_val
   end
   module_function :rcbu_API_configurations_data
 
@@ -150,57 +150,57 @@ module RcbuApiWrapperTestHelpers
     # Mock get for lookup_configurations
     stub_request(:get, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/system/#{data[:agent_id]}")
       .with(headers: {
-           # Headers with values we care about
-           'Accept'       => 'application/json',
-           'X-Auth-Token' => data[:api_token],
+              # Headers with values we care about
+              'Accept'       => 'application/json',
+              'X-Auth-Token' => data[:api_token],
 
-           # Headers we don't care about, but need to specify for mocking
-           'Accept-Encoding' => /.*/,
-           'User-Agent'      => /.*/
-           }).to_return(
-                        # Overload the data response for subsequent call testing
-                        { status: 200, body: rcbu_API_configurations_data[0].to_json, headers: { 'Content-Type' => 'application/json' } },
-                        { status: 200, body: rcbu_API_configurations_data[1].to_json, headers: { 'Content-Type' => 'application/json' } },
-                        { status: 400, body: '', headers: {} }
-                        )
+              # Headers we don't care about, but need to specify for mocking
+              'Accept-Encoding' => /.*/,
+              'User-Agent'      => /.*/
+            }).to_return(
+                         # Overload the data response for subsequent call testing
+                         { status: 200, body: rcbu_API_configurations_data[0].to_json, headers: { 'Content-Type' => 'application/json' } },
+                         { status: 200, body: rcbu_API_configurations_data[1].to_json, headers: { 'Content-Type' => 'application/json' } },
+                         { status: 400, body: '', headers: {} }
+                         )
 
     # Mock post for create_config
     stub_request(:post, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/")
       .with(body: data[:dummy_write_data],
-           headers: {
-             # Headers with values we care about
-             'Content-Type' => 'application/json',
-             'X-Auth-Token' => data[:api_token],
+            headers: {
+              # Headers with values we care about
+              'Content-Type' => 'application/json',
+              'X-Auth-Token' => data[:api_token],
 
-             # Headers we don't care about, but need to specify for mocking
-             'Accept'          => /.*/,
-             'Accept-Encoding' => /.*/,
-             'Content-Length'  => /.*/,
-             'User-Agent'      => /.*/
-           }).to_return(
-                        # Overload the data response for bad call testing
-                        { status: 200, body: '', headers: {} },
-                        { status: 400, body: '', headers: {} }
+              # Headers we don't care about, but need to specify for mocking
+              'Accept'          => /.*/,
+              'Accept-Encoding' => /.*/,
+              'Content-Length'  => /.*/,
+              'User-Agent'      => /.*/
+            }).to_return(
+                         # Overload the data response for bad call testing
+                         { status: 200, body: '', headers: {} },
+                         { status: 400, body: '', headers: {} }
                         )
 
     # Mock put for update_config
     stub_request(:put, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/#{data[:dummy_config_id]}")
       .with(body: data[:dummy_write_data],
-           headers: {
-             # Headers with values we care about
-             'Content-Type' => 'application/json',
-             'X-Auth-Token' => data[:api_token],
+            headers: {
+              # Headers with values we care about
+              'Content-Type' => 'application/json',
+              'X-Auth-Token' => data[:api_token],
 
-             # Headers we don't care about, but need to specify for mocking
-             'Accept'          => /.*/,
-             'Accept-Encoding' => /.*/,
-             'Content-Length'  => /.*/,
-             'User-Agent'      => /.*/
-           }).to_return(
-                        # Overload the data response for bad call testing
-                        { status: 200, body: '', headers: {} },
-                        { status: 400, body: '', headers: {} }
-                        )
+              # Headers we don't care about, but need to specify for mocking
+              'Accept'          => /.*/,
+              'Accept-Encoding' => /.*/,
+              'Content-Length'  => /.*/,
+              'User-Agent'      => /.*/
+            }).to_return(
+                         # Overload the data response for bad call testing
+                         { status: 200, body: '', headers: {} },
+                         { status: 400, body: '', headers: {} }
+                         )
   end
   module_function :mock_rcbu_backup_configuration_api
 end
@@ -214,17 +214,20 @@ describe 'RcbuApiWrapper' do
     end
 
     it 'sets the agent_id class instance variable' do
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
       @test_obj.agent_id.should eql @test_data[:agent_id]
     end
 
     it 'sets the identity_api_url class instance variable' do
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
       @test_obj.identity_api_url.should eql @test_data[:api_url]
     end
 
     it 'sets the api token class instance variable' do
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
       @test_obj.token.should eql @test_data[:api_token]
     end
 
@@ -233,26 +236,25 @@ describe 'RcbuApiWrapper' do
       @identity_data['access']['serviceCatalog'][0]['name'] = 'notCloudBackup'
       RcbuApiWrapperTestHelpers.mock_identity_API(@test_data, @identity_data)
 
-      expect { Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username],
-                                                                   @test_data[:api_key],
-                                                                   @test_data[:region],
-                                                                   @test_data[:agent_id],
-                                                                   @test_data[:api_url]) }.to raise_exception
+      expect do
+        Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                            @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      end.to raise_exception
     end
 
     it 'fails if the region is not in the cloudBackup service catalog' do
-      expect { Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username],
-                                                                   @test_data[:api_key],
-                                                                   'Atlantis',
-                                                                   @test_data[:agent_id],
-                                                                   @test_data[:api_url]) }.to raise_exception
+      expect do
+        Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], 'Atlantis',
+                                                            @test_data[:agent_id], @test_data[:api_url])
+      end.to raise_exception
     end
 
     it 'sets the rcbu API URL class instance variable' do
       fail 'Assert error on test data: serviceCatalog order' if @identity_data['access']['serviceCatalog'][0]['name'] != 'cloudBackup'
       fail 'Assert error on test data: endpoint order' if @identity_data['access']['serviceCatalog'][0]['endpoints'][0]['region'] != @test_data[:region]
 
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
       @test_obj.rcbu_api_url.should eql @identity_data['access']['serviceCatalog'][0]['endpoints'][0]['publicURL']
     end
   end
@@ -264,7 +266,8 @@ describe 'RcbuApiWrapper' do
       @configurations_data = RcbuApiWrapperTestHelpers.rcbu_API_configurations_data
       RcbuApiWrapperTestHelpers.mock_identity_API(@test_data, @identity_data)
       RcbuApiWrapperTestHelpers.mock_rcbu_backup_configuration_api(@test_data, @configurations_data)
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'sets the configurations class instance variable' do
@@ -302,7 +305,8 @@ describe 'RcbuApiWrapper' do
       @configurations_data = RcbuApiWrapperTestHelpers.rcbu_API_configurations_data
       RcbuApiWrapperTestHelpers.mock_identity_API(@test_data, @identity_data)
       RcbuApiWrapperTestHelpers.mock_rcbu_backup_configuration_api(@test_data, @configurations_data)
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'looks up configurations when configurations class instance variable is nil' do
@@ -346,7 +350,8 @@ describe 'RcbuApiWrapper' do
       @configurations_data = RcbuApiWrapperTestHelpers.rcbu_API_configurations_data
       RcbuApiWrapperTestHelpers.mock_identity_API(@test_data, @identity_data)
       RcbuApiWrapperTestHelpers.mock_rcbu_backup_configuration_api(@test_data, @configurations_data)
-      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::RcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                      @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'create_config posts the configuration to the API' do
