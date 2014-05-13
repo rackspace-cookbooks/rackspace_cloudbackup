@@ -44,15 +44,15 @@ module RcbuBackupObjTestHelpers
   end
 
   # This variable is extremely useful in attribute testing.  This method allows us to access it outside of test scope.
-  def get_all_attributes
+  def all_attributes
     return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(nil, test_api_wrapper).all_attributes
   end
-  module_function :get_all_attributes
+  module_function :all_attributes
 
-  def get_settable_attributes
+  def settable_attributes
     return Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(nil, test_api_wrapper).settable_attributes
   end
-  module_function :get_settable_attributes
+  module_function :settable_attributes
 end
 
 describe 'RcbuBackupObj' do
@@ -90,8 +90,8 @@ describe 'RcbuBackupObj' do
       end
     end
 
-    setters = RcbuBackupObjTestHelpers.get_settable_attributes
-    RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+    setters = RcbuBackupObjTestHelpers.settable_attributes
+    RcbuBackupObjTestHelpers.all_attributes.each do |attribute|
       it "has a getter for #{attribute}" do
         # *almost* all should return nil, but not all.  Banking on exceptions.
         @test_obj.send(attribute)
@@ -200,7 +200,7 @@ describe 'RcbuBackupObj' do
       @test_obj.compare?(comp_obj).should eql true
     end
 
-    RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+    RcbuBackupObjTestHelpers.all_attributes.each do |attribute|
       it "returns false when #{attribute} differ" do
         @test_obj.all_attributes.each do |init_attr|
           @test_obj.send("#{init_attr}=", @test_values[init_attr])
@@ -230,7 +230,7 @@ describe 'RcbuBackupObj' do
       @test_obj.compare?(comp_obj).should eql true
     end
 
-    loadable_attrs = RcbuBackupObjTestHelpers.get_all_attributes
+    loadable_attrs = RcbuBackupObjTestHelpers.all_attributes
     # Pop BackupConfigurationName, it's the search key and as such must match label; can't change it
     loadable_attrs.delete('BackupConfigurationName')
     # Pop BackupConfigurationId, it's set by the mocked API and requires a unique test
@@ -239,8 +239,8 @@ describe 'RcbuBackupObj' do
       it "loads #{attribute} into a class instance variable" do
         test_value = "Test #{attribute} Value"
         @test_api_wrapper.create_config('BackupConfigurationName' => @test_label,
-                                        attribute                      => test_value,
-                                         )
+                                        attribute                 => test_value
+                                        )
         @test_obj.load
         @test_obj.send(attribute).should eql test_value
       end
@@ -271,8 +271,8 @@ describe 'RcbuBackupObj' do
       @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
     end
 
-    setters = RcbuBackupObjTestHelpers.get_settable_attributes
-    RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+    setters = RcbuBackupObjTestHelpers.settable_attributes
+    RcbuBackupObjTestHelpers.all_attributes.each do |attribute|
       test_variable = "update(#{attribute}) Test Variable"
 
       if setters.include?(attribute)
@@ -296,7 +296,7 @@ describe 'RcbuBackupObj' do
     end
 
     it 'returns a hash of all_attributes when no argument is given' do
-      @test_obj.to_hash().keys.should eql @test_obj.all_attributes
+      @test_obj.to_hash.keys.should eql @test_obj.all_attributes
     end
 
     # For this test looping over all_attributes is really overkill
@@ -359,7 +359,7 @@ describe 'RcbuBackupObj' do
       fail 'mock data present' if @test_api_wrapper.mock_configurations != []
     end
 
-    direct_attrs = RcbuBackupObjTestHelpers.get_all_attributes.each do |attribute|
+    RcbuBackupObjTestHelpers.all_attributes.each do |attribute|
       it "duplicates #{attribute} value" do
         copy = @test_obj.dup
         copy.send(attribute).should eql @test_obj.send(attribute)
