@@ -17,7 +17,8 @@
 
 require_relative '../../supported_platforms.rb'
 
-module CloudSpecHelpers
+# CloudAgentSpecHelpers: Helpers for this test
+module CloudAgentSpecHelpers
   def initialize_tests
     # This is required here as ChefSpec interferes with WebMocks, breaking tests
     # rspec does not fully reinitialize the global namespace, so anything declared outside of tests
@@ -27,10 +28,11 @@ module CloudSpecHelpers
   module_function :initialize_tests
 end
 
-# Troubleshooting
-CloudSpecHelpers.initialize_tests
-
 describe 'rackspace_cloudbackup::cloud' do
+  # This may cause webmock interference here
+  # TODO: Determine if this is safe.
+  CloudAgentSpecHelpers.initialize_tests
+
   rackspace_cloudbackup_test_platforms.each do |platform, versions|
     describe "on #{platform}" do
       versions.each do |version|
@@ -45,20 +47,20 @@ describe 'rackspace_cloudbackup::cloud' do
               node.set['rackspace']['cloud_credentials']['api_key']  = 'SuchFakePassword.VeryMock.Wow.'
             end
           end
-          
+
           before :each do
             chef_run.converge('rackspace_cloudbackup::cloud')
           end
 
           it 'Installs the cloud backup repository' do
             case platform.to_s
-            when "redhat", "centos"
-              expect(chef_run).to create_yum_repository("cloud-backup")
-            when "ubuntu","debian"
-              expect(chef_run).to add_apt_repository("cloud-backup")
+            when 'redhat', 'centos'
+              expect(chef_run).to create_yum_repository('cloud-backup')
+            when 'ubuntu', 'debian'
+              expect(chef_run).to add_apt_repository('cloud-backup')
             else
               fail "ERROR: Unknown platform #{platform}"
-            end            
+            end
           end
 
           it 'Installs DriveClient' do
@@ -66,7 +68,7 @@ describe 'rackspace_cloudbackup::cloud' do
           end
 
           it 'Registers DriveClient' do
-            fail 'Oh buttons!'
+            expect(chef_run).to register_agent('Register Fauxhai')
           end
 
           it 'Enables DriveClient' do
@@ -81,7 +83,3 @@ describe 'rackspace_cloudbackup::cloud' do
     end
   end
 end
-
-          
-           
-            
