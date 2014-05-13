@@ -98,7 +98,7 @@ module RcbuApiWrapperTestHelpers
     base_dataset = []
     retVal = []
     3.times do |x|
-      base_dataset.push( 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}" )
+      base_dataset.push('name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}")
     end
     retVal.push(base_dataset)
 
@@ -106,7 +106,7 @@ module RcbuApiWrapperTestHelpers
     3.times do |y|
       # Intentionally remove data0 so we can tell which set the data came from.
       x = y + 1
-      base_dataset.push( 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}" )
+      base_dataset.push('name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}")
     end
     retVal.push(base_dataset)
 
