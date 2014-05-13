@@ -142,9 +142,9 @@ describe 'RcbuBackupObj' do
         # Preload the stateful mocks with a dataset containing keys used in the constructor
         # A more exhaustive test will be done against load itself.
         @test_api_wrapper.create_config('BackupConfigurationName' => @test_label,
-                                          'MachineAgentId'          => 'TestMachineID',
-                                          'Inclusions'              => 'TestInclusions', # Technically invalid, but will suffice
-                                          'Exclusions'              => 'TestExclusions', # Technically invalid, but will suffice
+                                        'MachineAgentId'          => 'TestMachineID',
+                                        'Inclusions'              => 'TestInclusions', # Technically invalid, but will suffice
+                                        'Exclusions'              => 'TestExclusions', # Technically invalid, but will suffice
                                           )
 
         @test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupObj.new(@test_label, @test_api_wrapper)
@@ -238,7 +238,7 @@ describe 'RcbuBackupObj' do
       it "loads #{attr} into a class instance variable" do
         test_value = "Test #{attr} Value"
         @test_api_wrapper.create_config('BackupConfigurationName' => @test_label,
-                                         attr                      => test_value,
+                                        attr                      => test_value,
                                          )
         @test_obj.load
         @test_obj.send(attr).should eql test_value
@@ -255,9 +255,9 @@ describe 'RcbuBackupObj' do
     # Spirit: Testing for code fragility / future breakage from API updates
     it 'doesn\'t error when provided with unknown keys' do
       @test_api_wrapper.create_config('BackupConfigurationName' => @test_label,
-                                       'RackSpaceRules'          => true,
-                                       'DevOpsRocks'             => 'doublePlusYes',
-                                       'Kittens'                 => 'mittens'
+                                      'RackSpaceRules'          => true,
+                                      'DevOpsRocks'             => 'doublePlusYes',
+                                      'Kittens'                 => 'mittens'
                                        )
       @test_obj.load
     end
