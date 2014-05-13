@@ -30,7 +30,7 @@ module RcbuBackupWrapperTestHelpers
 
   def load_backup_config_stub(rcbu_bootstrap_file)
     # Merge in the argument so we can test for it
-    return dummy_bootstrap_data.merge({'BootstrapFile' => rcbu_bootstrap_file})
+    return dummy_bootstrap_data.merge({ 'BootstrapFile' => rcbu_bootstrap_file })
   end
   module_function :load_backup_config_stub
 
@@ -91,7 +91,7 @@ describe 'RcbuBackupWrapper' do
     end
 
     it 'fails when Opscode::Rackspace::CloudBackup.gather_bootstrap_data is missing AgentId' do
-      Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).and_return({'foo' => 'bar'})
+      Opscode::Rackspace::CloudBackup.stub(:gather_bootstrap_data).and_return({ 'foo' => 'bar' })
       expect { Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._load_backup_config(nil) }.to raise_exception
     end
 
@@ -123,17 +123,17 @@ describe 'RcbuBackupWrapper' do
       test_data = ['testdir1', 'testdir2']
       test_target = []
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._path_mapper(test_data, test_target)
-      test_target.should eql [{'FilePath' => 'testdir1', 'FileItemType' => 'Folder'},
-                              {'FilePath' => 'testdir2', 'FileItemType' => 'Folder'}]
+      test_target.should eql [{ 'FilePath' => 'testdir1', 'FileItemType' => 'Folder' },
+                              { 'FilePath' => 'testdir2', 'FileItemType' => 'Folder' }]
     end
 
     it 'updates FileItemType for existing directories' do
       test_data = ['testdir1', 'testdir2']
-      test_target = [{'FilePath' => 'testdir1', 'FileItemType' => 'Foo'},
-                     {'FilePath' => 'testdir2', 'FileItemType' => 'bar'}]
+      test_target = [{ 'FilePath' => 'testdir1', 'FileItemType' => 'Foo' },
+                     { 'FilePath' => 'testdir2', 'FileItemType' => 'bar' }]
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._path_mapper(test_data, test_target)
-      test_target.should eql [{'FilePath' => 'testdir1', 'FileItemType' => 'Folder'},
-                              {'FilePath' => 'testdir2', 'FileItemType' => 'Folder'}]
+      test_target.should eql [{ 'FilePath' => 'testdir1', 'FileItemType' => 'Folder' },
+                              { 'FilePath' => 'testdir2', 'FileItemType' => 'Folder' }]
     end
   end
 
@@ -275,26 +275,26 @@ describe 'RcbuBackupWrapper' do
 
         it 'sets the specified value' do
           @test_obj.backup_obj.send(api_name).should eql nil
-          @test_obj.update({option => @test_value}).should eql true
+          @test_obj.update({ option => @test_value }).should eql true
           @test_obj.backup_obj.send(api_name).should eql @test_value
         end
 
         it "Doesn't update the object when the value is unchanged" do
           @test_obj.backup_obj.send(api_name).should eql @test_value
-          @test_obj.update({option => @test_value}).should eql false
+          @test_obj.update({ option => @test_value }).should eql false
         @test_obj.backup_obj.send(api_name).should eql @test_value
         end
 
         it "Doesn't update the object when passed a nil value" do
           @test_obj.backup_obj.send(api_name).should eql @test_value
-          @test_obj.update({option => nil}).should eql false
+          @test_obj.update({ option => nil }).should eql false
           @test_obj.backup_obj.send(api_name).should eql @test_value
         end
       end
     end
 
     # Test indirect maps
-    {inclusions: 'Inclusions', exclusions: 'Exclusions'}.each do |option, api_name|
+    { inclusions: 'Inclusions', exclusions: 'Exclusions' }.each do |option, api_name|
       describe "for option #{option}" do
         before :each do
           @test_value = ["Test #{option} Value 1", "Test #{option} Value 2", "Test #{option} Value 3"]
@@ -304,19 +304,19 @@ describe 'RcbuBackupWrapper' do
 
         it 'sets the proper path hash' do
           @test_obj.backup_obj.send(api_name).should eql []
-          @test_obj.update({option => @test_value}).should eql true
+          @test_obj.update({ option => @test_value }).should eql true
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
         end
 
         it "Doesn't update the object when the value is unchanged" do
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
-          @test_obj.update({option => @test_value}).should eql false
+          @test_obj.update({ option => @test_value }).should eql false
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
         end
 
         it "Doesn't update the object when passed a nil value" do
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
-          @test_obj.update({option => nil}).should eql false
+          @test_obj.update({ option => nil }).should eql false
           @test_obj.backup_obj.send(api_name).should eql @api_test_value
         end
       end

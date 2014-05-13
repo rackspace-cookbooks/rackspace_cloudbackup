@@ -59,7 +59,7 @@ describe 'gather_bootstrap_data' do
   end
 
   it 'returns properly formatted content' do
-    test_content = {'foo' => 'bar', 'bar' => 'baz', 'baz' => 'foobar'}
+    test_content = { 'foo' => 'bar', 'bar' => 'baz', 'baz' => 'foobar' }
     test_file = GatherBootstrapDataTestHelpers::DummyBootstrapFile.new(JSON.dump(test_content))
     Opscode::Rackspace::CloudBackup.gather_bootstrap_data(test_file.path).should eql test_content
     test_file.close

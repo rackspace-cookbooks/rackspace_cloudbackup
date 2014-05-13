@@ -183,10 +183,10 @@ describe 'RcbuBackupObj' do
       end
       # Inclusions and Exclusions must be arrays of hashes
       # They are handled differently by the .dup override to make a deep copy
-      @test_values['Inclusions'] = [{val: 'Test Includes Value 1'}, {val: 'Test Includes Value 2'}]
-      @test_differing_values['Inclusions'] = [{val: 'Test Differing Includes Value 1'}, {val: 'Test Includes Value 2'}]
-      @test_values['Exclusions'] = [{val: 'Test Excludes Value 1'}, {val: 'Test Excludes Value 2'}]
-      @test_differing_values['Inclusions'] = [{val: 'Test Differing Includes Value 1'}, {val: 'Test Includes Value 2'}]
+      @test_values['Inclusions'] = [{ val: 'Test Includes Value 1' }, { val: 'Test Includes Value 2' }]
+      @test_differing_values['Inclusions'] = [{ val: 'Test Differing Includes Value 1' }, { val: 'Test Includes Value 2' }]
+      @test_values['Exclusions'] = [{ val: 'Test Excludes Value 1' }, { val: 'Test Excludes Value 2' }]
+      @test_differing_values['Inclusions'] = [{ val: 'Test Differing Includes Value 1' }, { val: 'Test Includes Value 2' }]
     end
 
     it 'returns true when all attributes are the same' do

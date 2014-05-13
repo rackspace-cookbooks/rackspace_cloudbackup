@@ -36,7 +36,7 @@ module RcbuApiWrapperTestHelpers
       api_token: 'Test API Token',
 
       # For write tests
-      dummy_write_data: { 'name' => 'dataW', 'key1' => 'dataW-1', 'key2' => 'dataW-2'},
+      dummy_write_data: { 'name' => 'dataW', 'key1' => 'dataW-1', 'key2' => 'dataW-2' },
       dummy_config_id:  'TestConfigurationID'
     }
   end
@@ -98,7 +98,7 @@ module RcbuApiWrapperTestHelpers
     base_dataset = []
     retVal = []
     3.times do |x|
-      base_dataset.push({ 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}"})
+      base_dataset.push({ 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}" })
     end
     retVal.push(base_dataset)
 
@@ -106,7 +106,7 @@ module RcbuApiWrapperTestHelpers
     3.times do |y|
       # Intentionally remove data0 so we can tell which set the data came from.
       x = y + 1
-      base_dataset.push({ 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}"})
+      base_dataset.push({ 'name' => "data#{x}", 'key1' => "data#{x}-1", 'key2' => "data#{x}-2", 'BackupConfigurationName' => "data#{x}" })
     end
     retVal.push(base_dataset)
 
@@ -140,7 +140,7 @@ module RcbuApiWrapperTestHelpers
                                                'Content-Length'  => /.*/,
                                                'User-Agent'      => /.*/
                                              }).
-      to_return(:status => 200, :body => identity_data.to_json, :headers => {'Content-Type' => 'application/json'})
+      to_return(:status => 200, :body => identity_data.to_json, :headers => { 'Content-Type' => 'application/json' })
   end
   module_function :mock_identity_API
 
@@ -157,9 +157,9 @@ module RcbuApiWrapperTestHelpers
            'User-Agent'      => /.*/
            }).
       # Overload the data response for subsequent call testing
-      to_return({ :status => 200, :body => rcbu_API_configurations_data[0].to_json, :headers => {'Content-Type' => 'application/json'} },
-                { :status => 200, :body => rcbu_API_configurations_data[1].to_json, :headers => {'Content-Type' => 'application/json'} },
-                { :status => 400, :body => '', :headers => {}})
+      to_return({ :status => 200, :body => rcbu_API_configurations_data[0].to_json, :headers => { 'Content-Type' => 'application/json' } },
+                { :status => 200, :body => rcbu_API_configurations_data[1].to_json, :headers => { 'Content-Type' => 'application/json' } },
+                { :status => 400, :body => '', :headers => {} })
 
     # Mock post for create_config
     stub_request(:post, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/").
@@ -176,8 +176,8 @@ module RcbuApiWrapperTestHelpers
              'User-Agent'      => /.*/
            }).
       # Overload the data response for bad call testing
-      to_return({:status => 200, :body => '', :headers => {}},
-                {:status => 400, :body => '', :headers => {}})
+      to_return({ :status => 200, :body => '', :headers => {} },
+                { :status => 400, :body => '', :headers => {} })
 
     # Mock put for update_config
     stub_request(:put, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/#{data[:dummy_config_id]}").
@@ -194,8 +194,8 @@ module RcbuApiWrapperTestHelpers
              'User-Agent'      => /.*/
            }).
       # Overload the data response for bad call testing
-      to_return({:status => 200, :body => '', :headers => {}},
-                {:status => 400, :body => '', :headers => {}})
+      to_return({ :status => 200, :body => '', :headers => {} },
+                { :status => 400, :body => '', :headers => {} })
 
   end
   module_function :mock_rcbu_backup_configuration_api
