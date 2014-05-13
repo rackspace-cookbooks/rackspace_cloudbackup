@@ -365,7 +365,5 @@ describe 'RcbuBackupObj' do
         copy.send(attribute).should eql @test_obj.send(attribute)
       end
     end
-
-    # TODO: INCOMPLETE
   end
 end
