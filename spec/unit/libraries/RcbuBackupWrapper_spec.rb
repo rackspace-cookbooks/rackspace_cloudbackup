@@ -19,6 +19,7 @@ require 'rspec_helper'
 
 require_relative '../../../libraries/RcbuBackupWrapper.rb'
 
+# Define the unique helper module for this test suite.
 module RcbuBackupWrapperTestHelpers
   def dummy_bootstrap_data
     return {

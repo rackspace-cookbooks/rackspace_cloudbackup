@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Define the CloudBackupTestHelpers which provides shared helper code for all tests.
 module CloudBackupTestHelpers
   # Test data from driveclient-1.16.006544-0.x86_64
   def valid_bootstrap_data

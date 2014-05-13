@@ -18,7 +18,9 @@
 require 'tempfile'
 require 'json'
 
+# Define the unique helper module for this test suite.
 module GatherBootstrapDataTestHelpers
+  # This class provides a tempfile for testing file IO
   class DummyBootstrapFile
     def initialize(content)
       @file = Tempfile.new('rackspaceCloudbackup_gatherBootstrapData_testData')

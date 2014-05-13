@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Define the unique helper module for this test suite.
 module ConfigureCloudBackupHwrpSpecHelpers
   def initialize_tests
     # This is required here as ChefSpec interferes with WebMocks, breaking tests

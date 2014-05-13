@@ -22,6 +22,7 @@ require_relative '../../../libraries/MockRcbuApiWrapper.rb'
 
 include WebMock::API
 
+# Define the unique helper module for this test suite.
 module MockRcbuApiWrapperTestHelpers
   def test_data
     return {

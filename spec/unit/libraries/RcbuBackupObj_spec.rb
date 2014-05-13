@@ -20,6 +20,7 @@ require 'rspec_helper'
 require_relative '../../../libraries/RcbuBackupObj.rb'
 require_relative '../../../libraries/MockRcbuApiWrapper.rb'
 
+# Define the unique helper module for this test suite.
 module RcbuBackupObjTestHelpers
   def test_api_wrapper
     return Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new('Test API Username',
