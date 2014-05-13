@@ -49,7 +49,7 @@ module RegisterAgentHwrpSpecHelpers
 
     def initialize(command)
       @testhook_command = command
-      testhook_run_called = false
+      @testhook_run_called = false
     end
 
     def run_command
@@ -92,7 +92,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
     { label:                'Attr Test Label',
       rackspace_api_key:    'Attr Test Key',
       rackspace_username:   'Attr Test Username',
-      bootstrap_file_path:  'Attr Test Bootstrap File Path',
+      bootstrap_file_path:  'Attr Test Bootstrap File Path'
     }.each do |attr, value|
       describe "##{attr}" do
         before :all do
@@ -182,8 +182,7 @@ describe 'rackspace_cloudbackup_register_agent_hwrp' do
         @test_obj.load_current_resource
         expect { @test_obj.action_register }.to raise_exception
       end
-
-      end
+    end
 
     describe 'action_nothing' do
       before :each do
