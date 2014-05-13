@@ -60,7 +60,7 @@ module ConfigureCloudBackupHwrpSpecHelpers
     # As the common_dummy_data block contains an inner hash we need to recreate the hash as a single depth key:value pair
     # using the test_value value to pass into the TestResourceData test class.
     # We also need to add the name parameter which is not present in the dummy data set as is it handled by the provider, not the resource.
-    return CloudBackupTestHelpers::TestResourceData.new(common_dummy_data.merge(common_dummy_data) { |k,v| v[:test_value] }.merge(name: 'Test Name'))
+    return CloudBackupTestHelpers::TestResourceData.new(common_dummy_data.merge(common_dummy_data) { |k, v| v[:test_value] }.merge(name: 'Test Name'))
     # Everybody got that? http://lost.cubit.net/archives/assets_c/2010/04/04122010_6x08_Spaceballs-thumb-470x258-3171.jpg
   end
   module_function :common_new_resource_data
@@ -98,7 +98,7 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
         @test_resource.label.should eql 'Test Label'
       end
 
-      ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data.merge(ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data) { |k,v| v[:default] }.delete_if { |k,v| v.nil? }.each do |option, default_value|
+      ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data.merge(ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data) { |k, v| v[:default] }.delete_if { |k, v| v.nil? }.each do |option, default_value|
         it "should default #{option} to #{default_value}" do
           @test_resource.send(option).should eql default_value
         end

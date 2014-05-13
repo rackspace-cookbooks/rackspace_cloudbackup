@@ -368,5 +368,3 @@ describe 'RcbuBackupObj' do
     # TODO: INCOMPLETE
   end
 end
-
-
