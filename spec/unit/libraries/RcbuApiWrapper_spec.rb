@@ -141,15 +141,15 @@ module RcbuApiWrapperTestHelpers
                                                'Accept-Encoding' => /.*/,
                                                'Content-Length'  => /.*/,
                                                'User-Agent'      => /.*/
-                                             }).
-      to_return(status: 200, body: identity_data.to_json, headers: { 'Content-Type' => 'application/json' })
+                                             })
+      .to_return(status: 200, body: identity_data.to_json, headers: { 'Content-Type' => 'application/json' })
   end
   module_function :mock_identity_API
 
   def mock_rcbu_backup_configuration_api(data = test_data, configurations_data = rcbu_API_configurations_data)
     # Mock get for lookup_configurations
-    stub_request(:get, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/system/#{data[:agent_id]}").
-      with(headers: {
+    stub_request(:get, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/system/#{data[:agent_id]}")
+      .with(headers: {
            # Headers with values we care about
            'Accept'       => 'application/json',
            'X-Auth-Token' => data[:api_token],
@@ -157,15 +157,16 @@ module RcbuApiWrapperTestHelpers
            # Headers we don't care about, but need to specify for mocking
            'Accept-Encoding' => /.*/,
            'User-Agent'      => /.*/
-           }).
-      # Overload the data response for subsequent call testing
-      to_return({ status: 200, body: rcbu_API_configurations_data[0].to_json, headers: { 'Content-Type' => 'application/json' } },
-                { status: 200, body: rcbu_API_configurations_data[1].to_json, headers: { 'Content-Type' => 'application/json' } },
-                { status: 400, body: '', headers: {} })
+           }).to_return(
+                        # Overload the data response for subsequent call testing
+                        { status: 200, body: rcbu_API_configurations_data[0].to_json, headers: { 'Content-Type' => 'application/json' } },
+                        { status: 200, body: rcbu_API_configurations_data[1].to_json, headers: { 'Content-Type' => 'application/json' } },
+                        { status: 400, body: '', headers: {} }
+                        )
 
     # Mock post for create_config
-    stub_request(:post, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/").
-      with(body: data[:dummy_write_data],
+    stub_request(:post, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/")
+      .with(body: data[:dummy_write_data],
            headers: {
              # Headers with values we care about
              'Content-Type' => 'application/json',
@@ -176,14 +177,15 @@ module RcbuApiWrapperTestHelpers
              'Accept-Encoding' => /.*/,
              'Content-Length'  => /.*/,
              'User-Agent'      => /.*/
-           }).
-      # Overload the data response for bad call testing
-      to_return({ status: 200, body: '', headers: {} },
-                { status: 400, body: '', headers: {} })
+           }).to_return(
+                        # Overload the data response for bad call testing
+                        { status: 200, body: '', headers: {} },
+                        { status: 400, body: '', headers: {} }
+                        )
 
     # Mock put for update_config
-    stub_request(:put, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/#{data[:dummy_config_id]}").
-      with(body: data[:dummy_write_data],
+    stub_request(:put, "https://#{data[:region]}.mockrcbu.local/v1.0/#{data[:api_tenant_id]}/backup-configuration/#{data[:dummy_config_id]}")
+      .with(body: data[:dummy_write_data],
            headers: {
              # Headers with values we care about
              'Content-Type' => 'application/json',
@@ -194,10 +196,11 @@ module RcbuApiWrapperTestHelpers
              'Accept-Encoding' => /.*/,
              'Content-Length'  => /.*/,
              'User-Agent'      => /.*/
-           }).
-      # Overload the data response for bad call testing
-      to_return({ status: 200, body: '', headers: {} },
-                { status: 400, body: '', headers: {} })
+           }).to_return(
+                        # Overload the data response for bad call testing
+                        { status: 200, body: '', headers: {} },
+                        { status: 400, body: '', headers: {} }
+                        )
   end
   module_function :mock_rcbu_backup_configuration_api
 end
