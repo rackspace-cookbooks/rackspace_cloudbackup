@@ -27,3 +27,7 @@ CyclomaticComplexity:
 # Raise allowed parameter count to 8, 5 is a bit low.
 ParameterLists:
   Max: 8
+
+# 123_456 doesn't add value IMO.
+NumericLiterals:
+  Enabled: false
