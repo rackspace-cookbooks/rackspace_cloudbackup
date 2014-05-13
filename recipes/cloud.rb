@@ -80,10 +80,10 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
 
   # Set up the array the config template will use
   # This is separate from node['rackspace_cloudbackup']['backups'] to use the label logic above
-  template_data.push({ 'label'    => job['label'],
-                       'location' => job['location'],
-                       'comment'  => job['comment'],
-                       'enabled'  => job['enabled'] })
+  template_data.push('label'    => job['label'],
+                     'location' => job['location'],
+                     'comment'  => job['comment'],
+                     'enabled'  => job['enabled'])
 
 end
 
