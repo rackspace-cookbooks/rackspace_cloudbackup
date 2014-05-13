@@ -51,5 +51,5 @@ rackspace_cloudbackup_register_agent "Register #{node['hostname']}" do
 end
 
 service "driveclient" do
-  action :enable
+  action [:enable, :start]
 end
