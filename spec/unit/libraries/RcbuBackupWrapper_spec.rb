@@ -101,7 +101,8 @@ describe 'RcbuBackupWrapper' do
         RcbuBackupWrapperTestHelpers.load_backup_config_stub(arg)
       end
 
-      Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._load_backup_config('Test Bootstrap File').should eql RcbuBackupWrapperTestHelpers.load_backup_config_stub('Test Bootstrap File')
+      Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._load_backup_config('Test Bootstrap File')
+        .should eql RcbuBackupWrapperTestHelpers.load_backup_config_stub('Test Bootstrap File')
     end
   end
 
@@ -121,7 +122,7 @@ describe 'RcbuBackupWrapper' do
 
   describe '_path_mapper' do
     it 'adds new directories to the target array' do
-      test_data = ['testdir1', 'testdir2']
+      test_data = %w(testdir1 testdir2)
       test_target = []
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._path_mapper(test_data, test_target)
       test_target.should eql [{ 'FilePath' => 'testdir1', 'FileItemType' => 'Folder' },
@@ -129,7 +130,7 @@ describe 'RcbuBackupWrapper' do
     end
 
     it 'updates FileItemType for existing directories' do
-      test_data = ['testdir1', 'testdir2']
+      test_data = %w(testdir1 testdir2)
       test_target = [{ 'FilePath' => 'testdir1', 'FileItemType' => 'Foo' },
                      { 'FilePath' => 'testdir2', 'FileItemType' => 'bar' }]
       Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._path_mapper(test_data, test_target)
@@ -283,7 +284,7 @@ describe 'RcbuBackupWrapper' do
         it "Doesn't update the object when the value is unchanged" do
           @test_obj.backup_obj.send(api_name).should eql @test_value
           @test_obj.update(option => @test_value).should eql false
-        @test_obj.backup_obj.send(api_name).should eql @test_value
+          @test_obj.backup_obj.send(api_name).should eql @test_value
         end
 
         it "Doesn't update the object when passed a nil value" do
