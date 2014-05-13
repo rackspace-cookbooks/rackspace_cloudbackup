@@ -27,13 +27,13 @@ module RegisterAgentHwrpSpecHelpers
   module_function :initialize_tests
 
   def common_new_resource_data
-    return CloudBackupTestHelpers::TestResourceData.new({
+    return CloudBackupTestHelpers::TestResourceData.new(
                                                           name:                 'Test Name',
                                                           label:                'Test Label',
                                                           rackspace_api_key:    'Test Key',
                                                           rackspace_username:   'Test Username',
-                                                          bootstrap_file_path:  'Test Bootstrap File Path',
-                                                        })
+                                                          bootstrap_file_path:  'Test Bootstrap File Path'
+                                                        )
   end
   module_function :common_new_resource_data
 

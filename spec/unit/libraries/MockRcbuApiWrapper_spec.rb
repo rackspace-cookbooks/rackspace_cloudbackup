@@ -134,7 +134,7 @@ describe 'MockRcbuApiWrapper' do
 
     it 'fails if the config_id doesn\'t exist in mock_configurations class variable' do
       @test_obj.mock_configurations.should eql []
-      expect { @test_obj.update_config(12345, { foo: 'bar' }) }.to raise_exception
+      expect { @test_obj.update_config(12345,  foo: 'bar' ) }.to raise_exception
     end
 
     it 'updates existing entries in the mock_configurations class variable' do
