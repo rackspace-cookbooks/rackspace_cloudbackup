@@ -34,7 +34,7 @@ module Opscode
         end
 
         def _identity_data(api_username, api_key)
-          fail "Why are you calling _identity_data directly?"
+          fail 'Why are you calling _identity_data directly?'
         end
 
         def lookup_configurations

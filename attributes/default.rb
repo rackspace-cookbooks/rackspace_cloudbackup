@@ -85,11 +85,11 @@ default['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention'] 
 
 
 # time: backup timing settings.  These settings are Cron format.
-default['rackspace_cloudbackup']['backups_defaults']['time']['day']     = "*"
-default['rackspace_cloudbackup']['backups_defaults']['time']['month']   = "*"
-default['rackspace_cloudbackup']['backups_defaults']['time']['hour']    = "3"
-default['rackspace_cloudbackup']['backups_defaults']['time']['minute']  = "14"
-default['rackspace_cloudbackup']['backups_defaults']['time']['weekday'] = "*"
+default['rackspace_cloudbackup']['backups_defaults']['time']['day']     = '*'
+default['rackspace_cloudbackup']['backups_defaults']['time']['month']   = '*'
+default['rackspace_cloudbackup']['backups_defaults']['time']['hour']    = '3'
+default['rackspace_cloudbackup']['backups_defaults']['time']['minute']  = '14'
+default['rackspace_cloudbackup']['backups_defaults']['time']['weekday'] = '*'
 
 # Cron settings: Default settings for the cron jobs
 default['rackspace_cloudbackup']['backups_defaults']['cron']['user']   = nil

@@ -246,7 +246,7 @@ describe 'RcbuBackupObj' do
       end
     end
 
-    it "loads BackupConfigurationId into a class instance variable" do
+    it 'loads BackupConfigurationId into a class instance variable' do
       @test_api_wrapper.create_config( 'BackupConfigurationName' => @test_label )
       @test_api_wrapper.mock_configurations.length.should eql 1
       @test_obj.load
@@ -340,8 +340,8 @@ describe 'RcbuBackupObj' do
       # Deeply hooking into the underlying mock object to test this.
       orig_mock_api_data = @test_api_wrapper.mock_configurations[0].dup
 
-      @test_obj.MachineAgentId = "Test Machine Agent ID"
-      @test_obj.NotifySuccess  = "Test Notify Value"
+      @test_obj.MachineAgentId = 'Test Machine Agent ID'
+      @test_obj.NotifySuccess  = 'Test Notify Value'
 
       @test_obj.save
       @test_api_wrapper.mock_configurations.length.should eql 1

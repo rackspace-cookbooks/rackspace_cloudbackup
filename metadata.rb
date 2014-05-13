@@ -7,8 +7,8 @@ long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 
 version          '1.0.0'
 
-recipe           "rackspace-cloud-backup", "Installs and registers cloud backup"
+recipe           'rackspace-cloud-backup', 'Installs and registers cloud backup'
 
-depends "apt", "~> 2.0"
-depends "yum", "~> 3.0"
-depends "ohai"
+depends 'apt', '~> 2.0'
+depends 'yum', '~> 3.0'
+depends 'ohai'

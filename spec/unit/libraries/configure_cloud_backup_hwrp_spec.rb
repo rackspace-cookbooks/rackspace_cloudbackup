@@ -210,8 +210,8 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
       end
 
       # Test the special cases
-      { inclusions: { obj_attr: 'Inclusions', expected_value: [{"FilePath"=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:inclusions][:test_value][0], "FileItemType"=>"Folder"}]},
-        exclusions: { obj_attr: 'Exclusions', expected_value: [{"FilePath"=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:exclusions][:test_value][0], "FileItemType"=>"Folder"}]}
+      { inclusions: { obj_attr: 'Inclusions', expected_value: [{'FilePath'=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:inclusions][:test_value][0], 'FileItemType'=>'Folder'}]},
+        exclusions: { obj_attr: 'Exclusions', expected_value: [{'FilePath'=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:exclusions][:test_value][0], 'FileItemType'=>'Folder'}]}
       }.each do |attr, opt_hash|
         it "Updates the object with #{attr}" do
           @test_obj.action_create
@@ -250,13 +250,13 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
           # This is dirty, but functional
           # Raise a specific exception we can catch in the test
           # If the stub is called, we catch the exception, and we're good.
-          fail "EXPECTED ERROR: action_create called"
+          fail 'EXPECTED ERROR: action_create called'
         end
 
         @test_obj.current_resource.api_obj.backup_obj.BackupConfigurationId.should eql nil
         # Catch the exception thrown by the stub
         # This is dirty, but makes the test so much easier
-        expect { @test_obj.action_create_if_missing }.to raise_error("EXPECTED ERROR: action_create called")
+        expect { @test_obj.action_create_if_missing }.to raise_error('EXPECTED ERROR: action_create called')
       end
         
       
@@ -267,7 +267,7 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
 
         # This test should NOT invoke action_create
         @test_obj.stub(:action_create) do
-          fail "ERROR: action_create called unexpectedly"
+          fail 'ERROR: action_create called unexpectedly'
         end
 
         @test_obj.current_resource.api_obj.backup_obj.BackupConfigurationId.should_not eql nil

@@ -53,7 +53,7 @@ describe 'gather_bootstrap_data' do
   end
   
   it 'returns nil when the content is malformed' do
-    test_file = GatherBootstrapDataTestHelpers::DummyBootstrapFile.new("wqerklkshksdagksaldgvbwae;o")
+    test_file = GatherBootstrapDataTestHelpers::DummyBootstrapFile.new('wqerklkshksdagksaldgvbwae;o')
     Opscode::Rackspace::CloudBackup.gather_bootstrap_data(test_file.path).should eql nil
     test_file.close
   end

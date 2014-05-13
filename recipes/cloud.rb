@@ -17,11 +17,11 @@
 #
 
 # Install the agent
-include_recipe "rackspace_cloudbackup::cloud_agent"
+include_recipe 'rackspace_cloudbackup::cloud_agent'
 
 
 # Install deps for the Python scripts
-package "python-argparse" do
+package 'python-argparse' do
   action :install
 end
 
@@ -30,8 +30,8 @@ end
   cookbook_file "/usr/local/bin/#{script}" do
     source script
     mode 00755
-    owner "root"
-    group "root"
+    owner 'root'
+    group 'root'
   end
 end
 
@@ -69,7 +69,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
     is_active            job['enabled']
 
     # Backups configured with this module are triggered by cron for consistency with non-RS cloud
-    frequency            "Manually"
+    frequency            'Manually'
     action :create
   end
 
@@ -89,11 +89,11 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
 end
 
 # Write the configuration file for the cron job script
-template "/etc/driveclient/run_backup.conf.yaml" do
+template '/etc/driveclient/run_backup.conf.yaml' do
   source 'run_backup.config.yaml.erb'
-  owner "root"
-  group "root"
-  mode "0600"
+  owner 'root'
+  group 'root'
+  mode '0600'
   action :create
   variables(
             api_username:  node['rackspace']['cloud_credentials']['username'],

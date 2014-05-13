@@ -273,7 +273,7 @@ describe 'RcbuBackupWrapper' do
           @test_value = "Test #{option} Value"
         end
         
-        it "sets the specified value" do
+        it 'sets the specified value' do
           @test_obj.backup_obj.send(api_name).should eql nil
           @test_obj.update({option => @test_value}).should eql true
           @test_obj.backup_obj.send(api_name).should eql @test_value
@@ -302,7 +302,7 @@ describe 'RcbuBackupWrapper' do
           Opscode::Rackspace::CloudBackup::RcbuBackupWrapper._path_mapper(@test_value, @api_test_value)
         end
       
-        it "sets the proper path hash" do
+        it 'sets the proper path hash' do
           @test_obj.backup_obj.send(api_name).should eql []
           @test_obj.update({option => @test_value}).should eql true
           @test_obj.backup_obj.send(api_name).should eql @api_test_value

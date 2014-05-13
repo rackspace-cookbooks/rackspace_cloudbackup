@@ -17,26 +17,26 @@
 #
 
 case node[:platform]
-  when "redhat", "centos"
-    yum_repository "cloud-backup" do
-      description "Rackspace cloud backup agent repo"
-      url "http://agentrepo.drivesrvr.com/redhat/"
+  when 'redhat', 'centos'
+    yum_repository 'cloud-backup' do
+      description 'Rackspace cloud backup agent repo'
+      url 'http://agentrepo.drivesrvr.com/redhat/'
 
       # This will be needed with opscode-yum ~> 3.0, but not present on opscode-yum <3.0.0
       # gpgcheck false
   end
-  when "ubuntu","debian"
-    apt_repository "cloud-backup" do
-      uri "http://agentrepo.drivesrvr.com/debian/"
-      arch "amd64"
-      distribution "serveragent"
-      components ["main"]
-      key "http://agentrepo.drivesrvr.com/debian/agentrepo.key"
+  when 'ubuntu','debian'
+    apt_repository 'cloud-backup' do
+      uri 'http://agentrepo.drivesrvr.com/debian/'
+      arch 'amd64'
+      distribution 'serveragent'
+      components ['main']
+      key 'http://agentrepo.drivesrvr.com/debian/agentrepo.key'
       action :add
   end
 end
 
-package "driveclient" do
+package 'driveclient' do
   action :upgrade
 end
 
@@ -50,6 +50,6 @@ rackspace_cloudbackup_register_agent "Register #{node['hostname']}" do
   notifies :restart, 'service[driveclient]'
 end
 
-service "driveclient" do
+service 'driveclient' do
   action [:enable, :start]
 end

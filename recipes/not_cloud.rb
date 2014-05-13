@@ -8,32 +8,32 @@
 #
 #set up repos
 case node[:platform]
-  when "redhat", "centos"
-    yum_key "GPG-KEY-rackops" do
-      url "http://repo.rackops.org/rackops-signing-key.asc"
+  when 'redhat', 'centos'
+    yum_key 'GPG-KEY-rackops' do
+      url 'http://repo.rackops.org/rackops-signing-key.asc'
       action :add
     end
-    yum_repository "rackops-repo" do
-      description "Rackspace rackops repo"
-      url "http://repo.rackops.org/rpm/"
-	key "GPG-KEY-rackops"
+    yum_repository 'rackops-repo' do
+      description 'Rackspace rackops repo'
+      url 'http://repo.rackops.org/rpm/'
+	key 'GPG-KEY-rackops'
   end
-  when "ubuntu","debian"
-    case node["lsb"][:codename]
-    when "precise"
-      apt_repository "rackops-repo" do
-        uri "http://repo.rackops.org/apt/ubuntu"
-        distribution "precise"
-        components ["main"]
-        key "http://repo.rackops.org/rackops-signing-key.asc"
+  when 'ubuntu','debian'
+    case node['lsb'][:codename]
+    when 'precise'
+      apt_repository 'rackops-repo' do
+        uri 'http://repo.rackops.org/apt/ubuntu'
+        distribution 'precise'
+        components ['main']
+        key 'http://repo.rackops.org/rackops-signing-key.asc'
         action :add
     end
-    when "wheezy"
-      apt_repository "rackops-repo" do
-        uri "http://repo.rackops.org/apt/debian"
-        distribution "wheezy"
-        components ["main"]
-        key "http://repo.rackops.org/rackops-signing-key.asc"
+    when 'wheezy'
+      apt_repository 'rackops-repo' do
+        uri 'http://repo.rackops.org/apt/debian'
+        distribution 'wheezy'
+        components ['main']
+        key 'http://repo.rackops.org/rackops-signing-key.asc'
         action :add
     end
   end
@@ -41,12 +41,12 @@ end
 
 #install turbolift
 case node[:platform]
-  when "redhat", "centos"
-    package "python-turbolift" do
+  when 'redhat', 'centos'
+    package 'python-turbolift' do
       action :upgrade
   end
-  when "ubuntu","debian"
-    package "python-turbolift" do
+  when 'ubuntu','debian'
+    package 'python-turbolift' do
       #options "--allow-unauthenticated"
       action :upgrade
   end

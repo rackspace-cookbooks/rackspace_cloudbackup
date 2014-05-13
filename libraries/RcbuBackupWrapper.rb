@@ -106,9 +106,9 @@ module Opscode
             tgt_class = @mocking ? Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper : Opscode::Rackspace::CloudBackup::RcbuApiWrapper
             api_obj = tgt_class.new(api_username, api_key, region, @agent_config['AgentId'])
             @@api_obj_cache.save(api_obj, api_username, api_key, region, @agent_config['AgentId']) # rubocop:disable ClassVars
-            Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object")
+            Chef::Log.debug('Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object')
           else
-            Chef::Log.debug("Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object")
+            Chef::Log.debug('Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object')
           end
           
           return api_obj
