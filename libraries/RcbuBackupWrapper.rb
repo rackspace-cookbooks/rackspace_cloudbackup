@@ -23,6 +23,8 @@ require_relative 'gather_bootstrap_data.rb'
 module Opscode
   module Rackspace
     module CloudBackup
+      # RcbuBackupWrapper: Wrap the underlying objects and provide an object class directly consumable by the HWRP.
+      # This is essentially a HWRP to RcbuBackupObj glue class.
       class RcbuBackupWrapper
         attr_accessor :mocking, :agent_config, :backup_obj, :direct_name_map
 
@@ -144,7 +146,7 @@ module Opscode
               self.class._path_mapper(value, @backup_obj.Exclusions)
 
             else
-              raise "Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.update: Unknown option #{key}"
+              fail "Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.update: Unknown option #{key}"
             end
           end
 

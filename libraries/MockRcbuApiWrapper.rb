@@ -20,6 +20,7 @@ require_relative 'RcbuApiWrapper.rb'
 module Opscode
   module Rackspace
     module CloudBackup
+      # MockRcbuApiWrapper: Mock out the RcbuApiWrapper class for testing
       class MockRcbuApiWrapper < RcbuApiWrapper
         attr_accessor :mock_configurations
 

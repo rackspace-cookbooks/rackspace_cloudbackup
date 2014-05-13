@@ -18,7 +18,13 @@
 module Opscode
   module Rackspace
     module CloudBackup
+      # RcbuBackupObj: Provide a object class representing a backup object in the API
       class RcbuBackupObj
+        # Disable the VariableName cop which fails on SnakeCase variable names
+        # This class uses the API variable naming as it is representing the API.
+        # As such variable names match the API, not style best practices.
+        # rubocop: disable VariableName
+
         attr_accessor :api_wrapper, :all_attributes, :settable_attributes, :label
 
         def initialize(label, api_wrapper)
@@ -57,7 +63,7 @@ module Opscode
 
           # Inclusions and Exclusions need to be arrays
           if @Inclusions.nil?
-              @Inclusions = []
+            @Inclusions = []
           end
           if @Exclusions.nil?
             @Exclusions = []
@@ -122,12 +128,11 @@ module Opscode
           copy = super
 
           # Inclusions and Exclusions are arrays and are shallow copied by dup
-          copy.Inclusions=_deep_copy_array(@Inclusions)
-          copy.Exclusions=_deep_copy_array(@Exclusions)
+          copy.Inclusions = _deep_copy_array(@Inclusions)
+          copy.Exclusions = _deep_copy_array(@Exclusions)
 
           return copy
         end
-
       end
     end
   end

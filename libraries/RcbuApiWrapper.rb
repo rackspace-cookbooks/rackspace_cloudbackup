@@ -21,6 +21,8 @@ require 'rest_client'
 module Opscode
   module Rackspace
     module CloudBackup
+      # RcbuApiWrapper: Provide a minimal SDK for interacting with the RCBU API
+      # RCBU is not supported by Fog, the RCBU team maintains their own SDKs and do not support Ruby.
       class RcbuApiWrapper
         attr_accessor :token, :rcbu_api_url, :agent_id, :configurations, :identity_api_url
 
@@ -36,9 +38,14 @@ module Opscode
 
           region.upcase!
           backup_catalog_region = backup_catalog['endpoints'].find { |e| e['region'] == region }
-          fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup details from service catalog for region #{region}" if backup_catalog_region.nil?
+          if backup_catalog_region.nil?
+            fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup details from service catalog for region #{region}"
+          end
+
           @rcbu_api_url = backup_catalog_region['publicURL']
-          fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}" if @rcbu_api_url.nil?
+          if @rcbu_api_url.nil?
+            fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup API URL from service catalog for region #{region}"
+          end
         end
 
         def _identity_data(api_username, api_key)

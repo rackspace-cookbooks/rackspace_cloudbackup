@@ -19,7 +19,9 @@ require 'json'
 
 module Opscode
   module Rackspace
+    # CloudBackup helper modules, this file adds methods to the namespace for handling bootstrap data
     module CloudBackup
+      # gather_bootstrap_data:  Read the bootstrap file and return loaded information.
       def gather_bootstrap_data(bootstrap_file)
         begin
           bootstrap_raw_data = open(bootstrap_file).read
