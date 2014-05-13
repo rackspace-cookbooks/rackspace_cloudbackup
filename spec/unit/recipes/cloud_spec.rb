@@ -80,9 +80,10 @@ describe 'rackspace_cloudbackup::cloud' do
                 expect(chef_run).to create_cloudbackup_configure_cloud_backup(job['label']).with(inclusions: [job['location']])
               end
 
+              # Test the behavior, not the implementation.  Don't worry that it's a definition
               it 'configures the cron job' do
-                # TODO: Finish
-                fail "Mittens!"
+                # TODO: Also spartan
+                expect(chef_run).to create_cron("'#{job['label']}' cronjob")
               end
             end
           end
