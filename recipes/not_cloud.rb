@@ -80,16 +80,16 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
   # Build the command
   # Broken up to keep lines short and to enable flag toggles
   command_str = '/usr/local/bin/turbolift_backup.sh -s'
-  command_str = " -u #{node['rackspace']['cloud_credentials']['username']}"
-  command_str = " -k #{node['rackspace']['cloud_credentials']['api_key']}"
-  command_str = " -d #{node['rackspace']['datacenter']}"
-  command_str = " -c #{container}"
-  command_str = " -l \"#{job['location']}\""
+  command_str += " -u #{node['rackspace']['cloud_credentials']['username']}"
+  command_str += " -k #{node['rackspace']['cloud_credentials']['api_key']}"
+  command_str += " -d #{node['rackspace']['datacenter']}"
+  command_str += " -c #{container}"
+  command_str += " -l \"#{job['location']}\""
 
   unless job['enabled']
     # Set the disabled bit
     # This is the primary value of the wrapper script, the job will still exist but turbolift won't run.
-    command_str = ' -D'
+    command_str += ' -D'
   end
 
   # Shared defininition from definitions/cron_wrapper.rb
