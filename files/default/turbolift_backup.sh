@@ -64,7 +64,8 @@ while getopts "k:u:d:c:l:Dsv" opt; do
 	    apiuser=${OPTARG}
 	    ;;
 	d)
-	    datacenter=${OPTARG}
+	    # turbolift expects lowercase datacenter
+	    datacenter=$(echo "${OPTARG}" | tr '[:upper:]' '[:lower:]')
 	    ;;
 	c)
 	    container=${OPTARG}
@@ -133,7 +134,8 @@ fi
 
 tarlocation=$(echo "$location" | sed -e 's|/|___|g')
 time=$(date +%Y-%m-%d_%H:%M:%S)
-turbolift --os-rax-auth $datacenter -u $username -a $apikey archive -s $location -c $container --verify --tar-name "${time} - ${tarlocation}"
+tarname="$(hostname -f)-${time}-${tarlocation}"
+turbolift --quiet --os-rax-auth $datacenter -u $apiuser -a $apikey archive -s $location -c $container --verify --tar-name $tarname
 retval=$?
 
 if [ $retval -ne 0 ]; then
@@ -141,7 +143,7 @@ if [ $retval -ne 0 ]; then
     exit 1
 else
     if [ $verbose -eq 1 ]; then
-	print_helper "NOTICE: Turbolift returned code ${retval} for location ${location}" $loglocation
+	print_helper "NOTICE: Turbolift returned success code ${retval} for location ${location}, backup file \"${tarname}\"" $loglocation
     fi
     exit 0
 fi
