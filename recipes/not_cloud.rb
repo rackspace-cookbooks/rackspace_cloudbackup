@@ -7,6 +7,7 @@
 # Apache 2.0
 #
 # set up repos
+
 case node[:platform]
 when 'redhat', 'centos'
   yum_key 'GPG-KEY-rackops' do
@@ -40,54 +41,64 @@ when 'ubuntu', 'debian'
 end
 
 # install turbolift
-case node[:platform]
-when 'redhat', 'centos'
-  package 'python-turbolift' do
-    action :upgrade
-  end
-when 'ubuntu', 'debian'
-  package 'python-turbolift' do
-    # options "--allow-unauthenticated"
-    action :upgrade
+package 'python-turbolift' do
+  action :upgrade
+end
+
+# Install the helper wrapper
+['turbolift_backup.sh'].each do |script|
+  cookbook_file "/usr/local/bin/#{script}" do
+    source script
+    mode 00755
+    owner 'root'
+    group 'root'
   end
 end
 
-# set up cronjob
-if node['rackspace_cloudbackup']['backup_locations'] && node['rackspace_cloudbackup']['backup_container'] && node['rackspace_cloudbackup']['rackspace_endpoint'] && node['rackspace_cloudbackup']['rackspace_apikey'] && node['rackspace_cloudbackup']['rackspace_username']
-  for location in node['rackspace_cloudbackup']['backup_locations'] do
-    cron "turbolift-#{location}" do
-      if node['rackspace_cloudbackup']['backup_cron_day']
-        day node['rackspace_cloudbackup']['backup_cron_day']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_hour']
-        hour node['rackspace_cloudbackup']['backup_cron_hour']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_minute']
-        minute node['rackspace_cloudbackup']['backup_cron_minute']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_month']
-        month node['rackspace_cloudbackup']['backup_cron_month']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_weekday']
-        weekday node['rackspace_cloudbackup']['backup_cron_weekday']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_user']
-        user node['rackspace_cloudbackup']['backup_cron_user']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_mailto']
-        mailto node['rackspace_cloudbackup']['backup_cron_mailto']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_path']
-        path node['rackspace_cloudbackup']['backup_cron_path']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_shell']
-        shell node['rackspace_cloudbackup']['backup_cron_shell']
-      end
-      if node['rackspace_cloudbackup']['backup_cron_home']
-        home node['rackspace_cloudbackup']['backup_cron_home']
-      end
-      command "time=$(date +\\%Y-\\%m-\\%d_\\%H:\\%M:\\%S); turbolift --os-rax-auth #{node['rackspace_cloudbackup']['rackspace_endpoint']} -u #{node['rackspace_cloudbackup']['rackspace_username']} -a #{node['rackspace_cloudbackup']['rackspace_apikey']} archive -s #{location} -c #{node['rackspace_cloudbackup']['backup_container']} --verify --tar-name \"${time} - #{location.gsub('/', '___')}\""
-      action :create
-    end
+# Ensure mandatory options are set
+if node['rackspace']['cloud_credentials']['username'].nil? || node['rackspace']['cloud_credentials']['api_key'].nil?
+  fail 'ERROR: Cloud credentials unset'
+end
+
+fail 'ERROR: datacenter not set' if node['rackspace']['datacenter'].nil?
+
+node['rackspace_cloudbackup']['backups'].each do |node_job|
+  job = node_job.dup # Obtain a copy that's not in the node attributes so we can tinker in it
+
+  if job['label'].nil?
+    # NOTE: This format intentionally matches earlier revisions to avoid creating duplicate backups
+    job['label'] = "Backup for #{node['ipaddress']}, backing up #{job['location']}"
+  end
+
+  if job['non_cloud'].nil?
+    job['non_cloud'] = {}
+  end
+
+  if job['enabled'].nil?
+    job['enabled'] = true
+  end
+
+  container = job['non_cloud']['container'].nil? ? node['rackspace_cloudbackup']['backups_defaults']['non_cloud_container'] : job['non_cloud']['container']
+  fail "ERROR: Target backup contianer not set for location \"#{job['location']}\"" if container.nil?
+
+  # Build the command
+  # Broken up to keep lines short and to enable flag toggles
+  command_str = '/usr/local/bin/turbolift_backup.sh -s'
+  command_str = " -u #{node['rackspace']['cloud_credentials']['username']}"
+  command_str = " -k #{node['rackspace']['cloud_credentials']['api_key']}"
+  command_str = " -d #{node['rackspace']['datacenter']}"
+  command_str = " -c #{container}"
+  command_str = " -l \"#{job['location']}\""
+
+  unless job['enabled']
+    # Set the disabled bit
+    # This is the primary value of the wrapper script, the job will still exist but turbolift won't run.
+    command_str = ' -D'
+  end
+
+  # Shared defininition from definitions/cron_wrapper.rb
+  cloud_backup_cron_configurator "#{job['label']} cron_configurator" do
+    job job
+    command command_str
   end
 end
