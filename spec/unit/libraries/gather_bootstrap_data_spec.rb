@@ -31,7 +31,7 @@ module GatherBootstrapDataTestHelpers
     end
 
     def path
-      return @file.path()
+      return @file.path
     end
 
     def close

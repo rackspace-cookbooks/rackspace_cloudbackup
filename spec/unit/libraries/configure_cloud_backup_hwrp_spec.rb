@@ -51,7 +51,7 @@ module ConfigureCloudBackupHwrpSpecHelpers
       backup_postscript:       { test_value: 'backup_postscript Attribute Test Value',       required: false, default: nil },
       missed_backup_action_id: { test_value: 7654,                                           required: false, default: 1 },
       mock:                    { test_value: true,                                           required: false, default: false },
-      rcbu_bootstrap_file:     { test_value: '/tmp/test_bootstrap_file.json',                required: false, default: '/etc/driveclient/bootstrap.json' },
+      rcbu_bootstrap_file:     { test_value: '/tmp/test_bootstrap_file.json',                required: false, default: '/etc/driveclient/bootstrap.json' }
     }
   end
   module_function :common_dummy_data
@@ -70,7 +70,6 @@ module ConfigureCloudBackupHwrpSpecHelpers
     return Chef::Provider::RackspaceCloudbackupConfigureCloudBackup.new(resource_data, nil)
   end
   module_function :common_test_obj
-
 end
 
 describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
@@ -99,7 +98,9 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
         @test_resource.label.should eql 'Test Label'
       end
 
-      ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data.merge(ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data) { |k, v| v[:default] }.delete_if { |k, v| v.nil? }.each do |option, default_value|
+      ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data
+        .merge(ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data) { |k, v| v[:default] }
+        .delete_if { |k, v| v.nil? }.each do |option, default_value|
         it "should default #{option} to #{default_value}" do
           @test_resource.send(option).should eql default_value
         end
@@ -193,9 +194,9 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
       end
 
       # Test the 'standard' options
-      [ :is_active, :version_retention, :frequency, :start_time_hour, :start_time_minute, :start_time_am_pm,
-        :day_of_week_id, :hour_interval, :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript,
-        :backup_postscript, :missed_backup_action_id ].each do |attr|
+      [:is_active, :version_retention, :frequency, :start_time_hour, :start_time_minute, :start_time_am_pm,
+       :day_of_week_id, :hour_interval, :time_zone_id, :notify_recipients, :notify_success, :notify_failure, :backup_prescript,
+       :backup_postscript, :missed_backup_action_id].each do |attr|
         # Test methodology:  Rely on updated_by_last_action to know if it made a change
         # Rely on the underlying tests to ensure @current_resource.api_obj.update to return true/false appropriately.
 
@@ -210,8 +211,10 @@ describe 'rackspace_cloudbackup_configure_cloud_backup_hwrp' do
       end
 
       # Test the special cases
-      { inclusions: { obj_attr: 'Inclusions', expected_value: [{ 'FilePath'=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:inclusions][:test_value][0], 'FileItemType'=>'Folder' }] },
-        exclusions: { obj_attr: 'Exclusions', expected_value: [{ 'FilePath'=>ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:exclusions][:test_value][0], 'FileItemType'=>'Folder' }] }
+      { inclusions: { obj_attr: 'Inclusions', expected_value: [{ 'FilePath' => ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:inclusions][:test_value][0],
+                                                                 'FileItemType' => 'Folder' }] },
+        exclusions: { obj_attr: 'Exclusions', expected_value: [{ 'FilePath' => ConfigureCloudBackupHwrpSpecHelpers.common_dummy_data[:exclusions][:test_value][0],
+                                                                 'FileItemType' => 'Folder' }] }
       }.each do |attr, opt_hash|
         it "Updates the object with #{attr}" do
           @test_obj.action_create
