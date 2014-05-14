@@ -98,7 +98,7 @@ template '/etc/driveclient/run_backup.conf.yaml' do
             api_username:  node['rackspace']['cloud_credentials']['username'],
             api_key:       node['rackspace']['cloud_credentials']['api_key'],
             api_region:    node['rackspace']['datacenter'],
-            backup_config: template_data,
+            backup_config: template_data
             )
 end
 
