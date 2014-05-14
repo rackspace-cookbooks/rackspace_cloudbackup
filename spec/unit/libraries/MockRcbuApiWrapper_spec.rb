@@ -30,7 +30,7 @@ module MockRcbuApiWrapperTestHelpers
       api_key:      'Test API Key',
       region:       'TESTREGION',    # Needs to be UPCASE
       agent_id:     'TestAgentID', # I believe in the real API this needs to be an int, but our code doesn't care
-      api_url:      'http://mockidentity.local/',
+      api_url:      'http://mockidentity.local/'
     }
   end
   module_function :test_data
@@ -41,7 +41,8 @@ describe 'MockRcbuApiWrapper' do
     before :each do
       @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
-      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                          @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'sets the agent_id class instance variable' do
@@ -65,7 +66,8 @@ describe 'MockRcbuApiWrapper' do
     before :each do
       @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
-      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                          @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'has none of your shennanigans' do
@@ -78,7 +80,8 @@ describe 'MockRcbuApiWrapper' do
     before :each do
       @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
-      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                          @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'lookup_configurations sets configurations class instance variable to [] when mock_configurations class variable is empty' do
@@ -130,7 +133,8 @@ describe 'MockRcbuApiWrapper' do
     before :each do
       @test_data = MockRcbuApiWrapperTestHelpers.test_data
       WebMock.disable_net_connect!
-      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key], @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
+      @test_obj = Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper.new(@test_data[:api_username], @test_data[:api_key],
+                                                                          @test_data[:region], @test_data[:agent_id], @test_data[:api_url])
     end
 
     it 'fails if the config_id doesn\'t exist in mock_configurations class variable' do
