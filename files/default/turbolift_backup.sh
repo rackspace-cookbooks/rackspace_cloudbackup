@@ -137,11 +137,11 @@ turbolift --os-rax-auth $datacenter -u $username -a $apikey archive -s $location
 retval=$?
 
 if [ $retval -ne 0 ]; then
-    print_helper "WARNING: Turbolift returned code ${retval} for location #{location}" $loglocation
+    print_helper "WARNING: Turbolift returned code ${retval} for location ${location}" $loglocation
     exit 1
 else
     if [ $verbose -eq 1 ]; then
-	print_helper "NOTICE: Turbolift returned code ${retval} for location #{location}" $loglocation
+	print_helper "NOTICE: Turbolift returned code ${retval} for location ${location}" $loglocation
     fi
     exit 0
 fi
