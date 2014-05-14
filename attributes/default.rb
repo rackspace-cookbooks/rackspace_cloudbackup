@@ -43,7 +43,7 @@ default['rackspace']['datacenter'] = 'DFW'
 #      notify_email: Email address for notifications on Rackspace Cloud
 #      version_retention: Retention value, see API documentation
 #   }
-#   non-cloud: Hash of options specific to non-Rackspace Cloud Servers.  Format: {
+#   non_cloud: Hash of options specific to non-Rackspace Cloud Servers.  Format: {
 #      container: Cloud Files container to back up to
 #   }
 #   time: Time override hash for this backup.  (Optional) Format: {
