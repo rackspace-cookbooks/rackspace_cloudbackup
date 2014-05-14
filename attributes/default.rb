@@ -26,8 +26,8 @@
 # default['rackspace']['cloud_credentials']['api_key']
 
 # Datacenter to send backups to
-# TODO: automate setting of this
-default['rackspace']['datacenter'] = 'DFW'
+# TODO: Properly automate this outside this cookbook, this only works in cloud.
+default['rackspace']['datacenter'] = node['rackspace']['region']
 
 #
 # Backups configuration
