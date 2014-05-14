@@ -43,6 +43,13 @@ module RegisterAgentHwrpSpecHelpers
   end
   module_function :common_test_obj
 
+  # A trivial class to mock Process::Status for our purposes with a successful exit code
+  class DummyStatus
+    def exitstatus
+      return 0
+    end
+  end
+
   # A simple class to mock Mixlib::ShellOut for our testing
   class MixLibShellOutMock
     attr_accessor :testhook_command, :testhook_run_called
@@ -54,6 +61,10 @@ module RegisterAgentHwrpSpecHelpers
 
     def run_command
       @testhook_run_called = true
+    end
+
+    def status
+      return DummyStatus.new
     end
   end
 end

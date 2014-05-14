@@ -81,7 +81,11 @@ class Chef
           # This is a class instance variable to expose it for testing.  It allows Mixlib::ShellOut to be mocked and then probed via a getter
           @shell_cmd = Mixlib::ShellOut.new(cmd_str)
           @shell_cmd.run_command
-          new_resource.updated_by_last_action(true)
+          if @shell_cmd.status.exitstatus == 0
+            new_resource.updated_by_last_action(true)
+          else
+            fail "Failed to register the agent! 'driveclient -c' returned #{@shell_cmd.status.exitstatus}"
+          end
         when true
           new_resource.updated_by_last_action(false)
         else
