@@ -10,14 +10,10 @@
 
 case node[:platform]
 when 'redhat', 'centos'
-  yum_key 'GPG-KEY-rackops' do
-    url 'http://repo.rackops.org/rackops-signing-key.asc'
-    action :add
-  end
   yum_repository 'rackops-repo' do
     description 'Rackspace rackops repo'
     url 'http://repo.rackops.org/rpm/'
-    key 'GPG-KEY-rackops'
+    gpgkey 'http://repo.rackops.org/rackops-signing-key.asc'
   end
 when 'ubuntu', 'debian'
   case node['lsb'][:codename]
@@ -79,7 +75,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
   end
 
   container = job['non_cloud']['container'].nil? ? node['rackspace_cloudbackup']['backups_defaults']['non_cloud_container'] : job['non_cloud']['container']
-  fail "ERROR: Target backup contianer not set for location \"#{job['location']}\"" if container.nil?
+  fail "ERROR: Target backup container not set for location \"#{job['location']}\"" if container.nil?
 
   # Build the command
   # Broken up to keep lines short and to enable flag toggles
