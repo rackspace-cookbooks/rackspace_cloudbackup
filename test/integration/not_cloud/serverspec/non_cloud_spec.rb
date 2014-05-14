@@ -2,6 +2,21 @@
 
 require 'spec_helper'
 
+# Define the unique helper module for this test suite.
+module NonCloudSpecHelpers
+  def crontab_path
+    case os[:family].downcase
+    when 'redhat', 'centos'
+      return '/var/spool/cron/root'
+    when 'ubuntu', 'debian'
+      return '/var/spool/cron/crontabs/root'
+    else
+      fail "Unknown OS \"#{os[:family]}\""
+    end
+  end
+  module_function :crontab_path
+end
+
 describe 'Non-cloud server' do
   describe command('/usr/bin/turbolift --help') do
     # If there are dependency errors or other turbolift errors this won't return 0
@@ -15,7 +30,7 @@ describe 'Non-cloud server' do
     it { should be_readable.by('others') }
   end
 
-  describe file('/var/spool/cron/crontabs/root') do
+  describe file(NonCloudSpecHelpers.crontab_path) do
     it { should be_file }
     it { should be_owned_by 'root' }
     it { should be_mode 600 } # As it contins the API key
