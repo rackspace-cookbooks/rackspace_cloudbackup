@@ -52,6 +52,7 @@ describe 'rackspace_cloudbackup::cloud' do
               node.set['rackspace_cloudbackup']['mock'] = true
               node.set['rackspace']['cloud_credentials']['username'] = 'IfThisHitsTheApiSomethingIsBusted'
               node.set['rackspace']['cloud_credentials']['api_key']  = 'SuchFakePassword.VeryMock.Wow.'
+              node.set['rackspace']['datacenter']                    = 'DFW'
               node.set['rackspace_cloudbackup']['backups_defaults']['non_cloud_container'] = 'testContainer'
             end
           end
