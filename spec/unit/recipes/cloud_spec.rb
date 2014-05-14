@@ -17,6 +17,7 @@
 
 require_relative '../../supported_platforms.rb'
 
+# Define the unique helper module for this test suite.
 module CloudSpecHelpers
   def initialize_tests
     # This is required here as ChefSpec interferes with WebMocks, breaking tests
@@ -29,7 +30,7 @@ module CloudSpecHelpers
   def test_backup_data
     return [
             { 'label' => 'test /tmp backup',      'location' => '/tmp/' },
-            { 'label' => 'test /dev/null backup', 'location' => '/dev/null' },
+            { 'label' => 'test /dev/null backup', 'location' => '/dev/null' }
            ]
   end
   module_function :test_backup_data
@@ -96,7 +97,3 @@ describe 'rackspace_cloudbackup::cloud' do
     end
   end
 end
-
-
-
-
