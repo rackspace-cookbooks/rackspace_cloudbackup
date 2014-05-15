@@ -24,24 +24,6 @@ platforms:
   - recipe[apt]
 
 suites:
-  - name: not_cloud
-    run_list:
-      - recipe[rackspace_cloudbackup::not_cloud]
-    attributes:
-      rackspace_cloudbackup:
-        mock: true
-        backups:
-          - location: /etc
-            enabled: false
-          - location: /home
-            enabled: false
-        backups_defaults:
-          non_cloud_container: testContainer
-      rackspace:
-        datacenter: 'DFW'
-        cloud_credentials:
-          username: nobody
-          api_key:  secret
   - name: cloud
     run_list:
       - recipe[rackspace_cloudbackup::cloud]
