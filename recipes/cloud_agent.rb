@@ -16,8 +16,7 @@
 # limitations under the License.
 #
 
-case node[:platform]
-when 'redhat', 'centos'
+if platform_family?('rhel')
   yum_repository 'cloud-backup' do
     description 'Rackspace cloud backup agent repo'
     url 'http://agentrepo.drivesrvr.com/redhat/'
@@ -25,7 +24,7 @@ when 'redhat', 'centos'
     # RCBU packages are unsigned.
     gpgcheck false
   end
-when 'ubuntu', 'debian'
+elsif platform_family?('debian')
   apt_repository 'cloud-backup' do
     uri 'http://agentrepo.drivesrvr.com/debian/'
     arch 'amd64'
@@ -34,6 +33,8 @@ when 'ubuntu', 'debian'
     key 'http://agentrepo.drivesrvr.com/debian/agentrepo.key'
     action :add
   end
+else
+  fail "Unknown platform node['platform']"
 end
 
 package 'driveclient' do

@@ -20,8 +20,7 @@
 include_recipe 'rackspace_cloudbackup::cloud_agent'
 
 # Install deps for the Python scripts
-case node[:platform]
-when 'redhat', 'centos'
+if platform_family?('rhel')
   # python-argparse and PyYAML are in the EPEL repo on RHEL
   yum_repository 'epel' do
     description 'Extra Packages for Enterprise Linux'
@@ -36,12 +35,14 @@ when 'redhat', 'centos'
     end
   end
 
-when 'ubuntu', 'debian'
+elsif platform_family?('debian')
   %w(python-argparse python-yaml).each do |dep|
     package dep do
       action :install
     end
   end
+else
+  fail "Unknown platform node['platform']"
 end
 
 # Insert our scripts
