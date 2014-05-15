@@ -101,7 +101,7 @@ def triggerBackup(locationKey, config, tokenData, args):
     if config["locations"][locationKey]["enabled"] is False:
         if args.verbose:
             print "INFO: Skipping disabled location %s" % locationKey
-        return True        
+        return True
 
     if args.verbose:
         handler=urllib2.HTTPSHandler(debuglevel=10)
