@@ -10,7 +10,7 @@ describe 'Cloud server' do
   end
 
   it 'should have driveclient enabled' do
-    expect(service 'rackspace-monitoring-agent').to be_enabled
+    expect(service 'driveclient').to be_enabled
   end
 
   describe file('/usr/local/bin/run_backup.py') do
