@@ -8,13 +8,10 @@
 #
 if defined?(node['cloud']['provider'])
   if node['cloud']['provider'] == 'rackspace'
-    include_recipe "rackspace-cloud-backup::cloud"
+    include_recipe 'rackspace_cloudbackup::cloud'
   else
-  include_recipe "rackspace-cloud-backup::not_cloud"
+    fail "ERROR: backups currently unsupported on #{node['cloud']['provider']} cloud servers"
   end
 else
-  log "message" do
-	message "Could not find the node['cloud']['provider'] attribute!"
-	level :warn
-  end
+  fail 'ERROR: backups currently unsupported on non-cloud servers'
 end

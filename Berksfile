@@ -1,4 +1,4 @@
-site :opscode
-
 metadata
-cookbook "yum", "~> 2.0"
+# TODO: Pin to trusted source
+cookbook "yum",  "~> 3.0"
+cookbook "apt", "~> 2.0"

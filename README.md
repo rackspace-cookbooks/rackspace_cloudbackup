@@ -1,70 +1,191 @@
-rackspace-cloud-backup Cookbook
+rackspace_cloudbackup Cookbook
 ===============================
-This cookbook will install the Rackspace Cloud Backup agent and register it based on the credentials found in
-node['rackspace_cloud_backup']['rackspace_username'] and node['rackspace_cloud_backup']['rackspace_apikey']
 
-------------
-Requires 
---------
-- Apt and Yum
-- Epel repo on Red Hat based boxes
+NOTE: v1.0.0 is a major rewrite with breaking changes.  Please review this readme for new usage and check the changelog
+-----------------------------------------------------------------------------------------------------------------------
 
-Attributes
-----------
-    default[:rackspace_cloud_backup][:rackspace_username] = nil
-    default[:rackspace_cloud_backup][:rackspace_apikey] = nil
-    default[:rackspace_cloud_backup][:rackspace_endpoint] = "dfw"
-    default[:rackspace_cloud_backup][:backup_locations] = nil
-    default[:rackspace_cloud_backup][:backup_container] = nil
-    default[:rackspace_cloud_backup][:backup_cron_day] = "*"
-    default[:rackspace_cloud_backup][:backup_cron_hour] = "3"
-    default[:rackspace_cloud_backup][:backup_cron_minute] = "14"
-    default[:rackspace_cloud_backup][:backup_cron_month] = "*"
-    default[:rackspace_cloud_backup][:backup_cron_weekday] = "*"
-    default[:rackspace_cloud_backup][:backup_cron_user] = nil
-    default[:rackspace_cloud_backup][:backup_cron_mailto] = nil
-    default[:rackspace_cloud_backup][:backup_cron_path] = nil
-    default[:rackspace_cloud_backup][:backup_cron_shell] = nil
-    default[:rackspace_cloud_backup][:backup_cron_home] = nil
-    default[:rackspace_cloud_backup][:cloud_notify_email] = nil
+# Description
 
-Usage
------
-#### rackspace-cloud-backup::default
-Just set the environment variables for the rackspace_username and rackspace_apikey attributes
+This cookbook provides backups to Rackspace Cloud Files.
+On Rackspace Cloud Servers it will install and configure the Rackspace Cloud Backup (RCBU) service for backups.
+On cloud the RCBU agent will be installed and registered and each backup location configured as a unique backup job.
+Jobs are currently triggered via Cron for timing compatibility.
 
-Here's an example of some environment variables for if it used turbolift
+Non-Rackspace Cloud servers currently unsupported and will fail convergance.
 
-    "rackspace_cloud_backup": {
-      "backup_cron_hour": "*",
-      "backup_cron_day": "*",
-      "rackspace_username": "exampleuser",
-      "rackspace_endpoint": "dfw",
-      "backup_locations": [
-        "/root/files",
-        "/etc/init.d"
-      ],
-      "backup_cron_user": "root",
-      "backup_cron_weekday": "*",
-      "backup_container": "ubuntu-test-turbolift",
-      "rackspace_apikey": "lolnopenotgonnahappen",
-      "backup_cron_month": "*",
-      "backup_cron_minute": "50"
-      "cloud_notify_email" = "email@example.com"
-    }
+# General Requirements
+* Chef 11
+* A Rackspace Cloud Hosting account is required to use this tool.  And a valid `username` and `api_key` are required to authenticate into your account.
 
-##### rackspace-cloud-backup::cloud
-This recipe calls cloud backup to install, register and register it's backups.
-It also creats a simple cron job that will call for the backup to run.
+This cookbook will install the EPEL repository on RHEL based systems.
 
-##### rackspace-cloud-backup::not\_cloud
-This recipe calls for turbolift to install, and creates cron-jobs that upload the directories you wish to back up to cloud files.
+# Usage
 
-Contributing
-------------
+## Credentials
+
+API credentials are stored in the shared node['rackspace']['cloud_credentials'] hash.
+
+| Attribute | Description | Required |
+| --------- | ----------- | -------- |
+| node['rackspace']['cloud_credentials']['username'] | Rackspace API username | Yes |
+| node['rackspace']['cloud_credentials']['api_key']  | Rackspace API key | Yes |
+
+## Primary Configuration Hash List
+
+node['rackspace_cloudbackup']['backups'] is a list of hashes, each list entry representing a location to back up.
+The hash format is as follows:
+
+```
+{
+   label: Unique backup label*
+   location: filesystem path to backup (Required)
+   comment:   Some comment (optional)
+   enable:    Enable the backup, Boolean, Optional with default of true
+   cloud: Hash of options specific to Rackspace Cloud Servers.  Format: {
+      notify_email: Email address for notifications on Rackspace Cloud**
+      version_retention: Retention value, see API documentation***
+   }
+   time: Time override hash for this backup in Cron format.  (Optional) Format: {
+      day: Day of month to run backup
+      month: Month to run backup
+      hour: Hour to run backup
+      minute: Minute to run backup
+      weekday: Day of week to run backup
+   }
+   cron: Cron override hash for this backup.  (Optional) Format: {
+      user:   User to run the job as
+      mailto: Address to send error messages to
+      path:   Cron path
+      shell:  Cron shell
+      home:   Cron home
+  }
+}
+```
+
+Notes:
+- *   This backup is the unique identifier for the job.  It defaults to ```"Backup for #{node['ipaddress']}, backing up #{job['location']}"``` for compatability with earlier versions.  Changing the label may result in orphaned or lost backups.
+- **  Mail sent to this address will come from a Rackspace RCBU server, not the local server.  It must be a valid address.
+- *** [3.3.1. Create backup configuration](http://docs.rackspace.com/rcbu/api/v1.0/rcbu-devguide/content/POST_createBackupConfiguration_v1.0__tenant_id__backup-configuration_backupConfig.html)
+
+
+Example:
+
+```ruby
+# Note that some further defaults are required.  See below for a complete example.
+node.default['rackspace_cloudbackup']['backups'] =
+  [
+   { location: "/var/www",
+     comment:  "Web Content Backup",
+     cloud: {
+       # Override the default to send notifications to webmaster
+       # See below for default values
+       notify_email: "webmaster@yourdomain.com"
+     }
+   },
+
+   { location: "/etc",
+     time: {
+       # Only backup the server configuration on the first of the month at midnight
+       day:     1,
+       month:   '*',
+       hour:    0,
+       minute:  0,
+       weekday: '*'
+     }
+   },
+
+   # This is the minimal block, a single location with all other options default
+   { location: "/home" },
+  ]
+```
+
+## Default Values
+
+In addition to the node['rackspace_cloudbackup']['backups'] hash a node['rackspace_cloudbackup']['backups_defaults'] hash is provided for default node-wide job setting.
+This allows deduplication of common settings in the primary configuration hash list.
+See [attributes/default.rb](https://github.com/rackspace-cookbooks/rackspace-cloud-backup/blob/master/attributes/default.rb) for default values and further details.
+
+### General settings
+| Attribute | Purpose |
+| --------- | ------- |
+| node['rackspace']['datacenter'] | Datacenter to back up to, must match cloud server datacenter. |
+| node['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email']      | Email address for notifications on Rackspace Cloud   |
+| node['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention'] | Cloud version retention value, see API documentation |
+
+### Time settings
+| Attribute | Purpose |
+| --------- | ------- |
+| node['rackspace_cloudbackup']['backups_defaults']['time']['day']             | Default backup day, Cron format     |
+| node['rackspace_cloudbackup']['backups_defaults']['time']['month']           | Default backup month, Cron format   |
+| node['rackspace_cloudbackup']['backups_defaults']['time']['hour']            | Default backup hour, Cron format    |
+| node['rackspace_cloudbackup']['backups_defaults']['time']['minute']          | Default backup minute, Cron format  |
+| node['rackspace_cloudbackup']['backups_defaults']['time']['weekday']         | Default backup weekday, Cron format |
+
+## Example Usage
+
+Below is a complete example codeblock.
+
+```ruby
+
+# Define API values
+node.default['rackspace']['cloud_credentials']['username'] = '{your api username}'
+node.default['rackspace']['cloud_credentials']['api_key']  = '{your api key}'
+
+# Set the default notification email
+node.default['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email'] = 'root@yourdomain.com'
+
+# Define the backups
+node.default['rackspace_cloudbackup']['backups'] =
+  [
+   { location: "/var/www",
+     comment:  "Web Content Backup",
+     cloud: {
+       # Override the default to send notifications to webmaster
+       notify_email: "webmaster@yourdomain.com"
+     }
+   },
+
+   { location: "/etc",
+     time: {
+       # Only backup the server configuration on the first of the month at midnight
+       day:     1,
+       month:   '*',
+       hour:    0,
+       minute:  0,
+       weekday: '*'
+     }
+   },
+
+   # This is the minimal block, a single location with all other options default
+   { location: "/home" },
+  ]
+
+# Remember that this must be called after all recipies which modify the hash have completed.
+include_recipe 'rackspace_cloudbackup'
+```
+
+# Contributing
+
 Please see https://github.com/rackspace-cookbooks/contributing for how to contribute.
 
-License and Authors
--------------------
-License: Apache 2.0
-Authors: Matthew Thode (prometheanfire)
+# License and Authors
+
+Authors:
+- Matthew Thode (prometheanfire)
+- Tom Noonan II
+
+```
+Copyright:: 2012 - 2014 Rackspace
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+```

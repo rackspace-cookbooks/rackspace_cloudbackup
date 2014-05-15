@@ -1,131 +1,134 @@
-#
-# Cookbook Name:: rackspace-cloud-backup
+# Cookbook Name:: rackspace_cloudbackup
 # Recipe:: cloud
 #
-# Copyright 2013, Rackspace US, Inc.
+# Copyright 2014, Rackspace, US, Inc.
 #
-# Apache 2.0
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
-#
-# Verify mandatory options are set
-#
-opt_error = false
-['rackspace_username', 'rackspace_apikey', 'cloud_notify_email', 'backup_locations'].each do |option|
-  if node['rackspace_cloud_backup'][option].nil?
-    # Logging, and not raising, here so that all missing args will be logged in one run
-    Chef::Log.warn "ERROR: rackspace-cloud-backup::cloud: Mandatory option #{option} unset"
-    opt_error = true
-  end
-end
-if opt_error
-  raise RuntimeError, "Mandatory option configuration unset, see previous logs for details"
-end
-# End option verification
+# Install the agent
+include_recipe 'rackspace_cloudbackup::cloud_agent'
 
-case node[:platform]
-  when "redhat", "centos"
-    yum_repository "cloud-backup" do
-      description "Rackspace cloud backup agent repo"
-      url "http://agentrepo.drivesrvr.com/redhat/"
-
-      # This will be needed with opscode-yum ~> 3.0, but not present on opscode-yum <3.0.0
-      # gpgcheck false
-  end
-  when "ubuntu","debian"
-    apt_repository "cloud-backup" do
-      uri "http://agentrepo.drivesrvr.com/debian/"
-      arch "amd64"
-      distribution "serveragent"
-      components ["main"]
-      key "http://agentrepo.drivesrvr.com/debian/agentrepo.key"
-      action :add
-  end
-end
-
-package "driveclient" do
-  action :upgrade
-end
-
-#
 # Install deps for the Python scripts
-#
-package "python-argparse" do
-  action :install
+if platform_family?('rhel')
+  # python-argparse and PyYAML are in the EPEL repo on RHEL
+  yum_repository 'epel' do
+    description 'Extra Packages for Enterprise Linux'
+    mirrorlist 'http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch'
+    gpgkey 'http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6'
+    action :create
+  end
+
+  %w(python-argparse PyYAML).each do |dep|
+    package dep do
+      action :install
+    end
+  end
+
+elsif platform_family?('debian')
+  %w(python-argparse python-yaml).each do |dep|
+    package dep do
+      action :install
+    end
+  end
+else
+  fail "Unknown platform node['platform']"
 end
 
 # Insert our scripts
-['configure_run_backup.py', 'run_backup', 'verify_registration.py'].each do |script|
-  cookbook_file "/etc/driveclient/#{script}" do
+['run_backup.py'].each do |script|
+  cookbook_file "/usr/local/bin/#{script}" do
     source script
     mode 00755
-    owner "root"
-    group "root"
+    owner 'root'
+    group 'root'
   end
 end
 
-execute "Verify Registration" do
-  # This script is idempotent and will bounce driveclient on register
-  command "/etc/driveclient/verify_registration.py --register -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']}"
-  action :run
+# Load in the Opscode::Rackspace::CloudBackup module
+class Chef::Recipe
+  include Opscode::Rackspace::CloudBackup
 end
 
-service "driveclient" do
-  action :enable
+# Configure our backups
+template_data = []
+node['rackspace_cloudbackup']['backups'].each do |node_job|
+  job = node_job.dup # Obtain a copy that's not in the node attributes so we can tinker in it
+
+  if job['label'].nil?
+    # NOTE: This format intentionally matches earlier revisions to avoid creating duplicate backups
+    job['label'] = "Backup for #{node['ipaddress']}, backing up #{job['location']}"
+  end
+
+  if job['cloud'].nil?
+    job['cloud'] = {}
+  end
+
+  if job['enabled'].nil?
+    job['enabled'] = true
+  end
+
+  rackspace_cloudbackup_configure_cloud_backup job['label'] do
+    rackspace_username   node['rackspace']['cloud_credentials']['username']
+    rackspace_api_key    node['rackspace']['cloud_credentials']['api_key']
+    rackspace_api_region node['rackspace']['datacenter']
+    inclusions           [job['location']]
+
+    version_retention    job['cloud']['version_retention'] || node['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention']
+    notify_recipients    job['cloud']['notify_email']      || node['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email']
+    is_active            job['enabled']
+
+    # Backups configured with this module are triggered by cron for consistency with non-RS cloud
+    frequency            'Manually'
+
+    # For various tests
+    mock                 node['rackspace_cloudbackup']['mock']
+    action :create
+  end
+
+  # Shared defininition from definitions/cron_wrapper.rb
+  cloud_backup_cron_configurator "#{job['label']} cron_configurator" do
+    job job
+    command "/usr/local/bin/run_backup.py --location '#{job['location']}'"
+  end
+
+  # Set up the array the config template will use
+  # This is separate from node['rackspace_cloudbackup']['backups'] to use the label logic above
+  template_data.push('label'    => job['label'],
+                     'location' => job['location'],
+                     'comment'  => job['comment'],
+                     'enabled'  => job['enabled'])
+
 end
 
-execute "Generate run_backup config" do
-  # This script is idempotent
-  command "/etc/driveclient/configure_run_backup.py -u #{node['rackspace_cloud_backup']['rackspace_username']} -a #{node['rackspace_cloud_backup']['rackspace_apikey']} -e #{node['rackspace_cloud_backup']['cloud_notify_email']} -i #{node['ipaddress']} --directoryarray '#{node['rackspace_cloud_backup']['backup_locations']}' --endpoint #{node['rackspace_cloud_backup']['rackspace_endpoint']}.backup.api.rackspacecloud.com"
-  action :run
-end
-
-# This file is generated by configure_run_backup.py but it contains the API key
-# Ensure it is only redable by root
-file "/etc/driveclient/run_backup.conf.json" do
-  owner "root"
-  group "root"
-  mode "0600"
-end
-
-
-cron "cloud-backup-trigger" do
-  if node['rackspace_cloud_backup']['backup_cron_day']
-    day node['rackspace_cloud_backup']['backup_cron_day']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_hour']
-    hour node['rackspace_cloud_backup']['backup_cron_hour']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_minute']
-    minute node['rackspace_cloud_backup']['backup_cron_minute']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_month']
-    month node['rackspace_cloud_backup']['backup_cron_month']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_weekday']
-    weekday node['rackspace_cloud_backup']['backup_cron_weekday']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_user']
-    user node['rackspace_cloud_backup']['backup_cron_user']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_mailto']
-    mailto node['rackspace_cloud_backup']['backup_cron_mailto']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_path']
-    path node['rackspace_cloud_backup']['backup_cron_path']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_shell']
-    shell node['rackspace_cloud_backup']['backup_cron_shell']
-  end
-  if node['rackspace_cloud_backup']['backup_cron_home']
-    home node['rackspace_cloud_backup']['backup_cron_home']
-  end
-  command "/etc/driveclient/run_backup"
+# Write the configuration file for the cron job script
+template '/etc/driveclient/run_backup.conf.yaml' do
+  source 'run_backup.config.yaml.erb'
+  owner 'root'
+  group 'root'
+  mode '0600'
   action :create
+  variables(
+            api_username:  node['rackspace']['cloud_credentials']['username'],
+            api_key:       node['rackspace']['cloud_credentials']['api_key'],
+            api_region:    node['rackspace']['datacenter'],
+            mock:          node['rackspace_cloudbackup']['mock'],
+            backup_config: template_data
+            )
 end
 
 # Clean up after earlier revisions
-[ 'auth.py', 'backups_created', 'create_backup.py', '.registered'].each do |target|
+%w(auth.py backups_created create_backup.py .registered verify_registration.py configure_run_backup.py run_backup run_backup.conf.json).each do |target|
   file "/etc/driveclient/#{target}" do
     action :delete
   end
