@@ -84,7 +84,7 @@ class Chef
         when false
           if @current_resource.mock
             # Mocking, don't register
-            Chef::Log.warn("WARNING: Skipping registration due to mock = true")
+            Chef::Log.warn('WARNING: Skipping registration due to mock = true')
             new_resource.updated_by_last_action(true)
           else
             cmd_str = "driveclient -c -k '#{@current_resource.rackspace_api_key}' -u '#{@current_resource.rackspace_username}'"

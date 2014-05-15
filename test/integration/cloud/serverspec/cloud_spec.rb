@@ -26,21 +26,20 @@ describe 'Cloud server' do
     it { should be_mode 600 } # As it contains the API key
 
     # TODO: Test the YAML file properly
-    it { should contain "apikey: secret" }
-    it { should contain "apiuser: nobody" }
-    it { should contain "region: DFW" }
-    it { should contain "/etc" }
-    it { should contain "/home" }
+    it { should contain 'apikey: secret' }
+    it { should contain 'apiuser: nobody' }
+    it { should contain 'region: DFW' }
+    it { should contain '/etc' }
+    it { should contain '/home' }
   end
 
   describe file(SpecHelpers.crontab_path) do
     it { should be_file }
     it { should be_owned_by 'root' }
-    
+
     # Check the jorbs
     # These settings come through from the .kitchen.yml file
     it { should contain "/usr/local/bin/run_backup.py --location '/etc'" }
     it { should contain "/usr/local/bin/run_backup.py --location '/home'" }
   end
 end
-  

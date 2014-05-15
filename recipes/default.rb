@@ -13,5 +13,5 @@ if defined?(node['cloud']['provider'])
     fail "ERROR: backups currently unsupported on #{node['cloud']['provider']} cloud servers"
   end
 else
-  fail "ERROR: backups currently unsupported on non-cloud servers"
+  fail 'ERROR: backups currently unsupported on non-cloud servers'
 end
