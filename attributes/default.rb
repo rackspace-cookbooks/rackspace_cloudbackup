@@ -43,9 +43,6 @@ default['rackspace']['datacenter'] = node['rackspace']['region']
 #      notify_email: Email address for notifications on Rackspace Cloud
 #      version_retention: Retention value, see API documentation
 #   }
-#   non_cloud: Hash of options specific to non-Rackspace Cloud Servers.  Format: {
-#      container: Cloud Files container to back up to
-#   }
 #   time: Time override hash for this backup.  (Optional) Format: {
 #      day: Day of month to run backup
 #      month: Month to run backup
@@ -68,11 +65,6 @@ default['rackspace_cloudbackup']['backups'] = []
 #
 # Defaults
 #
-
-# backups_defaults: hash of default attributes for the backups
-# container: Backup target container for backups not on Rackspace public cloud
-#    Required on non-public cloud servers
-default['rackspace_cloudbackup']['backups_defaults']['container'] = nil
 
 # cloud_notify_email: Email address to send notifications from Rackspace Cloud Backups to
 #   Required on Rackspace Cloud.  Notifications will come from Rackspace servers, must be a valid address.
