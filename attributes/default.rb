@@ -75,9 +75,6 @@ default['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email'] = nil
 # See API documentation, only a small number of values are legal
 default['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention'] = 30
 
-# non_cloud_container: Default CloudFiles container for non-cloud containers
-default['rackspace_cloudbackup']['backups_defaults']['non_cloud_container'] = nil
-
 # time: backup timing settings.  These settings are Cron format.
 default['rackspace_cloudbackup']['backups_defaults']['time']['day']     = '*'
 default['rackspace_cloudbackup']['backups_defaults']['time']['month']   = '*'
