@@ -48,6 +48,9 @@ rackspace_cloudbackup_register_agent "Register #{node['hostname']}" do
   rackspace_api_key  node['rackspace']['cloud_credentials']['api_key']
   action :register
   notifies :restart, 'service[driveclient]'
+
+  # For testing
+  mock               node['rackspace_cloudbackup']['mock']
 end
 
 service 'driveclient' do

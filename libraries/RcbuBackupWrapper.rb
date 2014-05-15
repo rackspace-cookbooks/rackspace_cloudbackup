@@ -26,15 +26,20 @@ module Opscode
       # RcbuBackupWrapper: Wrap the underlying objects and provide an object class directly consumable by the HWRP.
       # This is essentially a HWRP to RcbuBackupObj glue class.
       class RcbuBackupWrapper
-        attr_accessor :mocking, :agent_config, :backup_obj, :direct_name_map
+        attr_accessor :mocking, :agent_id, :backup_obj, :direct_name_map
 
         def initialize(api_username, api_key, region, backup_api_label, mock = false, rcbu_bootstrap_file = '/etc/driveclient/bootstrap.json')
           @mocking = mock
 
-          @agent_config = self.class._load_backup_config(rcbu_bootstrap_file)
-                                        # TODO: Should these arguments just be class variables?
-          @backup_obj = _get_backup_obj(api_username, api_key, region, backup_api_label)
+          if @mocking
+            @agent_id = 'MOCK_ID'
+          else
+            @agent_id = self.class._load_backup_config(rcbu_bootstrap_file)['AgentId']
+          end
 
+          # TODO: Should these arguments just be class variables?
+          @backup_obj = _get_backup_obj(api_username, api_key, region, backup_api_label)
+          
           # Mapping of the HWRP option names to the BackupObj (API) names that map directly (no mods)
           @direct_name_map = self.class._default_direct_name_map
         end
@@ -101,13 +106,13 @@ module Opscode
           unless defined? @@api_obj_cache
             @@api_obj_cache = Opscode::Rackspace::CloudBackup::RcbuCache.new(4)
           end
-          api_obj = @@api_obj_cache.get(api_username, api_key, region, @agent_config['AgentId'])
+          api_obj = @@api_obj_cache.get(api_username, api_key, region, @agent_id)
           # rubocop:enable ClassVars
 
           if api_obj.nil?
             tgt_class = @mocking ? Opscode::Rackspace::CloudBackup::MockRcbuApiWrapper : Opscode::Rackspace::CloudBackup::RcbuApiWrapper
-            api_obj = tgt_class.new(api_username, api_key, region, @agent_config['AgentId'])
-            @@api_obj_cache.save(api_obj, api_username, api_key, region, @agent_config['AgentId']) # rubocop:disable ClassVars
+            api_obj = tgt_class.new(api_username, api_key, region, @agent_id)
+            @@api_obj_cache.save(api_obj, api_username, api_key, region, @agent_id) # rubocop:disable ClassVars
             Chef::Log.debug('Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Opened new API Object')
           else
             Chef::Log.debug('Opscode::Rackspace::CloudBackup::RcbuHwrpHelper.initialize: Reusing existing API Object')

@@ -71,8 +71,14 @@ describe 'RcbuBackupWrapper' do
       @test_obj.mocking.should eql 'Test Mocking'
     end
 
-    it 'sets the agent_config variable' do
-      @test_obj.agent_config.should eql RcbuBackupWrapperTestHelpers.load_backup_config_stub('Test Bootstrap File')
+    it 'sets the agent_id variable when not mocking' do
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', false, 'Test Bootstrap File')
+      test_obj.agent_id.should eql RcbuBackupWrapperTestHelpers.load_backup_config_stub('Test Bootstrap File')['AgentId']
+    end
+
+    it 'sets the agent_id variable when mocking' do
+      test_obj = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new('Test Username', 'Test Key', 'Test Region', 'Test Label', true, 'Test Bootstrap File')
+      test_obj.agent_id.should eql 'MOCK_ID'
     end
 
     it 'sets the backup_obj variable' do

@@ -16,7 +16,7 @@ locations:
 @backup_config.each do |backup|
   # This is called here to poll the API on template generation during convergance
   # As the ID will be created when the HWRP creates the API object
-  api_id = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(@api_username, @api_key, @api_region, backup['label']).backup_id
+  api_id = Opscode::Rackspace::CloudBackup::RcbuBackupWrapper.new(@api_username, @api_key, @api_region, backup['label'], @mock).backup_id
   raise "ERROR: nil api_id for #{backup['label']}" if api_id.nil?
 -%>
   <%= backup['location'] %>:

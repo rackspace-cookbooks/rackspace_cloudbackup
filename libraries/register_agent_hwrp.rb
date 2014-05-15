@@ -33,6 +33,7 @@ class Chef
         @allowed_actions = [:register, :nothing]
 
         @label = name
+        @mock  = false
         @bootstrap_file_path = '/etc/driveclient/bootstrap.json'
       end
 
@@ -52,6 +53,10 @@ class Chef
       def bootstrap_file_path(arg = nil)
         set_or_return(:bootstrap_file_path, arg, kind_of: String)
       end
+
+      def mock(arg = nil)
+        set_or_return(:mock, arg, kind_of: [TrueClass, FalseClass])
+      end
     end
   end
 end
@@ -64,7 +69,7 @@ class Chef
 
       def load_current_resource
         @current_resource ||= Chef::Resource::RackspaceCloudbackupRegisterAgent.new(new_resource.name)
-        [:label, :rackspace_api_key, :rackspace_username, :bootstrap_file_path].each do |arg|
+        [:label, :rackspace_api_key, :rackspace_username, :bootstrap_file_path, :mock].each do |arg|
           @current_resource.send(arg, new_resource.send(arg))
         end
 
@@ -77,15 +82,22 @@ class Chef
       def action_register
         case @current_resource.agent_config['IsRegistered']
         when false
-          cmd_str = "driveclient -c -k '#{@current_resource.rackspace_api_key}' -u '#{@current_resource.rackspace_username}'"
-          # This is a class instance variable to expose it for testing.  It allows Mixlib::ShellOut to be mocked and then probed via a getter
-          @shell_cmd = Mixlib::ShellOut.new(cmd_str)
-          @shell_cmd.run_command
-          if @shell_cmd.status.exitstatus == 0
+          if @current_resource.mock
+            # Mocking, don't register
+            Chef::Log.warn("WARNING: Skipping registration due to mock = true")
             new_resource.updated_by_last_action(true)
           else
-            fail "Failed to register the agent! 'driveclient -c' returned #{@shell_cmd.status.exitstatus}"
+            cmd_str = "driveclient -c -k '#{@current_resource.rackspace_api_key}' -u '#{@current_resource.rackspace_username}'"
+            # This is a class instance variable to expose it for testing.  It allows Mixlib::ShellOut to be mocked and then probed via a getter
+            @shell_cmd = Mixlib::ShellOut.new(cmd_str)
+            @shell_cmd.run_command
+            if @shell_cmd.status.exitstatus == 0
+              new_resource.updated_by_last_action(true)
+            else
+              fail "Failed to register the agent! 'driveclient -c' returned #{@shell_cmd.status.exitstatus}"
+            end
           end
+
         when true
           new_resource.updated_by_last_action(false)
         else

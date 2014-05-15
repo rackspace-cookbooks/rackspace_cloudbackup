@@ -69,6 +69,9 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
 
     # Backups configured with this module are triggered by cron for consistency with non-RS cloud
     frequency            'Manually'
+
+    # For various tests
+    mock                 node['rackspace_cloudbackup']['mock']
     action :create
   end
 
@@ -98,6 +101,7 @@ template '/etc/driveclient/run_backup.conf.yaml' do
             api_username:  node['rackspace']['cloud_credentials']['username'],
             api_key:       node['rackspace']['cloud_credentials']['api_key'],
             api_region:    node['rackspace']['datacenter'],
+            mock:          node['rackspace_cloudbackup']['mock'],
             backup_config: template_data
             )
 end
