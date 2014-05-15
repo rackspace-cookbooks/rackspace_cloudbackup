@@ -83,7 +83,10 @@ default['rackspace_cloudbackup']['backups_defaults']['time']['minute']  = '14'
 default['rackspace_cloudbackup']['backups_defaults']['time']['weekday'] = '*'
 
 # Cron settings: Default settings for the cron jobs
-default['rackspace_cloudbackup']['backups_defaults']['cron']['user']   = nil
+# These settings are exposed in case they are required but should not be tuned under normal operation
+# On cloud the cron job runs a backup trigger script, not the backup iself.
+# See http://docs.opscode.com/resource_cron.html for option descriptions.
+default['rackspace_cloudbackup']['backups_defaults']['cron']['user']   = 'root' # User must be root for the configuration file to be readable
 default['rackspace_cloudbackup']['backups_defaults']['cron']['mailto'] = nil
 default['rackspace_cloudbackup']['backups_defaults']['cron']['path']   = nil
 default['rackspace_cloudbackup']['backups_defaults']['cron']['shell']  = nil
