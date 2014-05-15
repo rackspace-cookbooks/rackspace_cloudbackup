@@ -22,8 +22,8 @@ when 'redhat', 'centos'
     description 'Rackspace cloud backup agent repo'
     url 'http://agentrepo.drivesrvr.com/redhat/'
 
-    # This will be needed with opscode-yum ~> 3.0, but not present on opscode-yum <3.0.0
-    # gpgcheck false
+    # RCBU packages are unsigned.
+    gpgcheck false
   end
 when 'ubuntu', 'debian'
   apt_repository 'cloud-backup' do

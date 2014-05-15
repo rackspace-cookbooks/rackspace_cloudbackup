@@ -20,8 +20,28 @@
 include_recipe 'rackspace_cloudbackup::cloud_agent'
 
 # Install deps for the Python scripts
-package 'python-argparse' do
-  action :install
+case node[:platform]
+when 'redhat', 'centos'
+  # python-argparse and PyYAML are in the EPEL repo on RHEL
+  yum_repository 'epel' do
+    description 'Extra Packages for Enterprise Linux'
+    mirrorlist 'http://mirrors.fedoraproject.org/mirrorlist?repo=epel-6&arch=$basearch'
+    gpgkey 'http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6'
+    action :create
+  end
+
+  %w(python-argparse PyYAML).each do |dep|
+    package dep do
+      action :install
+    end
+  end
+
+when 'ubuntu', 'debian'
+  %w(python-argparse python-yaml).each do |dep|
+    package dep do
+      action :install
+    end
+  end
 end
 
 # Insert our scripts

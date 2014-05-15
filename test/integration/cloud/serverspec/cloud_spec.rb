@@ -4,9 +4,8 @@ require 'spec_helper'
 
 describe 'Cloud server' do
   # As we mock registration driveclient won't have a config and won't be running, but it should be installed and enabled
-  describe file('/usr/local/bin/driveclient') do
-    it { should be_file }
-    it { should be_executable }
+  describe package('driveclient') do
+    it { should be_installed }
   end
 
   it 'should have driveclient enabled' do
@@ -18,6 +17,11 @@ describe 'Cloud server' do
     it { should be_executable }
     it { should be_owned_by 'root' }
     it { should be_readable.by('others') }
+  end
+
+  describe command('/usr/local/bin/run_backup.py --help') do
+    # If there are dependency errors this won't return 0
+    it { should return_exit_status 0 }
   end
 
   describe file('/etc/driveclient/run_backup.conf.yaml') do
