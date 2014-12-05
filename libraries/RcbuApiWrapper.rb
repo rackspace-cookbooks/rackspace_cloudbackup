@@ -16,7 +16,6 @@
 #
 
 require 'json'
-require 'rest_client'
 
 module Opscode
   module Rackspace
@@ -27,6 +26,7 @@ module Opscode
         attr_accessor :token, :rcbu_api_url, :agent_id, :configurations, :identity_api_url
 
         def initialize(api_username, api_key, region, agent_id, identity_api_url = 'https://identity.api.rackspacecloud.com/v2.0/tokens')
+          require 'rest_client'
           @agent_id = agent_id
           @identity_api_url = identity_api_url
 
@@ -61,6 +61,7 @@ module Opscode
         end
 
         def lookup_configurations
+          require 'rest_client'
           response = RestClient.get("#{@rcbu_api_url}/backup-configuration/system/#{@agent_id}",
                                     'X-Auth-Token' => @token, 'Accept' => :json)
           if response.code != 200
@@ -83,6 +84,7 @@ module Opscode
         end
 
         def create_config(config)
+          require 'rest_client'
           response = RestClient.post("#{@rcbu_api_url}/backup-configuration/",
                                      config.to_json,
                                      'Content-Type' => :json, 'X-Auth-Token' => @token)
@@ -93,6 +95,7 @@ module Opscode
         end
 
         def update_config(config_id, config)
+          require 'rest_client'
           response = RestClient.put("#{@rcbu_api_url}/backup-configuration/#{config_id}",
                                     config.to_json,
                                     'Content-Type' => :json, 'X-Auth-Token' => @token)
