@@ -2,6 +2,9 @@
 
 This file is used to list changes made in each version of rackspace-cloud-backup.
 
+## 1.0.1
+* Move rest-client requires into each method call, so cookbook can be loaded and afterwards install gem requirements (otherwise upgrades are impossible)
+
 ## 1.0.0:
 * Change namespace to rackspace_cloudbackup
 * Provide a parameterized configuration hash
