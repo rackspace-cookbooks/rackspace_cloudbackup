@@ -2,6 +2,9 @@
 
 This file is used to list changes made in each version of rackspace-cloud-backup.
 
+## 1.0.2
+* Bump for dev
+
 ## 1.0.1
 * Move rest-client requires into each method call, so cookbook can be loaded and afterwards install gem requirements (otherwise upgrades are impossible)
 
