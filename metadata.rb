@@ -5,7 +5,7 @@ license          'Apache 2.0'
 description      'Installs/Configures rackspace-cloud-backup'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 
-version          '1.0.2'
+version          '1.0.3'
 
 recipe           'default', 'Installs and registers cloud backup'
 recipe           'cloud', 'Installs and registers cloud backup, bypasses cloud provider check'
