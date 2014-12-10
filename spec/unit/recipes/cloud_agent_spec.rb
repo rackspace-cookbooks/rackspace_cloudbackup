@@ -55,7 +55,7 @@ describe 'rackspace_cloudbackup::cloud' do
           it 'Installs the cloud backup repository' do
             case platform.to_s
             when 'redhat', 'centos'
-              expect(chef_run).to create_yum_repository('cloud-backup')
+              expect(chef_run).to include_recipe('yum-epel')
             when 'ubuntu', 'debian'
               expect(chef_run).to add_apt_repository('cloud-backup')
             else

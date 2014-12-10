@@ -7,6 +7,6 @@ rubocop:    bundle exec rubocop --no-color $SANDBOX/$COOKBOOK
 # Disable foodcritic style warnings.  Rubocop will handle that and FC023 introduces version bugs.
 # definitions and lwrp disabled: currently fails on 'FC015: Consider converting definition to a LWRP'
 # Considered and rejected.
-foodcritic: bundle exec foodcritic --tags ~style,~definitions,~lwrp -f ~style  $SANDBOX/$COOKBOOK
+foodcritic: bundle exec foodcritic --tags ~style,~definitions,~lwrp -f ~style -t ~FC015  $SANDBOX/$COOKBOOK
 chefspec:   bundle exec rspec
 kitchen:    bundle exec kitchen test --destroy always
