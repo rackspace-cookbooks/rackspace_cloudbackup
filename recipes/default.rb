@@ -6,6 +6,12 @@
 #
 # Apache 2.0
 #
+
+# ensure rest-client gem is available
+chef_gem 'rest-client' do
+  action :nothing
+end.run_action(:install)
+
 if defined?(node['cloud']['provider'])
   if node['cloud']['provider'] == 'rackspace'
     include_recipe 'rackspace_cloudbackup::cloud'
