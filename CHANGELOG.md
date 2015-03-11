@@ -2,6 +2,9 @@
 
 This file is used to list changes made in each version of rackspace-cloud-backup.
 
+## 1.0.3
+* #23 - Install rest-client gem, a required dependency.
+
 ## 1.0.2
 * #20 - Switches from custom yum resource to yum-epel cookbook (@steve-jansen)
 
