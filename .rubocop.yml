@@ -38,7 +38,32 @@ WordArray:
 UnusedBlockArgument:
   Enabled: false
 
+ParameterLists:
+  Max: 6
+
+# Offense count: 8
+Metrics/AbcSize:
+  Max: 30
+
+# Offense count: 1
+# Configuration parameters: EnforcedStyle, SupportedStyles.
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+# Offense count: 5
+# Configuration parameters: MinBodyLength.
+Style/GuardClause:
+  Enabled: false
+
+# Offense count: 1
+# Configuration parameters: EnforcedStyle, MinBodyLength, SupportedStyles.
+Style/Next:
+  Enabled: false
+
 AllCops:
   Include:
     - '**/metadata.rb'
     - '**/*.rb'
+  Exclude:
+    - 'libraries/**/*'
+    - 'spec/**/*'

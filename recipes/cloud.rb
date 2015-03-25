@@ -16,6 +16,13 @@
 # limitations under the License.
 #
 
+# ensure rest-client gem is available
+node.set['build-essential']['compile_time'] = true
+include_recipe 'build-essential'
+chef_gem 'rest-client' do
+  action :nothing
+end.run_action(:install)
+
 # Install the agent
 include_recipe 'rackspace_cloudbackup::cloud_agent'
 
@@ -103,7 +110,6 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
                      'location' => job['location'],
                      'comment'  => job['comment'],
                      'enabled'  => job['enabled'])
-
 end
 
 # Write the configuration file for the cron job script
@@ -114,11 +120,11 @@ template '/etc/driveclient/run_backup.conf.yaml' do
   mode '0600'
   action :create
   variables(
-            api_username:  node['rackspace']['cloud_credentials']['username'],
-            api_key:       node['rackspace']['cloud_credentials']['api_key'],
-            api_region:    node['rackspace']['datacenter'],
-            mock:          node['rackspace_cloudbackup']['mock'],
-            backup_config: template_data
+    api_username:  node['rackspace']['cloud_credentials']['username'],
+    api_key:       node['rackspace']['cloud_credentials']['api_key'],
+    api_region:    node['rackspace']['datacenter'],
+    mock:          node['rackspace_cloudbackup']['mock'],
+    backup_config: template_data
             )
 end
 
