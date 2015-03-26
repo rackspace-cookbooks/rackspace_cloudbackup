@@ -21,7 +21,7 @@ describe 'Cloud server' do
 
   describe command('/usr/local/bin/run_backup.py --help') do
     # If there are dependency errors this won't return 0
-     its(:exit_status) { should eq 0 }
+    its(:exit_status) { should eq 0 }
   end
 
   describe file('/etc/driveclient/run_backup.conf.yaml') do
