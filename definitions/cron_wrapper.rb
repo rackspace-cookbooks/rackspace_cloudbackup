@@ -30,17 +30,17 @@ define(:cloud_backup_cron_configurator, job: nil, command: nil) do
 
   # By default these are appended to root's crontab
   cron "'#{params[:job]['label']}' cronjob" do
-    month   params[:job]['time']['month']   || node['rackspace_cloudbackup']['backups_defaults']['time']['month']
-    day     params[:job]['time']['day']     || node['rackspace_cloudbackup']['backups_defaults']['time']['day']
-    hour    params[:job]['time']['hour']    || node['rackspace_cloudbackup']['backups_defaults']['time']['hour']
-    minute  params[:job]['time']['minute']  || node['rackspace_cloudbackup']['backups_defaults']['time']['minute']
+    month   params[:job]['time']['month'] || node['rackspace_cloudbackup']['backups_defaults']['time']['month']
+    day     params[:job]['time']['day'] || node['rackspace_cloudbackup']['backups_defaults']['time']['day']
+    hour    params[:job]['time']['hour'] || node['rackspace_cloudbackup']['backups_defaults']['time']['hour']
+    minute  params[:job]['time']['minute'] || node['rackspace_cloudbackup']['backups_defaults']['time']['minute']
     weekday params[:job]['time']['weekday'] || node['rackspace_cloudbackup']['backups_defaults']['time']['weekday']
 
-    user    params[:job]['cron']['user']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['user']
+    user    params[:job]['cron']['user'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['user']
     mailto  params[:job]['cron']['mailto'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['mailto']
-    path    params[:job]['cron']['path']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['path']
-    shell   params[:job]['cron']['shell']  || node['rackspace_cloudbackup']['backups_defaults']['cron']['shell']
-    home    params[:job]['cron']['home']   || node['rackspace_cloudbackup']['backups_defaults']['cron']['home']
+    path    params[:job]['cron']['path'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['path']
+    shell   params[:job]['cron']['shell'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['shell']
+    home    params[:job]['cron']['home'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['home']
 
     command  params[:command]
     action :create

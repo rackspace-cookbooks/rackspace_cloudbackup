@@ -67,3 +67,4 @@ AllCops:
   Exclude:
     - 'libraries/**/*'
     - 'spec/**/*'
+    - 'vendor/**/*'

@@ -87,7 +87,7 @@ node['rackspace_cloudbackup']['backups'].each do |node_job|
     inclusions           [job['location']]
 
     version_retention    job['cloud']['version_retention'] || node['rackspace_cloudbackup']['backups_defaults']['cloud_version_retention']
-    notify_recipients    job['cloud']['notify_email']      || node['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email']
+    notify_recipients    job['cloud']['notify_email'] || node['rackspace_cloudbackup']['backups_defaults']['cloud_notify_email']
     is_active            job['enabled']
 
     # Backups configured with this module are triggered by cron for consistency with non-RS cloud
@@ -125,7 +125,7 @@ template '/etc/driveclient/run_backup.conf.yaml' do
     api_region:    node['rackspace']['datacenter'],
     mock:          node['rackspace_cloudbackup']['mock'],
     backup_config: template_data
-            )
+  )
 end
 
 # Clean up after earlier revisions
