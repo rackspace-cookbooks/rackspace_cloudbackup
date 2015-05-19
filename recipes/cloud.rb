@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 
-# ensure rest-client gem is available
+# ensure rest_client gem is available
 node.set['build-essential']['compile_time'] = true
 include_recipe 'build-essential'
-chef_gem 'rest-client' do
+chef_gem 'rest_client' do
   action :nothing
 end.run_action(:install)
 
