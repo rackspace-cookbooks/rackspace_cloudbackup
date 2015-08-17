@@ -42,7 +42,7 @@ define(:cloud_backup_cron_configurator, job: nil, command: nil) do
     shell   params[:job]['cron']['shell'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['shell']
     home    params[:job]['cron']['home'] || node['rackspace_cloudbackup']['backups_defaults']['cron']['home']
 
-    command  params[:command]
+    command params[:command]
     action :create
   end
 end
