@@ -11,7 +11,7 @@ recipe           'default', 'Installs and registers cloud backup'
 recipe           'cloud', 'Installs and registers cloud backup, bypasses cloud provider check'
 recipe           'cloud_agent', 'Registers the node as a cloud backup system'
 
-depends 'apt', '~> 2.0'
+depends 'apt', '>= 2.0'
 depends 'build-essential'
 depends 'yum', '~> 3.0'
 depends 'yum-epel', '~> 0.5.3'
