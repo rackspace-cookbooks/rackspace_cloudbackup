@@ -36,7 +36,7 @@ module Opscode
           backup_catalog = identity['access']['serviceCatalog'].find { |c| c['name'] == 'cloudBackup' }
           fail 'Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate cloudBackup service catalog' if backup_catalog.nil?
 
-          region.upcase!
+          region = region.upcase
           backup_catalog_region = backup_catalog['endpoints'].find { |e| e['region'] == region }
           if backup_catalog_region.nil?
             fail "Opscode::Rackspace::CloudBackup::RcbuAPIWrapper.initialize: Unable to locate CloudBackup details from service catalog for region #{region}"
