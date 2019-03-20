@@ -17,7 +17,7 @@
 #
 
 # ensure rest-client gem is available
-node.set['build-essential']['compile_time'] = true
+node.override['build-essential']['compile_time'] = true
 include_recipe 'build-essential'
 chef_gem 'rest-client' do
   action :nothing
